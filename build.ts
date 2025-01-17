@@ -1,4 +1,4 @@
-if (process.argv.includes("--clean")) {
+if (process.argv[2].toLowerCase() == "clean") {
   console.log("Cleaning up...");
   {
     let a = Bun.spawnSync({
@@ -32,7 +32,7 @@ if (process.argv.includes("--clean")) {
       process.exit(1);
     }
   }
-} else if (process.argv.includes("--fmt")) {
+} else if (process.argv[2].toLowerCase() == "fmt") {
   let a = Bun.spawnSync({
     cmd: ["gleam", "format"],
     cwd: "./cynthia_websites_mini_server/",
@@ -141,7 +141,7 @@ if (process.argv[2].toLowerCase() == "gleam") {
     console.error("gleam command failed, aborting");
     process.exit(1);
   }
-} else if (process.argv.includes("--bundle")) {
+} else if (process.argv[2].toLowerCase() == "bundle") {
   console.log("Compiling all to single package...");
   {
     // Bundle code to dist
@@ -155,7 +155,7 @@ if (process.argv[2].toLowerCase() == "gleam") {
     });
     console.log("Bundling completed.");
   }
-} else if (process.argv.includes("--run")) {
+} else if (process.argv[2].toLowerCase() == "run") {
   console.log("Running server...");
   {
     // Run the server
@@ -169,7 +169,7 @@ if (process.argv[2].toLowerCase() == "gleam") {
       stdin: "inherit",
     });
   }
-} else if (process.argv.includes("--test")) {
+} else if (process.argv[2].toLowerCase() == "test") {
   console.log("Running tests...");
   {
     // Run the tests
@@ -195,7 +195,7 @@ if (process.argv[2].toLowerCase() == "gleam") {
       process.exit(1);
     }
   }
-} else if (process.argv.includes("--check")) {
+} else if (process.argv[2].toLowerCase() == "check") {
   console.log("Checking code...");
   {
     // Check the code
@@ -222,10 +222,13 @@ if (process.argv[2].toLowerCase() == "gleam") {
     }
   }
 } else {
-  console.log("To build, run: bun ./build.ts --bundle");
-  console.log("To run, run: bun ./build.ts --run");
-  console.log("To test, run: bun ./build.ts --test");
-  console.log("To check, run: bun ./build.ts --check");
-  console.log("To clean, run: bun ./build.ts --clean");
-  console.log("To format, run: bun ./build.ts --fmt");
+  console.log("To build, run: bun ./build.ts bundle");
+  console.log("To run, run: bun ./build.ts run");
+  console.log("To test, run: bun ./build.ts test");
+  console.log("To check, run: bun ./build.ts check");
+  console.log("To clean, run: bun ./build.ts clean");
+  console.log("To format, run: bun ./build.ts fmt");
+  console.log(
+    "To run gleam commands on both ends, run: bun ./build.ts gleam <subcommand>",
+  );
 }
