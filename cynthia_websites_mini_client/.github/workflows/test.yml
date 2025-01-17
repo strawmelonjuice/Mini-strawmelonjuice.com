@@ -1,0 +1,21 @@
+name: test
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: gleam-lang/setup-gleam@v1.0.2
+        with:
+          gleam-version: "1.7.0"
+      - run: bun ./build.ts gleam deps download
+      - run: bun ./build.ts gleam test
+      - run: bun ./build.ts gleam format --check src test
