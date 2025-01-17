@@ -119,7 +119,6 @@ console.log("Building and bundling server code...");
   );
 }
 console.log("Prepping code successfully completed.");
-console.log(process.argv[2]);
 if (process.argv[2].toLowerCase() == "gleam") {
   const argumens = process.argv.slice(3);
   console.log("Running" + (" gleam " + argumens.join(" ")));
