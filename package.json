@@ -21,7 +21,7 @@
     "clean": "bun ./build.ts clean",
     "test": "bun ./build.ts test",
     "format": "bun ./build.ts fmt",
-    "dev": "bun nodemon --ext gleam --exec bun ./build.ts run",
+    "dev": "bun nodemon --ext gleam,ts --ignore **/build/**/*.ts --ignore cynthia_websites_mini_server/src/client_code_generated_ffi.ts   --exec bun ./build.ts run",
     "prepack": "bun run bundle"
   },
   "dependencies": {}

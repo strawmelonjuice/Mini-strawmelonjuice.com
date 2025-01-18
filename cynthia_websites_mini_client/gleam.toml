@@ -1,5 +1,4 @@
 name = "cynthia_websites_mini_client"
-version = "1.0.0"
 
 target = "javascript"
 [javascript]
@@ -10,6 +9,10 @@ typescript_declarations = true
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
 plinth = ">= 0.5.6 and < 1.0.0"
 gleam_javascript = ">= 0.13.0 and < 1.0.0"
+lustre = ">= 4.6.3 and < 5.0.0"
+gleam_community_colour = ">= 1.4.1 and < 2.0.0"
+
+cynthia_websites_mini_shared = { path = "../cynthia_websites_mini_shared" }
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

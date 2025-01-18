@@ -1,7 +1,5 @@
-name = "cynthia_websites_mini_server"
-target = "javascript"
-[javascript]
-runtime = "bun"
+name = "cynthia_websites_mini_shared"
+
 # Fill out these fields if you intend to generate HTML documentation or publish
 # your project to the Hex package manager.
 #
@@ -15,12 +13,4 @@ runtime = "bun"
 
 [dependencies]
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
-gleamy_lights = ">= 2.3.0 and < 3.0.0"
-bungibindies = ">= 1.0.2 and < 2.0.0"
-plinth = ">= 0.5.6 and < 1.0.0"
-gleam_javascript = ">= 0.13.0 and < 1.0.0"
 gleam_community_colour = ">= 1.4.1 and < 2.0.0"
-cynthia_websites_mini_shared = { path = "../cynthia_websites_mini_shared" }
-
-[dev-dependencies]
-gleeunit = ">= 1.0.0 and < 2.0.0"

@@ -1,3 +1,19 @@
+const tailwindconfig: import("tailwindcss").Config = {
+  daisyui: {
+    themes: ["autumn", "coffee"],
+    darkMode: ["selector", '[data-theme="night"]'],
+  },
+  content: [
+    "./cynthia_websites_mini_client/**/*.gleam",
+    "./cynthia_websites_mini_server/src/cynthia_websites_mini_server/static_routes.gleam",
+    "./cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui.gleam",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [require("daisyui")],
+};
+
 if (process.argv[2].toLowerCase() == "clean") {
   console.log("Cleaning up...");
   {
@@ -64,7 +80,7 @@ console.log("Building and bundling client code...");
   let o = Bun.spawnSync({
     cmd: ["gleam", "build"],
     cwd: "./cynthia_websites_mini_client/",
-    // stderr: "inherit",
+    stderr: "inherit",
   }).success;
   if (o) {
   } else {
@@ -73,7 +89,7 @@ console.log("Building and bundling client code...");
   }
   await Bun.write(
     "./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts",
-    `import { main } from "./cynthia_websites_mini_client.mjs";main();`,
+    `import { main } from "./cynthia_websites_mini_client.mjs";document.addEventListener("DOMContentLoaded", main());`,
   );
   // Bundle client code to a single file
   await Bun.build({
@@ -81,21 +97,45 @@ console.log("Building and bundling client code...");
       "./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts",
     ],
     outdir: "./cynthia_websites_mini_client/build/bundled/",
-    minify: true,
+    minify: {
+      whitespace: true,
+      syntax: true,
+      identifiers: false,
+    },
+
     target: "browser",
   });
-  {
-    let css = "/* Something has gone wrong building this CSS. */";
-  }
+  let css = "/* Something has gone wrong building this CSS. */";
+
+  const postcss = require("postcss");
+  const tailwindcss = require("tailwindcss");
+
+  const sourceCSS = "@tailwind base; @tailwind components; @tailwind utilities";
+  const config = {
+    presets: [tailwindconfig],
+  };
+  await postcss([tailwindcss(config)])
+    .process(sourceCSS)
+    .then((genned_css: { css: string }) => {
+      // `css` is a string of the compiled CSS.
+      css = genned_css.css;
+    })
+    .catch((err: any) => {
+      console.error(err);
+    });
+  const client_styles = JSON.stringify(css);
+
   const client_script = JSON.stringify(
     await Bun.file(
       "./cynthia_websites_mini_client/build/bundled/cynthia_websites_mini_client.js",
     ).text(),
   );
-  console.log("Putting client script into server code...");
-  Bun.write(
+  console.log("Putting client script and styles into server code...");
+  Bun.file(
     "./cynthia_websites_mini_server/src/client_code_generated_ffi.ts",
-    `export function client_script() { return ${client_script}; }`,
+  ).write(
+    `export function client_script() { return ${client_script}; }
+export function client_styles() { return ${client_styles}; }`,
   );
 }
 console.log("Building and bundling server code...");
@@ -104,7 +144,7 @@ console.log("Building and bundling server code...");
   let o = Bun.spawnSync({
     cmd: ["gleam", "build"],
     cwd: "./cynthia_websites_mini_server/",
-    // stderr: "inherit",
+    stderr: "inherit",
   }).success;
   // Check if the build was successful
   if (o) {
