@@ -154,6 +154,7 @@ if (process.argv[2].toLowerCase() == "gleam") {
       outdir: "./dist",
     });
     console.log("Bundling completed.");
+    process.exit(0);
   }
 } else if (process.argv[2].toLowerCase() == "run") {
   console.log("Running server...");

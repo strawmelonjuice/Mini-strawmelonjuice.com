@@ -1,14 +1,18 @@
 {
-  "name": "cynthiawebsiteengine-mini",
+  "name": "@cynthiaweb/cynthiawebsiteengine-mini",
+  "version": "1.0.0",
   "module": "cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
   "bin": {
     "cynthiaweb-mini": "./dist/cynthia_websites_mini_server.js"
   },
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
+    "@types/bun": "latest",
+    "nodemon": "^3.1.9",
+    "autoprefixer": "^10.4.20",
+    "daisyui": "^4.12.23",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5.0.0"
   },
   "scripts": {
@@ -17,12 +21,7 @@
     "clean": "bun ./build.ts clean",
     "test": "bun ./build.ts test",
     "format": "bun ./build.ts fmt",
-    "dev": "bun ./build.ts run"
+    "dev": "bun nodemon --ext gleam --exec bun ./build.ts run"
   },
-  "dependencies": {
-    "autoprefixer": "^10.4.20",
-    "daisyui": "^4.12.23",
-    "postcss": "^8.5.1",
-    "tailwindcss": "^3.4.17"
-  }
+  "dependencies": {}
 }
