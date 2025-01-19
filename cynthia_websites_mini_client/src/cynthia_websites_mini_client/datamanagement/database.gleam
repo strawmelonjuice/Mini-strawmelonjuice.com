@@ -19,8 +19,8 @@ pub fn init() {
   )
   db
   |> run(
-  "CREATE TABLE IF NOT EXISTS `content` (id TEXT PRIMARY KEY, html TEXT, last_update: INTEGER);",
-  [] |> array.from_list(),
+    "CREATE TABLE IF NOT EXISTS `content` (id TEXT PRIMARY KEY, html TEXT, last_update: INTEGER);",
+    [] |> array.from_list(),
   )
   db
 }
