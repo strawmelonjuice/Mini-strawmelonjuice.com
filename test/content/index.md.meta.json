@@ -1,0 +1,12 @@
+{
+  "title": "Index",
+  "description": "This is an index page",
+  "kind": "page",
+  "layout": "default",
+  "permalink": "/index",
+  "page": {
+    "menus": [
+      1
+    ]
+  }
+}

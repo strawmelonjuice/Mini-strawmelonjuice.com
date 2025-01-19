@@ -1,0 +1,8 @@
+[config]
+global_theme = "autumn"
+global_theme_dark = "coffee"
+global_colour = "#FFFFFF"
+global_font = "Fira Sans"
+global_font_size = 12
+global_site_name = "My Site"
+global_site_description = "A big site on a mini Cynthia!"

@@ -134,3 +134,7 @@ build/
 
 # Client bundle output
 cynthia_websites_mini_server/src/client_code_generated_ffi.ts
+
+# Linked files for FFI type declarations
+cynthia_websites_mini_server/prelude.ts
+cynthia_websites_mini_client/prelude.ts

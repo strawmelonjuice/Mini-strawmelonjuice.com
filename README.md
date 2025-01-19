@@ -17,27 +17,27 @@ original `strawmelonjuice.PHP` engine.
 The configuration structure is also simplified,
 it now consists of Markdown files and their
 corresponding metadata files in JSON.
-Global configuration is done in the `config.jsonc` file.
+Global configuration is done in the `config.toml` file.
 
 ### Example directory structure
 
-```filetree
+```directory
 ./content/
     index.md
-    index.md.meta.jsonc
+    index.md.meta.json
     about.md
-    about.md.meta.jsonc
+    about.md.meta.json
     projects/
         project1.html
-        project1.html.meta.jsonc
+        project1.html.meta.json
         project2.md
-        project2.md.meta.jsonc
+        project2.md.meta.json
     articles/
         article1.md
-        article1.md.meta.jsonc
+        article1.md.meta.json
         article2.md
-        article2.md.meta.jsonc
-./config.jsonc
+        article2.md.meta.json
+./config.toml
 ```
 
 Something like this.

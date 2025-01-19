@@ -27,7 +27,6 @@ fn main() {
   </head>
   <body>
     <div id='viewable'>
-    <p>There must have been an error.</p>
     </div>
    " <> ui.footer <> " 
   </body>

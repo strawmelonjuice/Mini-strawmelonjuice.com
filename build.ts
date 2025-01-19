@@ -1,7 +1,7 @@
 const tailwindconfig: import("tailwindcss").Config = {
   daisyui: {
     themes: ["autumn", "coffee"],
-    darkMode: ["selector", '[data-theme="night"]'],
+    darkMode: ["selector", '[data-theme="coffee"]'],
   },
   content: [
     "./cynthia_websites_mini_client/**/*.gleam",
@@ -17,30 +17,52 @@ const tailwindconfig: import("tailwindcss").Config = {
 if (process.argv[2].toLowerCase() == "clean") {
   console.log("Cleaning up...");
   {
-    let a = Bun.spawnSync({
-      cmd: ["gleam", "clean"],
-      cwd: "./cynthia_websites_mini_client/",
-      // stderr: "inherit",
-    }).success;
-    let b = Bun.spawnSync({
-      cmd: ["gleam", "clean"],
-      cwd: "./cynthia_websites_mini_server/",
-      // stderr: "inherit",
-    }).success;
-    let c = Bun.spawnSync({
-      cmd: ["rm", "-rf", "./dist"],
-    });
-    let d = Bun.spawnSync({
-      cmd: ["rm", "-rf", "./node_modules/"],
-    });
-    let e = Bun.spawnSync({
-      cmd: [
-        "rm",
-        "-rf",
-        "./cynthia_websites_mini_server/src/client_code_generated_ffi.ts",
-      ],
-    });
-    if (a && b && c && d && e) {
+    const results: boolean[] = [];
+    results.push(
+      Bun.spawnSync({
+        cmd: ["gleam", "clean"],
+        cwd: "./cynthia_websites_mini_client/",
+        // stderr: "inherit",
+      }).success,
+    );
+    results.push(
+      Bun.spawnSync({
+        cmd: ["gleam", "clean"],
+        cwd: "./cynthia_websites_mini_server/",
+        // stderr: "inherit",
+      }).success,
+    );
+    results.push(
+      Bun.spawnSync({
+        cmd: ["rm", "-rf", "./dist"],
+      }).success,
+    );
+    results.push(
+      Bun.spawnSync({
+        cmd: ["rm", "-rf", "./node_modules/"],
+      }).success,
+    );
+    results.push(
+      Bun.spawnSync({
+        cmd: [
+          "rm",
+          "-rf",
+          "./cynthia_websites_mini_server/src/client_code_generated_ffi.ts",
+        ],
+      }).success,
+    );
+    results.push(
+      Bun.spawnSync({
+        cmd: ["rm", "-rf", "./cynthia_websites_mini_client/prelude.ts"],
+      }).success,
+    );
+    results.push(
+      Bun.spawnSync({
+        cmd: ["rm", "-rf", "./cynthia_websites_mini_server/prelude.ts"],
+      }).success,
+    );
+
+    if (results.every((x) => x)) {
       console.log("cleared.");
       process.exit(0);
     } else {
@@ -69,6 +91,16 @@ if (process.argv[2].toLowerCase() == "clean") {
     process.exit(1);
   }
 }
+// Create links to the Gleam preludes, so that we can import them in FFI code.
+// This is a workaround for the fact that Bun somehow doesn't seem to be respecting TSConfig rootdir paths.
+{
+  const fo = Bun.file(__dirname + "/cynthia_websites_mini_client/prelude.ts");
+  fo.write(`export * from "../build/dev/javascript/prelude.mjs";`);
+}
+{
+  const fo = Bun.file(__dirname + "/cynthia_websites_mini_server/prelude.ts");
+  fo.write(`export * from "../build/dev/javascript/prelude.mjs";`);
+}
 console.log("Checking Bun dependencies...");
 Bun.spawnSync({
   cmd: ["bun", "install"],
@@ -87,6 +119,9 @@ console.log("Building and bundling client code...");
     console.error("client build failed, aborting");
     process.exit(1);
   }
+  Bun.file(
+    "./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/gleam.ts",
+  ).unlink();
   await Bun.write(
     "./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts",
     `import { main } from "./cynthia_websites_mini_client.mjs";document.addEventListener("DOMContentLoaded", main());`,
@@ -102,8 +137,10 @@ console.log("Building and bundling client code...");
       syntax: true,
       identifiers: false,
     },
-
     target: "browser",
+  }).catch((e) => {
+    console.error(e);
+    process.exit(1);
   });
   let css = "/* Something has gone wrong building this CSS. */";
 
@@ -152,6 +189,11 @@ console.log("Building and bundling server code...");
     console.error("server build failed, aborting");
     process.exit(1);
   }
+
+  await Bun.file(
+    "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/gleam.ts",
+  ).unlink();
+
   // Create entry point for the server
   await Bun.write(
     "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
@@ -273,3 +315,4 @@ if (process.argv[2].toLowerCase() == "gleam") {
     "To run gleam commands on both ends, run: bun ./build.ts gleam <subcommand>",
   );
 }
+export {};

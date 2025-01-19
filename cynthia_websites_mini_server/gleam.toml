@@ -2,6 +2,9 @@ name = "cynthia_websites_mini_server"
 target = "javascript"
 [javascript]
 runtime = "bun"
+
+typescript_declarations = true
+
 # Fill out these fields if you intend to generate HTML documentation or publish
 # your project to the Hex package manager.
 #
@@ -21,6 +24,7 @@ plinth = ">= 0.5.6 and < 1.0.0"
 gleam_javascript = ">= 0.13.0 and < 1.0.0"
 gleam_community_colour = ">= 1.4.1 and < 2.0.0"
 cynthia_websites_mini_shared = { path = "../cynthia_websites_mini_shared" }
+simplifile = ">= 2.2.0 and < 3.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

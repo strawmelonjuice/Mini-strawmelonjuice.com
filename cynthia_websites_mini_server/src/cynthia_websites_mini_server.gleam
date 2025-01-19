@@ -13,7 +13,7 @@ pub fn main() {
     Ok(_) -> Nil
     Error(_) -> {
       io.println(premixed.text_red(
-        "Error: Cynthia mini needs to run in Bun! Try installing and running it with Bun instead.",
+        "Error: Cynthia Mini needs to run in Bun! Try installing and running it with Bun instead.",
       ))
       process.exit(1)
     }
