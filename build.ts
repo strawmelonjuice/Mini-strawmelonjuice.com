@@ -119,9 +119,20 @@ console.log("Building and bundling client code...");
     console.error("client build failed, aborting");
     process.exit(1);
   }
-  Bun.file(
-    "./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/gleam.ts",
-  ).unlink();
+
+  if (
+    !Bun.spawnSync({
+      cmd: [
+        "rm",
+        "-rf",
+        "./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/gleam.ts",
+      ],
+    }).success
+  ) {
+    console.log(
+      "Failed to remove ./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/gleam.ts",
+    );
+  }
   await Bun.write(
     "./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts",
     `import { main } from "./cynthia_websites_mini_client.mjs";document.addEventListener("DOMContentLoaded", main());`,
@@ -190,10 +201,19 @@ console.log("Building and bundling server code...");
     process.exit(1);
   }
 
-  await Bun.file(
-    "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/gleam.ts",
-  ).unlink();
-
+  if (
+    !Bun.spawnSync({
+      cmd: [
+        "rm",
+        "-rf",
+        "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/gleam.ts",
+      ],
+    }).success
+  ) {
+    console.log(
+      "Failed to remove ./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/gleam.ts",
+    );
+  }
   // Create entry point for the server
   await Bun.write(
     "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
