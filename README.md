@@ -14,6 +14,8 @@ approach that [CynthiaWebSiteEngine](https://github.com/strawmelonjuice/CynthiaW
 has, and instead takes an approach closer to that of the
 original `strawmelonjuice.PHP` engine.
 
+Part of, or possibly the entirety of plugin support will be added in afterwards, be it split over the server and client.
+
 The configuration structure is also simplified,
 it now consists of Markdown files and their
 corresponding metadata files in JSON.
