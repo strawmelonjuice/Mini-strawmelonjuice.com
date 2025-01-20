@@ -1,7 +1,7 @@
-import cynthia_websites_mini_server/config
 import bungibindies
 import bungibindies/bun
 import bungibindies/bun/http/serve.{ServeOptions}
+import cynthia_websites_mini_server/config
 import cynthia_websites_mini_server/static_routes
 import cynthia_websites_mini_server/web
 import gleam/io
@@ -25,7 +25,7 @@ pub fn main() {
     <> premixed.text_bright_orange(process.cwd())
     <> "!",
   )
-config.load()
+  config.load()
   bun.serve(ServeOptions(
     development: Some(True),
     hostname: None,
