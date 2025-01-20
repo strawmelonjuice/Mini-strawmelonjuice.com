@@ -1,5 +1,6 @@
-import { Ok as ResultOk, Error as ResultError } from "../../prelude.mjs";
+import { Ok as ResultOk, Error as ResultError } from "../../prelude";
 import { parse } from "smol-toml";
+import fs from "node:fs";
 interface PartialConfigToml {
   global_theme?: string;
   global_theme_dark?: string;
@@ -28,11 +29,12 @@ const default_config: ConfigToml = {
   global_site_description: "A big site on a mini Cynthia!",
 };
 
-function parse_configtoml(
+export function parse_configtoml(
   tomlfile: string,
 ): ResultOk<ConfigToml, unknown> | ResultError<string, any> {
   try {
-    const p = parse(tomlfile).config as PartialConfigToml;
+    const b = fs.readFileSync(tomlfile, "utf8");
+    const p = parse(b).config as PartialConfigToml;
     const f: ConfigToml = {
       global_theme: p.global_theme ?? default_config.global_theme,
       global_theme_dark:

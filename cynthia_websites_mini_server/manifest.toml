@@ -23,6 +23,7 @@ bungibindies = { version = ">= 1.0.2 and < 2.0.0" }
 cynthia_websites_mini_shared = { path = "../cynthia_websites_mini_shared" }
 gleam_community_colour = { version = ">= 1.4.1 and < 2.0.0" }
 gleam_javascript = { version = ">= 0.13.0 and < 1.0.0" }
+gleam_json = { version = ">= 2.3.0 and < 3.0.0" }
 gleam_stdlib = { version = ">= 0.44.0 and < 2.0.0" }
 gleamy_lights = { version = ">= 2.3.0 and < 3.0.0" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }

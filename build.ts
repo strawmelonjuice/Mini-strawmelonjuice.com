@@ -95,11 +95,11 @@ if (process.argv[2].toLowerCase() == "clean") {
 // This is a workaround for the fact that Bun somehow doesn't seem to be respecting TSConfig rootdir paths.
 {
   const fo = Bun.file(__dirname + "/cynthia_websites_mini_client/prelude.ts");
-  fo.write(`export * from "../build/dev/javascript/prelude.mjs";`);
+  fo.write(`export * from "./build/dev/javascript/prelude.mjs";`);
 }
 {
   const fo = Bun.file(__dirname + "/cynthia_websites_mini_server/prelude.ts");
-  fo.write(`export * from "../build/dev/javascript/prelude.mjs";`);
+  fo.write(`export * from "./build/dev/javascript/prelude.mjs";`);
 }
 console.log("Checking Bun dependencies...");
 Bun.spawnSync({
@@ -247,7 +247,7 @@ if (process.argv[2].toLowerCase() == "gleam") {
   console.log("Compiling all to single package...");
   {
     // Bundle code to dist
-    await Bun.build({
+    let s = await Bun.build({
       minify: false,
       target: "bun",
       entrypoints: [
@@ -255,7 +255,11 @@ if (process.argv[2].toLowerCase() == "gleam") {
       ],
       outdir: "./dist",
     });
-    console.log("Bundling completed.");
+    if (s.success) console.log("Bundling completed.");
+    else {
+      console.error("Bundling failed, aborting\n\n" + s.logs);
+      process.exit(1);
+    }
     process.exit(0);
   }
 } else if (process.argv[2].toLowerCase() == "run") {
