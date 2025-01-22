@@ -101,6 +101,10 @@ pub type Post {
     description: String,
     layout: String,
     permalink: String,
+    /// Date in the  ISO 8601 date format (EG: 2025-01-22T12:12:07+0000)
+    date_posted: String,
+    /// Date in the  ISO 8601 date format (EG: 2025-01-22T12:12:07+0000)
+    date_updated: String,
   )
 }
 
@@ -109,5 +113,15 @@ pub fn post_decoder(filename) -> decode.Decoder(Post) {
   use description <- decode.field("description", decode.string)
   use layout <- decode.field("layout", decode.string)
   use permalink <- decode.field("permalink", decode.string)
-  decode.success(Post(filename:, title:, description:, layout:, permalink:))
+  use date_posted <- decode.field("date-posted", decode.string)
+  use date_updated <- decode.field("date-updated", decode.string)
+  decode.success(Post(
+    filename:,
+    title:,
+    description:,
+    layout:,
+    permalink:,
+    date_posted:,
+    date_updated:,
+  ))
 }
