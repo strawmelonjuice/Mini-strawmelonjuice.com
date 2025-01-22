@@ -2,7 +2,7 @@ import plinth/javascript/date
 
 /// Converts a timestamp from the ISO 8601 date format (EG: 2025-01-22T12:12:07+0000)
 /// To a JavaScript 'date' object, accessible through Plinth.
-@external(javascript, "./timestamps.mjs", "parse")
+@external(javascript, "./timestamps_ffi.mjs", "parse")
 pub fn parse(timestamp: String) -> date.Date
 
 /// Converts a JavaScript 'date' object, accessible through Plinth
