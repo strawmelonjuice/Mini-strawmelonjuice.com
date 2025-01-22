@@ -26,7 +26,7 @@ Cynthia Mini diverges from Cynthia "Full" in that on Cynthia "Full", the server 
 
 Another difference, having to do with this, is that both the frontend and the backend carry a SQLite database for caching purposes. This because the client syncs and only then filters data from the server, and that load can be greatly decreased by keeping data in a database.
 
-On the client side [`SQL.js`](https://sql.js.org/) is used, on the server, the more native [`BunSQLite`](https://bun.sh/docs/api/sqlite) is used.
+On the client side [`SQL.js`](https://sql.js.org/) is used, on the server, the more native [`BunSQLite`](https://bun.sh/docs/api/sqlite) is used (using [`bungibindies`](https://hex.pm/packages/bungibindies), to bind to Bun API's)
 
 ### Example config directory structure
 
