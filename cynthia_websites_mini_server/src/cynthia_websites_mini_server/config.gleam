@@ -1,3 +1,4 @@
+import bungibindies/bun/sqlite
 import cynthia_websites_mini_shared/configtype
 import gleam/dynamic/decode
 import gleam/io
@@ -90,4 +91,9 @@ fn content_getter() {
       }
     })
   }
+}
+
+pub fn store_db(db: sqlite.Database) -> Nil {
+  // todo: Implement this
+  Nil
 }
