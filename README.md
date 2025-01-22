@@ -21,7 +21,14 @@ it now consists of Markdown files and their
 corresponding metadata files in JSON.
 Global configuration is done in the `config.toml` file.
 
-### Example directory structure
+### Caching
+Cynthia Mini diverges from Cynthia "Full" in that on Cynthia "Full", the server processes all the config into simple HTML, whereas on Cynthia Mini, all the server does is serve up the data. The frontend parses everything.
+
+Another difference, having to do with this, is that both the frontend and the backend carry a SQLite database for caching purposes. This because the client syncs and only then filters data from the server, and that load can be greatly decreased by keeping data in a database.
+
+On the client side [`SQL.js`](https://sql.js.org/) is used, on the server, the more native [`BunSQLite`](https://bun.sh/docs/api/sqlite) is used.
+
+### Example config directory structure
 
 ```directory
 ./content/
