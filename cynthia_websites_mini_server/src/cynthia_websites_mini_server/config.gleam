@@ -6,13 +6,24 @@ import gleam/json
 import gleam/list
 import gleam/result
 import gleam/string
+import gleamy_lights/premixed
 import plinth/node/process
+import question.{question}
 import simplifile
 
 pub fn load() -> configtype.SharedCynthiaConfig {
+  let global_conf_filepath = process.cwd() <> "/cynthia-mini.toml"
+  let global_conf_filepath_exists = simplifile.is_file(global_conf_filepath)
+  case global_conf_filepath_exists {
+    Ok(True) -> Nil
+    _ -> {
+      dialog_initcfg()
+      Nil
+    }
+  }
   let global_config = case
     i_load(
-      process.cwd() <> "/cynthia-mini.toml",
+      global_conf_filepath,
       configtype.default_shared_cynthia_config_global_only,
     )
   {
@@ -95,5 +106,41 @@ fn content_getter() {
 
 pub fn store_db(db: sqlite.Database) -> Nil {
   // todo: Implement this
+  // nil to continue
   Nil
+}
+
+fn dialog_initcfg() {
+  io.println("No Cynthia Mini configuration found...")
+  use <-
+    dialog_initcfg_prompt_1(_, fn() {
+      io.println_error("No Cynthia Mini configuration found... Exiting.")
+      process.exit(1)
+    })
+  todo
+}
+
+fn dialog_initcfg_prompt_1(if_yes: fn() -> Nil, if_no: fn() -> Nil) -> Nil {
+  use answer <- question(
+    "Initialise new config at this location?\n"
+    <> "This will create a "
+    <> premixed.text_bright_yellow("cynthia-mini.toml")
+    <> " file and some sample content.\n\n"
+    <> "([Y]/n)",
+  )
+  io.println("Answer: " <> answer)
+  case answer |> string.lowercase() {
+    "" | "y" -> if_yes()
+    "n" -> if_no()
+    _ -> {
+      io.println_error(
+        "Did not expect that answer, please answer "
+        <> premixed.text_green("y")
+        <> "for yes, or "
+        <> premixed.text_red("n")
+        <> "for no.",
+      )
+      dialog_initcfg_prompt_1(if_yes, if_no)
+    }
+  }
 }
