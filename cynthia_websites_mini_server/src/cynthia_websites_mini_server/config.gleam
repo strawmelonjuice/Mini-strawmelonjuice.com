@@ -1,8 +1,8 @@
 import bungibindies/bun/sqlite
+import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
-import gleam/bool
 import gleam/dynamic/decode
 import gleam/io
 import gleam/json
@@ -14,7 +14,11 @@ import plinth/javascript/console
 import plinth/node/process
 import simplifile
 
-pub fn load() -> configtype.SharedCynthiaConfig {
+/// # Config.load()
+/// Loads the configuration from the `cynthia-mini.toml` file and the content from the `content` directory.
+/// Then saves the configuration to the database.
+/// If an override environment variable or call param is provided, it will use that database file instead, and load from there. It will not need any files to exist in the filesystem (except for the SQLite file) in that case.
+pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
   let global_conf_filepath = process.cwd() <> "/cynthia-mini.toml"
   let global_conf_filepath_exists = files.file_exist(global_conf_filepath)
   case global_conf_filepath_exists {
@@ -45,7 +49,12 @@ pub fn load() -> configtype.SharedCynthiaConfig {
     }
   }
 
-  configtype.shared_merge_shared_cynthia_config(global_config, content)
+  let conf =
+    configtype.shared_merge_shared_cynthia_config(global_config, content)
+  let db = database.create_database()
+  store_db(db, conf)
+
+  #(db, conf)
 }
 
 pub type ContentKindOnly {
@@ -107,8 +116,11 @@ fn content_getter() {
   }
 }
 
-pub fn store_db(db: sqlite.Database) -> Nil {
-  // todo: Implement this
+pub fn store_db(
+  db: sqlite.Database,
+  conf: configtype.SharedCynthiaConfig,
+) -> Nil {
+  // TODO: Implement this
   // nil to continue
   Nil
 }

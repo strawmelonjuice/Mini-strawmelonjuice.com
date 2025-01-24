@@ -26,9 +26,8 @@ pub fn main() {
     <> premixed.text_bright_orange(process.cwd())
     <> "!",
   )
-  config.load()
-  let db = database.create_database()
-  config.store_db(db)
+  let #(db, conf) = config.load()
+
   bun.serve(ServeOptions(
     development: Some(True),
     hostname: None,
