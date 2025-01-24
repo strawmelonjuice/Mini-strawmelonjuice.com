@@ -1,3 +1,5 @@
+import gleam/io
+import gleam/string
 import gleeunit
 import gleeunit/should
 
@@ -16,9 +18,16 @@ pub fn hello_world_test() {
 }
 
 // Test timestamp conversion
-pub fn timestamp_to_test() {
-  let time = "2025-01-22T12:12:07+0000"
+pub fn timestamp_to_timestamp_test() {
+  let time = "2025-01-22T12:12:07.001+01:00"
   let parsed = timestamps.parse(time)
   timestamps.create(parsed)
   |> should.equal(time)
+}
+
+// Test timestamp conversion
+pub fn string_to_timestamp_test() {
+  timestamps.parse("2025-01-24 20:51:03 GMT+0100")
+  |> timestamps.create()
+  |> should.equal("2025-01-24T20:51:03.000+01:00")
 }
