@@ -15,7 +15,6 @@ packages = [
   { name = "gleamy_lights", version = "2.3.0", build_tools = ["gleam"], requirements = ["envoy", "gleam_community_colour", "gleam_stdlib"], otp_app = "gleamy_lights", source = "hex", outer_checksum = "8A3D43BCA0D935F7CC787F4D0D1771F822B3366114C08B93CC8D00747618499A" },
   { name = "gleeunit", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleeunit", source = "hex", outer_checksum = "F7A7228925D3EE7D0813C922E062BFD6D7E9310F0BEE585D3A42F3307E3CFD13" },
   { name = "plinth", version = "0.5.6", build_tools = ["gleam"], requirements = ["conversation", "gleam_javascript", "gleam_json", "gleam_stdlib"], otp_app = "plinth", source = "hex", outer_checksum = "7A9BEAB98F4BC6859803D5ABCD0F3B4C3578A747F12BF32F9E234F8325F5F0E0" },
-  { name = "question", version = "1.0.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "question", source = "hex", outer_checksum = "10C08C66570B3727FD39CCBB30F88B8648EA993CD85DF7F84EB6E5FD220E9758" },
   { name = "simplifile", version = "2.2.0", build_tools = ["gleam"], requirements = ["filepath", "gleam_stdlib"], otp_app = "simplifile", source = "hex", outer_checksum = "0DFABEF7DC7A9E2FF4BB27B108034E60C81BEBFCB7AB816B9E7E18ED4503ACD8" },
 ]
 
@@ -29,5 +28,4 @@ gleam_stdlib = { version = ">= 0.44.0 and < 2.0.0" }
 gleamy_lights = { version = ">= 2.3.0 and < 3.0.0" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
 plinth = { version = ">= 0.5.6 and < 1.0.0" }
-question = { version = ">= 1.0.0 and < 2.0.0" }
 simplifile = { version = ">= 2.2.0 and < 3.0.0" }

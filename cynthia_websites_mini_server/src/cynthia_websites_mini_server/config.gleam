@@ -1,5 +1,8 @@
 import bungibindies/bun/sqlite
+import cynthia_websites_mini_server/utils/files
+import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
+import gleam/bool
 import gleam/dynamic/decode
 import gleam/io
 import gleam/json
@@ -7,16 +10,16 @@ import gleam/list
 import gleam/result
 import gleam/string
 import gleamy_lights/premixed
+import plinth/javascript/console
 import plinth/node/process
-import question.{question}
 import simplifile
 
 pub fn load() -> configtype.SharedCynthiaConfig {
   let global_conf_filepath = process.cwd() <> "/cynthia-mini.toml"
-  let global_conf_filepath_exists = simplifile.is_file(global_conf_filepath)
+  let global_conf_filepath_exists = files.file_exist(global_conf_filepath)
   case global_conf_filepath_exists {
-    Ok(True) -> Nil
-    _ -> {
+    True -> Nil
+    False -> {
       dialog_initcfg()
       Nil
     }
@@ -111,36 +114,23 @@ pub fn store_db(db: sqlite.Database) -> Nil {
 }
 
 fn dialog_initcfg() {
+  console.clear()
   io.println("No Cynthia Mini configuration found...")
-  use <-
-    dialog_initcfg_prompt_1(_, fn() {
+  case
+    prompts.for_confirmation(
+      "Initialise new config at this location?\n"
+        <> "This will create a "
+        <> premixed.text_bright_yellow("cynthia-mini.toml")
+        <> " file and some sample content.\n\n",
+      True,
+    )
+  {
+    False -> {
       io.println_error("No Cynthia Mini configuration found... Exiting.")
       process.exit(1)
-    })
-  todo
-}
-
-fn dialog_initcfg_prompt_1(if_yes: fn() -> Nil, if_no: fn() -> Nil) -> Nil {
-  use answer <- question(
-    "Initialise new config at this location?\n"
-    <> "This will create a "
-    <> premixed.text_bright_yellow("cynthia-mini.toml")
-    <> " file and some sample content.\n\n"
-    <> "([Y]/n)",
-  )
-  io.println("Answer: " <> answer)
-  case answer |> string.lowercase() {
-    "" | "y" -> if_yes()
-    "n" -> if_no()
-    _ -> {
-      io.println_error(
-        "Did not expect that answer, please answer "
-        <> premixed.text_green("y")
-        <> "for yes, or "
-        <> premixed.text_red("n")
-        <> "for no.",
-      )
-      dialog_initcfg_prompt_1(if_yes, if_no)
+      panic as "We should not reach here"
     }
+    True -> Nil
   }
+  todo as "Implement the config writer."
 }
