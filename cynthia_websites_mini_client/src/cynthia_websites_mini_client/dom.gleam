@@ -21,3 +21,11 @@ pub fn push(title: String, body: le_element.Element(a)) {
   |> element.set_inner_html(new_body)
   Ok(Nil)
 }
+
+/// Get the color scheme of the user's system (media query)
+@external(javascript, "./dom.ts", "get_color_scheme")
+pub fn get_color_scheme() -> String
+
+/// Set the data attribute of an element
+@external(javascript, "./dom.ts", "set_data")
+pub fn set_data(element: element.Element, key: String, value: String) -> Nil

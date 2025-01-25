@@ -26,7 +26,7 @@ fn main() {
   <style>" <> client.css() <> "</style>
   </head>
   <body>
-    <div id='viewable'>
+    <div id='viewable' class='bg-base-100 w-[100VW] h-[100VH]'>
     </div>
    " <> ui.footer <> " 
   </body>
