@@ -221,125 +221,175 @@ console.log("Building and bundling server code...");
   );
 }
 console.log("Prepping code successfully completed.");
-if (process.argv[2].toLowerCase() == "gleam") {
-  const argumens = process.argv.slice(3);
-  console.log("Running" + (" gleam " + argumens.join(" ")));
-  let a = Bun.spawnSync({
-    cmd: ["gleam", ...argumens],
-    cwd: "./cynthia_websites_mini_server/",
-    stdout: "inherit",
-    stderr: "inherit",
-  }).success;
-  let b = Bun.spawnSync({
-    cmd: ["gleam", ...argumens],
-    cwd: "./cynthia_websites_mini_client/",
-    stdout: "inherit",
-    stderr: "inherit",
-  }).success;
-  if (a && b) {
-    console.log("gleam command successful.");
-    process.exit(0);
-  } else {
-    console.error("gleam command failed, aborting");
-    process.exit(1);
-  }
-} else if (process.argv[2].toLowerCase() === "bundle") {
-  const bytecode = process.argv.includes("--bytecode");
-  const bcodestring = bytecode ? "bytecode" : "";
-  console.log(`Compiling all to single ${bcodestring} package...`);
-  {
-    // Bundle code to dist
-    let s = await Bun.build({
-      minify: false,
-      target: "bun",
-      entrypoints: [
-        "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
-      ],
-      bytecode,
-      outdir: "./dist",
-    });
-    if (s.success) console.log("Bundling completed.");
-    else {
-      console.error("Bundling failed, aborting\n\n" + s.logs);
-      process.exit(1);
+  switch (process.argv[2].toLowerCase()) {
+    case "gleam": {
+      const argumens = process.argv.slice(3);
+      console.log("Running" + (" `gleam " + argumens.join(" ")) + "` on both ends.");
+      let a = Bun.spawnSync({
+        cmd: ["gleam", ...argumens],
+        cwd: "./cynthia_websites_mini_server/",
+        stdout: "inherit",
+        stderr: "inherit",
+      }).success;
+      let b = Bun.spawnSync({
+        cmd: ["gleam", ...argumens],
+        cwd: "./cynthia_websites_mini_client/",
+        stdout: "inherit",
+        stderr: "inherit",
+      }).success;
+      if (a && b) {
+        console.log("gleam command successful.");
+      } else {
+        console.error("gleam command failed, aborting");
+        process.exit(1);
+      }
     }
-    process.exit(0);
-  }
-} else if (process.argv[2].toLowerCase() == "run") {
-  console.log("Running server...");
-  {
-    // Run the server
-    Bun.spawnSync({
-      cmd: [
-        "bun",
-        "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
-      ],
-      stdout: "inherit",
-      stderr: "inherit",
-      stdin: "inherit",
-    });
-  }
-} else if (process.argv[2].toLowerCase() == "test") {
-  console.log("Running tests...");
-  {
-    // Run the tests
-    console.log("Running tests for server:");
-    let a = Bun.spawnSync({
-      cmd: ["gleam", "test"],
-      cwd: "./cynthia_websites_mini_server/",
-      stdout: "inherit",
-      stderr: "inherit",
-    }).success;
-    console.log("Running tests for client:");
-    let b = Bun.spawnSync({
-      cmd: ["gleam", "test"],
-      cwd: "./cynthia_websites_mini_client/",
-      stdout: "inherit",
-      stderr: "inherit",
-    }).success;
-    if (a && b) {
-      console.log("tests successful.");
-      process.exit(0);
-    } else {
-      console.error("tests failed, aborting");
-      process.exit(1);
+    break;
+    case "client-gleam": {
+      const argumens = process.argv.slice(3);
+      console.log("Running" + (" `gleam " + argumens.join(" ")) + "` on client.");
+      let b = Bun.spawnSync({
+        cmd: ["gleam", ...argumens],
+        cwd: "./cynthia_websites_mini_client/",
+        stdout: "inherit",
+        stderr: "inherit",
+      }).success;
+      if (b) {
+        console.log("gleam command successful.");
+      } else {
+        console.error("gleam command failed, aborting");
+        process.exit(1);
+      }
     }
-  }
-} else if (process.argv[2].toLowerCase() == "check") {
-  console.log("Checking code...");
-  {
-    // Check the code
-    console.log("Checking server code:");
-    let a = Bun.spawnSync({
-      cmd: ["gleam", "check"],
-      cwd: "./cynthia_websites_mini_server/",
-      stdout: "inherit",
-      stderr: "inherit",
-    }).success;
-    console.log("Checking client code:");
-    let b = Bun.spawnSync({
-      cmd: ["gleam", "check"],
-      cwd: "./cynthia_websites_mini_client/",
-      stdout: "inherit",
-      stderr: "inherit",
-    }).success;
-    if (a && b) {
-      console.log("checks successful.");
-      process.exit(0);
-    } else {
-      console.error("checks failed, aborting");
-      process.exit(1);
+      break;
+    case "server-gleam": {
+      const argumens = process.argv.slice(3);
+      console.log("Running" + (" `gleam " + argumens.join(" ")) + "` on server.");
+      let b = Bun.spawnSync({
+        cmd: ["gleam", ...argumens],
+        cwd: "./cynthia_websites_mini_server/",
+        stdout: "inherit",
+        stderr: "inherit",
+      }).success;
+      if (b) {
+        console.log("gleam command successful.");
+      } else {
+        console.error("gleam command failed, aborting");
+        process.exit(1);
+      }
     }
-  }
-} else {
-  console.log("To build, run: bun ./build.ts bundle");
-  console.log("To run, run: bun ./build.ts run");
-  console.log("To test, run: bun ./build.ts test");
-  console.log("To check, run: bun ./build.ts check");
-  console.log("To clean, run: bun ./build.ts clean");
-  console.log("To format, run: bun ./build.ts fmt");
-  console.log(
-    "To run gleam commands on both ends, run: bun ./build.ts gleam <subcommand>",
-  );
+      break;
+    case "bundle": {
+      const bytecode = process.argv.includes("--bytecode");
+      const bcodestring = bytecode ? "bytecode" : "";
+      console.log(`Compiling all to single ${bcodestring} package...`);
+      {
+        // Bundle code to dist
+        let s = await Bun.build({
+          minify: false,
+          target: "bun",
+          entrypoints: [
+            "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
+          ],
+          bytecode,
+          outdir: "./dist",
+        });
+        if (s.success) console.log("Bundling completed.");
+        else {
+          console.error("Bundling failed, aborting\n\n" + s.logs);
+          process.exit(1);
+        }
+      }
+    }
+    break;
+    case "run": {
+      console.log("Running server...");
+      {
+        // Run the server
+        Bun.spawnSync({
+          cmd: [
+            "bun",
+            "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
+          ],
+          stdout: "inherit",
+          stderr: "inherit",
+          stdin: "inherit",
+        });
+      }
+    }
+    break;
+    case "test":
+    {
+      console.log("Running tests...");
+      {
+        let results: boolean[] = [];
+        // Run the tests
+        if (!(process.argv[3].toLowerCase() === "client")) {
+          console.log("Running tests for server:");
+          results.push(Bun.spawnSync({
+            cmd: ["gleam", "test"],
+            cwd: "./cynthia_websites_mini_server/",
+            stdout: "inherit",
+            stderr: "inherit",
+          }).success);
+        }
+        if (!(process.argv[3].toLowerCase() === "server")) {
+          console.log("Running tests for client:");
+          results.push(Bun.spawnSync({
+            cmd: ["gleam", "test"],
+            cwd: "./cynthia_websites_mini_client/",
+            stdout: "inherit",
+            stderr: "inherit",
+          }).success);
+        }
+        if (results.every((x) => x)) {
+          console.log("test(s) successful.");
+        } else {
+          console.error("test(s) failed!");
+          process.exit(1);
+        }
+      }
+    }
+    break;
+    case "check":
+    {
+      console.log("Checking code...");
+      {
+        // Check the code
+        console.log("Checking server code:");
+        let a = Bun.spawnSync({
+          cmd: ["gleam", "check"],
+          cwd: "./cynthia_websites_mini_server/",
+          stdout: "inherit",
+          stderr: "inherit",
+        }).success;
+        console.log("Checking client code:");
+        let b = Bun.spawnSync({
+          cmd: ["gleam", "check"],
+          cwd: "./cynthia_websites_mini_client/",
+          stdout: "inherit",
+          stderr: "inherit",
+        }).success;
+        if (a && b) {
+          console.log("checks successful.");
+        } else {
+          console.error("checks failed, aborting");
+          process.exit(1);
+        }
+      }
+    }
+    break;
+    default: {
+      console.log("To build, run: bun `./build.ts bundle`");
+      console.log("To run, run: bun `./build.ts run`");
+      console.log("To test, run: bun `./build.ts test`");
+      console.log("To check, run: bun `./build.ts check`");
+      console.log("To clean, run: bun `./build.ts clean`");
+      console.log("To format, run: bun `./build.ts fmt`");
+      console.log(
+          "To run gleam commands on one or both ends, run: bun `./build.ts [client-|server-]gleam <subcommand>`",
+      );
+    }
 }
+process.exit(0)
 export {};
