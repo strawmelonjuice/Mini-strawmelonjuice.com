@@ -13,6 +13,12 @@ In return, Cynthia Mini comes with premade themes with each some customisable op
 
 ... Uh, well, that's awkward, I haven't come to this part yet ...
 
+### Default theme
+
+The default theme for light mode will be based on the DaisyUI "autumn" theme (light) or the "coffee" theme (dark), using
+Fira Sans as default font and using
+the "Cyndy" layout templates.
+
 ## Functionality
 
 CynthiaWeb-mini has functionality that moves away from the enormous
