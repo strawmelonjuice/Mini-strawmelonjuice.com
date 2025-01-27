@@ -132,9 +132,9 @@ fn dialog_initcfg() {
   case
     prompts.for_confirmation(
       "CynthiaMini can create a "
-        <> premixed.text_bright_yellow("cynthia-mini.toml")
+        <> premixed.text_orange("cynthia-mini.toml")
         <> " file and some sample content.\n"
-        <> premixed.text_lightblue(
+        <> premixed.text_magenta(
         "Do you want to initialise new config at this location?",
       ),
       True,
