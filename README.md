@@ -33,7 +33,7 @@ split over the server and client.
 The configuration structure is also simplified,
 it now consists of Markdown files and their
 corresponding metadata files in JSON.
-Global configuration is done in the `config.toml` file.
+Global configuration is done in the `cynthia-mini.toml` file.
 
 ### Caching
 
@@ -71,9 +71,8 @@ where there is no config directory, and only an SQLite database to run off direc
         article1.md.meta.json
         article2.md
         article2.md.meta.json
-./config.toml
+./cynthia-mini.toml
 ./cache.db
 ```
 
 Something like this.
-
