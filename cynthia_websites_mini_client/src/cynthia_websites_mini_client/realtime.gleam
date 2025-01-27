@@ -12,12 +12,12 @@ pub fn main() {
 fn update_styles() {
   case dom.get_color_scheme() {
     "light" -> {
-      datamanagement.pull_from_global_config_table("color_scheme")
+      datamanagement.pull_from_global_config_table("daisy_color_scheme")
       |> result.unwrap("autumn")
       |> dom.set_data(document.body(), "theme", _)
     }
     "dark" -> {
-      datamanagement.pull_from_global_config_table("color_scheme_dark")
+      datamanagement.pull_from_global_config_table("daisy_color_scheme_dark")
       |> result.unwrap("coffee")
       |> dom.set_data(document.body(), "theme", _)
     }

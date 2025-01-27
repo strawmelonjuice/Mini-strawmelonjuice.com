@@ -2,35 +2,21 @@
   {
     "name": "autumn",
     "prevalence": "light",
-    "fonts": [
-      "Fira Sans",
-      "Ubuntu",
-      "Noto Sans"
-    ],
+    "fonts": ["Fira Sans", "Ubuntu", "Noto Sans"],
     "font-size": 15,
-    "fonts-mono": [
-      "Fira Mono",
-      "Ubuntu Mono",
-      "Noto Mono"
-    ],
+    "fonts-mono": ["Fira Mono", "Ubuntu Mono", "Noto Mono"],
     "font-size-mono": 14,
-    "daisyUI": "autumn"
+    "daisyUI": "autumn",
+    "layout": "cindy"
   },
   {
     "name": "coffee",
     "prevalence": "dark",
-    "fonts": [
-      "Fira Sans",
-      "Ubuntu",
-      "Noto Sans"
-    ],
+    "fonts": ["Fira Sans", "Ubuntu", "Noto Sans"],
     "font-size": 15,
-    "fonts-mono": [
-      "Fira Mono",
-      "Ubuntu Mono",
-      "Noto Mono"
-    ],
+    "fonts-mono": ["Fira Mono", "Ubuntu Mono", "Noto Mono"],
     "font-size-mono": 14,
-    "daisyUI": "coffee"
+    "daisyUI": "coffee",
+    "layout": "cindy"
   }
 ]

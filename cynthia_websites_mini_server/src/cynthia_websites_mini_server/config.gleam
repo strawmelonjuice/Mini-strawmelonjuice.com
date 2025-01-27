@@ -17,7 +17,8 @@ import simplifile
 /// # Config.load()
 /// Loads the configuration from the `cynthia-mini.toml` file and the content from the `content` directory.
 /// Then saves the configuration to the database.
-/// If an override environment variable or call param is provided, it will use that database file instead, and load from there. It will not need any files to exist in the filesystem (except for the SQLite file) in that case.
+/// If an override environment variable or call param is provided, it will use that database file instead, and load from
+/// there. It will not need any files to exist in the filesystem (except for the SQLite file) in that case.
 pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
   let global_conf_filepath = process.cwd() <> "/cynthia-mini.toml"
   let global_conf_filepath_exists = files.file_exist(global_conf_filepath)
@@ -130,10 +131,12 @@ fn dialog_initcfg() {
   io.println("No Cynthia Mini configuration found...")
   case
     prompts.for_confirmation(
-      "Initialise new config at this location?\n"
-        <> "This will create a "
+      "CynthiaMini can create a "
         <> premixed.text_bright_yellow("cynthia-mini.toml")
-        <> " file and some sample content.\n\n",
+        <> " file and some sample content.\n"
+        <> premixed.text_lightblue(
+        "Do you want to initialise new config at this location?",
+      ),
       True,
     )
   {
