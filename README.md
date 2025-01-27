@@ -7,7 +7,7 @@ simple server here, serving static stuff and having the client do the rest.
 This leaves a lot of customization options in the bin,
 as for example custom formats are out of the optional.
 
-In return, Cynthia Mini comes with premade themes with each some customisable options!
+In return, Cynthia Mini comes with pre-made themes with each some customisable options!
 
 ## Themes
 
@@ -76,3 +76,4 @@ where there is no config directory, and only an SQLite database to run off direc
 ```
 
 Something like this.
+

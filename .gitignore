@@ -132,8 +132,9 @@ dist
 # Gleam build output
 build/
 
-# Client bundle output
+# Bundle output
 cynthia_websites_mini_server/src/client_code_generated_ffi.ts
+cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui/themes_generated.gleam
 
 # Linked files for FFI type declarations
 cynthia_websites_mini_server/prelude.ts
