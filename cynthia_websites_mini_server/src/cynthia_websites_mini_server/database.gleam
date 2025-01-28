@@ -53,7 +53,8 @@ pub fn create_database() -> sqlite.Database {
     "
       CREATE TABLE IF NOT EXISTS postMetaData (
         post_id INTEGER FOREIGN KEY REFERENCES contentStore(content_id),
-        -- ... and the rest.
+        date_published TEXT NOT NULL,
+        date_updated TEXT NOT NULL,
       )
     ",
   )

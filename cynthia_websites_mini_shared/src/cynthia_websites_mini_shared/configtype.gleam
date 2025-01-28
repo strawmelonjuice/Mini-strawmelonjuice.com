@@ -51,13 +51,20 @@ pub type Contents {
 
 pub type Page {
   Page(
+    // Common to all content
     filename: String,
     title: String,
     description: String,
     layout: String,
     permalink: String,
+    // Unique to page
     page: PagePageData,
   )
+}
+
+/// Data unique to page type content
+pub type PagePageData {
+  ContentsPagePageData(menus: List(Int))
 }
 
 pub fn page_decoder(filename) -> decode.Decoder(Page) {
@@ -82,17 +89,22 @@ pub fn page_decoder(filename) -> decode.Decoder(Page) {
   ))
 }
 
-pub type PagePageData {
-  ContentsPagePageData(menus: List(Int))
-}
-
 pub type Post {
   Post(
+    // Common to all content
     filename: String,
     title: String,
     description: String,
     layout: String,
     permalink: String,
+    // Unique to post
+    post: PostMetaData,
+  )
+}
+
+/// Data unique to post type content
+pub type PostMetaData {
+  PostMetaData(
     /// Date in the  ISO 8601 date format (EG: 2025-01-22T12:12:07+0000)
     date_posted: String,
     /// Date in the  ISO 8601 date format (EG: 2025-01-22T12:12:07+0000)
@@ -105,15 +117,20 @@ pub fn post_decoder(filename) -> decode.Decoder(Post) {
   use description <- decode.field("description", decode.string)
   use layout <- decode.field("layout", decode.string)
   use permalink <- decode.field("permalink", decode.string)
-  use date_posted <- decode.field("date-posted", decode.string)
-  use date_updated <- decode.field("date-updated", decode.string)
+  use post <- decode.field(
+    "post",
+    fn() -> decode.Decoder(PostMetaData) {
+      use date_posted <- decode.field("date_posted", decode.string)
+      use date_updated <- decode.field("date_updated", decode.string)
+      decode.success(PostMetaData(date_posted:, date_updated:))
+    }(),
+  )
   decode.success(Post(
     filename:,
     title:,
     description:,
     layout:,
     permalink:,
-    date_posted:,
-    date_updated:,
+    post:,
   ))
 }
