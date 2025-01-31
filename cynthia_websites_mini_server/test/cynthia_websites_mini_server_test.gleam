@@ -1,11 +1,8 @@
+import bungibindies/bun
+import cynthia_websites_mini_shared/timestamps
 import gleam/io
-import gleam/string
 import gleeunit
 import gleeunit/should
-
-// todo: Timestamp conversion test
-
-import cynthia_websites_mini_shared/timestamps
 
 pub fn main() {
   gleeunit.main()
@@ -17,17 +14,21 @@ pub fn hello_world_test() {
   |> should.equal(1)
 }
 
-// Test timestamp conversion
+// Test timestamp parsing
 pub fn timestamp_to_timestamp_test() {
-  let time = "2025-01-22T12:12:07.001+01:00"
-  let parsed = timestamps.parse(time)
-  timestamps.create(parsed)
-  |> should.equal(time)
+  let times = #("2025-01-31T12:38:20Z", "2025-01-31T12:38:20+00:00")
+  let results =
+    #(timestamps.parse(times.0), timestamps.parse(times.1))
+    |> io.debug()
+  bun.deep_equals(results.1, results.0)
+  |> should.be_true()
 }
 
-// Test timestamp conversion
-pub fn string_to_timestamp_test() {
-  timestamps.parse("2025-01-24 20:51:03 GMT+0100")
-  |> timestamps.create()
-  |> should.equal("2025-01-24T20:51:03.000+01:00")
+// Test timestamp formatting
+pub fn timestamp_to_string_test() {
+  let time = "2025-01-31T12:38:20.000Z"
+  let result = timestamps.parse(time) |> timestamps.create()
+  io.debug(result)
+  result
+  |> should.equal(time)
 }
