@@ -1,6 +1,6 @@
-[config]
-global_theme = "autumn"
-global_theme_dark = "coffee"
-global_colour = "#FFFFFF"
-global_site_name = "My Site"
-global_site_description = "A big site on a mini Cynthia!"
+[global]
+theme = "autumn"
+theme_dark = "coffee"
+colour = "#FFFFFF"
+site_name = "My Site"
+site_description = "A big site on a mini Cynthia!"

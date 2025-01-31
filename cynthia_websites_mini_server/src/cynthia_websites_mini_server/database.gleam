@@ -1,21 +1,33 @@
+import bungibindies/bun
+import bungibindies/bun/bunfile
 import bungibindies/bun/sqlite
 import bungibindies/bun/sqlite/param_array
 import cynthia_websites_mini_shared/configtype
+import gleam/dynamic/decode
 import gleam/io
 import gleam/list
+import gleam/option.{type Option, None, Some}
 import gleam/string
 import plinth/node/fs
 import plinth/node/process
 
-pub fn create_database() -> sqlite.Database {
-  let db = sqlite.new(process.cwd() <> "/cache.db")
-  db
-  |> sqlite.exec("PRAGMA journal_mode = WAL;")
-  db
-  |> sqlite.exec("PRAGMA foreign_keys = ON;")
+pub fn create_database(name: Option(String)) -> sqlite.Database {
+  let db = {
+    case name {
+      None -> {
+        deletecachedb()
+        // sqlite.new(":memory:")
+        sqlite.new(process.cwd() <> "/cache.db")
+      }
+      Some(n) -> sqlite.new(n)
+    }
+  }
+  sqlite.exec(db, "PRAGMA journal_mode = WAL;")
+  sqlite.exec(db, "PRAGMA foreign_keys = ON;")
+  sqlite.exec(db, "PRAGMA temp_store = '2';")
   io.println("Database configured, creating table 1/4")
-  db
-  |> sqlite.exec(
+  sqlite.exec(
+    db,
     "
     CREATE TABLE IF NOT EXISTS globalConfig (
         site_name TEXT NOT NULL,
@@ -27,8 +39,8 @@ pub fn create_database() -> sqlite.Database {
   ",
   )
   io.println("Database configured, creating table 2/4")
-  db
-  |> sqlite.exec(
+  sqlite.exec(
+    db,
     "
     CREATE TABLE IF NOT EXISTS contentStore (
       content_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,9 +55,10 @@ pub fn create_database() -> sqlite.Database {
     )
   ",
   )
+
   io.println("Database configured, creating table 3/4")
-  db
-  |> sqlite.exec(
+  sqlite.exec(
+    db,
     "
       CREATE TABLE IF NOT EXISTS pageMetaData (
         page_id INTEGER PRIMARY KEY NOT NULL,
@@ -56,8 +69,8 @@ pub fn create_database() -> sqlite.Database {
     ",
   )
   io.println("Database configured, creating table 4/4")
-  db
-  |> sqlite.exec(
+  sqlite.exec(
+    db,
     "
       CREATE TABLE IF NOT EXISTS postMetaData (
         post_id INTEGER PRIMARY KEY NOT NULL,
@@ -67,6 +80,7 @@ pub fn create_database() -> sqlite.Database {
       )
     ",
   )
+  io.println("Database configured, tables created.")
   db
 }
 
@@ -86,7 +100,7 @@ pub fn save_complete_config(
         theme,
         theme_dark
       )
-      VALUES (?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?);
     ",
     )
 
@@ -117,6 +131,7 @@ pub fn save_complete_config(
               meta_permalink
             )
             VALUES (?, ?, ?, ?, ?, ?, ?)
+            RETURNING content_id;
           ",
           )
 
@@ -133,7 +148,9 @@ pub fn save_complete_config(
           |> param_array.push(0)
           |> param_array.push(pg.layout)
           |> param_array.push(pg.permalink)
-        let id = sqlite.run(statement, params).last_insert_row_id
+        let assert Ok(contentinsertresult) =
+          decode.run(sqlite.get(statement, params), content_insert_id_decoder())
+        let id = contentinsertresult.content_id
         let statement =
           sqlite.prepare(
             db,
@@ -206,4 +223,16 @@ pub fn save_complete_config(
       }
     }
   })
+}
+
+@external(javascript, "./utils/files_ffi.ts", "deletecachedb")
+fn deletecachedb() -> Nil
+
+type ContentInsertID {
+  ContentInsertID(content_id: Int)
+}
+
+fn content_insert_id_decoder() -> decode.Decoder(ContentInsertID) {
+  use content_id <- decode.field("content_id", decode.int)
+  decode.success(ContentInsertID(content_id:))
 }

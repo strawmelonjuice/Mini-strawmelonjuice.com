@@ -27,14 +27,15 @@ pub fn main() {
     <> "!",
   )
   let #(db, conf) = config.load()
-
-  bun.serve(ServeOptions(
-    development: Some(True),
-    hostname: None,
-    port: None,
-    static_served: static_routes.static_routes(),
-    handler: web.handle_request,
-    id: None,
-    reuse_port: None,
-  ))
+  io.println("Starting server...")
+  let assert Ok(_) =
+    bun.serve(ServeOptions(
+      development: Some(True),
+      hostname: None,
+      port: None,
+      static_served: static_routes.static_routes(),
+      handler: web.handle_request,
+      id: None,
+      reuse_port: None,
+    ))
 }

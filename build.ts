@@ -380,6 +380,7 @@ switch (process.argv[2].toLowerCase()) {
           ],
           bytecode,
           outdir: "./dist",
+          sourcemap: "linked",
         });
         if (s.success) console.log("Bundling completed.");
         else {

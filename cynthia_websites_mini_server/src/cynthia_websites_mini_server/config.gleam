@@ -1,4 +1,5 @@
 import bungibindies/bun
+import bungibindies/bun/bunfile
 import bungibindies/bun/sqlite
 import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/utils/files
@@ -8,6 +9,7 @@ import gleam/dynamic/decode
 import gleam/io
 import gleam/json
 import gleam/list
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleamy_lights/premixed
@@ -53,9 +55,15 @@ pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
 
   let conf =
     configtype.shared_merge_shared_cynthia_config(global_config, content)
-  let db = database.create_database()
-  store_db(db, conf)
+  let db_path_env = case bun.env("CYNTHIA_MINI_DB") {
+    Error(_) -> None
 
+    Ok(path) -> Some(path)
+  }
+  let db = database.create_database(db_path_env)
+  io.println("Database configured, storing configuration...")
+  store_db(db, conf)
+  io.println("Database populated.")
   #(db, conf)
 }
 
@@ -125,7 +133,8 @@ pub fn store_db(
   db: sqlite.Database,
   conf: configtype.SharedCynthiaConfig,
 ) -> Nil {
-  todo as "Implement store_db()."
+  // Is this just going to be an alias function?
+  database.save_complete_config(db, conf)
 }
 
 fn dialog_initcfg() {
