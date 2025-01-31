@@ -1,3 +1,4 @@
+import bungibindies/bun
 import bungibindies/bun/sqlite
 import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/utils/files
@@ -73,6 +74,9 @@ fn i_load(
   default: configtype.SharedCynthiaConfigGlobalOnly,
 ) -> Result(configtype.SharedCynthiaConfigGlobalOnly, String)
 
+@external(javascript, "./config_ffi.ts", "config_to_toml")
+fn i_stringify(config: configtype.SharedCynthiaConfigGlobalOnly) -> String
+
 fn content_getter() {
   {
     simplifile.get_files(process.cwd() <> "/content")
@@ -121,9 +125,7 @@ pub fn store_db(
   db: sqlite.Database,
   conf: configtype.SharedCynthiaConfig,
 ) -> Nil {
-  // TODO: Implement this
-  // nil to continue
-  Nil
+  todo as "Implement store_db()."
 }
 
 fn dialog_initcfg() {
@@ -147,5 +149,12 @@ fn dialog_initcfg() {
     }
     True -> Nil
   }
-  todo as "Implement the config writer."
+  let new_config_toml =
+    configtype.default_shared_cynthia_config_global_only |> i_stringify()
+  let assert Ok(_) =
+    simplifile.create_directory_all(process.cwd() <> "/content")
+  { process.cwd() <> "/cynthia-mini.toml" }
+  |> bun.file()
+  |> bun.write(new_config_toml)
+  // todo as "Implement the config writer."
 }

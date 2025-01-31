@@ -16,13 +16,14 @@ pub fn create_database() -> sqlite.Database {
   io.println("Database configured, creating table 1/4")
   db
   |> sqlite.exec(
-    "CREATE TABLE IF NOT EXISTS globalConfig (
+    "
+    CREATE TABLE IF NOT EXISTS globalConfig (
         site_name TEXT NOT NULL,
         site_colour TEXT NOT NULL,
         site_description TEXT NOT NULL,
         theme TEXT NOT NULL,
-        theme_dark TEXT NOT NULL,
-      )
+        theme_dark TEXT NOT NULL
+    )
   ",
   )
   io.println("Database configured, creating table 2/4")
@@ -30,7 +31,7 @@ pub fn create_database() -> sqlite.Database {
   |> sqlite.exec(
     "
     CREATE TABLE IF NOT EXISTS contentStore (
-      content_id PRIMARY KEY AUTOINCREMENT,
+      content_id INTEGER PRIMARY KEY AUTOINCREMENT,
       content TEXT NOT NULL,
       extension TEXT NOT NULL,
       meta_title TEXT NOT NULL,
@@ -38,7 +39,7 @@ pub fn create_database() -> sqlite.Database {
       -- 0 = page, 1 = post
       meta_kind INTEGER NOT NULL,
       meta_layout TEXT NOT NULL,
-      meta_permalink TEXT NOT NULL,
+      meta_permalink TEXT NOT NULL
     )
   ",
   )
@@ -47,9 +48,10 @@ pub fn create_database() -> sqlite.Database {
   |> sqlite.exec(
     "
       CREATE TABLE IF NOT EXISTS pageMetaData (
-        page_id INTEGER FOREIGN KEY REFERENCES contentStore(content_id),
+        page_id INTEGER PRIMARY KEY NOT NULL,
         -- A JSON array of menu IDs
         meta_menus TEXT NOT NULL,
+        FOREIGN KEY(page_id) REFERENCES contentStore(content_id)
       )
     ",
   )
@@ -58,9 +60,10 @@ pub fn create_database() -> sqlite.Database {
   |> sqlite.exec(
     "
       CREATE TABLE IF NOT EXISTS postMetaData (
-        post_id INTEGER FOREIGN KEY REFERENCES contentStore(content_id),
+        post_id INTEGER PRIMARY KEY NOT NULL,
         date_published TEXT NOT NULL,
         date_updated TEXT NOT NULL,
+        FOREIGN KEY(post_id) REFERENCES contentStore(content_id)
       )
     ",
   )

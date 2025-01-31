@@ -1,5 +1,5 @@
 import { Ok as ResultOk, Error as ResultError } from "../../prelude";
-import { parse } from "smol-toml";
+import { parse, stringify } from "smol-toml";
 import fs from "node:fs";
 interface PartialConfigToml {
   global_theme?: string;
@@ -19,18 +19,10 @@ interface ConfigToml extends PartialConfigToml {
   global_site_name: string;
   global_site_description: string;
 }
-const default_config: ConfigToml = {
-  global_theme: "autumn",
-  global_theme_dark: "coffee",
-  global_colour: "#FFFFFF",
-  global_font: "Fira Sans",
-  global_font_size: 12,
-  global_site_name: "My Site",
-  global_site_description: "A big site on a mini Cynthia!",
-};
 
 export function parse_configtoml(
   tomlfile: string,
+  default_config: ConfigToml,
 ): ResultOk<ConfigToml, unknown> | ResultError<string, any> {
   try {
     const b = fs.readFileSync(tomlfile, "utf8");
@@ -48,6 +40,10 @@ export function parse_configtoml(
     };
     return new ResultOk(f);
   } catch (e) {
-    return new ResultError(e.toString());
+    return new ResultError(Bun.inspect(e));
   }
+}
+
+export function config_to_toml(config: ConfigToml): string {
+  return stringify(config);
 }
