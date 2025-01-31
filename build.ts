@@ -411,7 +411,10 @@ switch (process.argv[2].toLowerCase()) {
       {
         const results: boolean[] = [];
         // Run the tests
-        if (!(process.argv[3].toLowerCase() === "client")) {
+        if (
+          process.argv[3] != null &&
+          !(process.argv[3].toLowerCase() === "client")
+        ) {
           console.log("Running tests for server:");
           results.push(
             Bun.spawnSync({
@@ -422,7 +425,10 @@ switch (process.argv[2].toLowerCase()) {
             }).success,
           );
         }
-        if (!(process.argv[3].toLowerCase() === "server")) {
+        if (
+          process.argv[3] != null &&
+          !(process.argv[3].toLowerCase() === "server")
+        ) {
           console.log("Running tests for client:");
           results.push(
             Bun.spawnSync({
