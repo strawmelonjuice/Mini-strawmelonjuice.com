@@ -51,7 +51,9 @@ pub fn create_database(name: Option(String)) -> sqlite.Database {
       -- 0 = page, 1 = post
       meta_kind INTEGER NOT NULL,
       meta_layout TEXT NOT NULL,
-      meta_permalink TEXT NOT NULL
+      meta_permalink TEXT NOT NULL,
+      meta_original_file_path TEXT NOT NULL,
+      last_inserted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
     )
   ",
   )
@@ -128,9 +130,10 @@ pub fn save_complete_config(
               meta_description,
               meta_kind,
               meta_layout,
-              meta_permalink
+              meta_permalink,
+              meta_original_file_path
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             RETURNING content_id;
           ",
           )
@@ -148,6 +151,9 @@ pub fn save_complete_config(
           |> param_array.push(0)
           |> param_array.push(pg.layout)
           |> param_array.push(pg.permalink)
+          |> param_array.push(
+            pg.filename |> string.replace(process.cwd() <> "/content/", ""),
+          )
         let assert Ok(contentinsertresult) =
           decode.run(sqlite.get(statement, params), content_insert_id_decoder())
         let id = contentinsertresult.content_id
