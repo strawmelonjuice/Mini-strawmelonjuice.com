@@ -13,6 +13,7 @@ lustre = ">= 4.6.3 and < 5.0.0"
 gleam_community_colour = ">= 1.4.1 and < 2.0.0"
 
 cynthia_websites_mini_shared = { path = "../cynthia_websites_mini_shared" }
+gleam_json = ">= 2.3.0 and < 3.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

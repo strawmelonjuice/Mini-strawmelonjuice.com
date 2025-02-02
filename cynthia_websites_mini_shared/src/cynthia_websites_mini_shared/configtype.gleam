@@ -7,6 +7,7 @@ pub type SharedCynthiaConfig {
     global_colour: String,
     global_site_name: String,
     global_site_description: String,
+    global_layout: String,
     content: List(Contents),
   )
 }
@@ -18,6 +19,7 @@ pub type SharedCynthiaConfigGlobalOnly {
     global_colour: String,
     global_site_name: String,
     global_site_description: String,
+    global_layout: String,
   )
 }
 
@@ -27,6 +29,7 @@ pub const default_shared_cynthia_config_global_only: SharedCynthiaConfigGlobalOn
   global_colour: "#FFFFFF",
   global_site_name: "My Site",
   global_site_description: "A big site on a mini Cynthia!",
+  global_layout: "cyndy",
 )
 
 pub fn shared_merge_shared_cynthia_config(
@@ -39,6 +42,7 @@ pub fn shared_merge_shared_cynthia_config(
     global_colour: orig.global_colour,
     global_site_name: orig.global_site_name,
     global_site_description: orig.global_site_description,
+    global_layout: orig.global_layout,
     content:,
   )
 }

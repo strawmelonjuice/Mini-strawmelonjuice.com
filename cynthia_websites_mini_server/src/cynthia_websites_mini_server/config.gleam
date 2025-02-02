@@ -40,9 +40,11 @@ pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
   {
     Ok(config) -> config
     Error(why) -> {
-      io.println_error("Error: Could not load cynthia-mini.toml: " <> why)
-      io.println("Using default configuration.")
-      configtype.default_shared_cynthia_config_global_only
+      premixed.text_error_red(
+        "Error: Could not load cynthia-mini.toml: " <> why,
+      )
+      |> io.println_error
+      panic as why
     }
   }
   let content = case content_getter() {

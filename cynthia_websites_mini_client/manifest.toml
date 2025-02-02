@@ -3,7 +3,7 @@
 
 packages = [
   { name = "conversation", version = "1.4.3", build_tools = ["gleam"], requirements = ["gleam_http", "gleam_javascript", "gleam_stdlib"], otp_app = "conversation", source = "hex", outer_checksum = "908B46F60444442785A495197D482558AD8B849C3714A38FAA1940358CC8CCCD" },
-  { name = "cynthia_websites_mini_shared", version = "0.1.0", build_tools = ["gleam"], requirements = ["gleam_stdlib", "plinth"], source = "local", path = "../cynthia_websites_mini_shared" },
+  { name = "cynthia_websites_mini_shared", version = "0.1.0", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib", "plinth"], source = "local", path = "../cynthia_websites_mini_shared" },
   { name = "gleam_community_colour", version = "1.4.1", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib"], otp_app = "gleam_community_colour", source = "hex", outer_checksum = "386CB9B01B33371538672EEA8A6375A0A0ADEF41F17C86DDCB81C92AD00DA610" },
   { name = "gleam_erlang", version = "0.33.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleam_erlang", source = "hex", outer_checksum = "A1D26B80F01901B59AABEE3475DD4C18D27D58FA5C897D922FCB9B099749C064" },
   { name = "gleam_http", version = "3.7.2", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleam_http", source = "hex", outer_checksum = "8A70D2F70BB7CFEB5DF048A2183FFBA91AF6D4CF5798504841744A16999E33D2" },
@@ -20,6 +20,7 @@ packages = [
 cynthia_websites_mini_shared = { path = "../cynthia_websites_mini_shared" }
 gleam_community_colour = { version = ">= 1.4.1 and < 2.0.0" }
 gleam_javascript = { version = ">= 0.13.0 and < 1.0.0" }
+gleam_json = { version = ">= 2.3.0 and < 3.0.0" }
 gleam_stdlib = { version = ">= 0.44.0 and < 2.0.0" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
 lustre = { version = ">= 4.6.3 and < 5.0.0" }

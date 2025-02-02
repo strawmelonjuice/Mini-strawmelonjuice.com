@@ -4,7 +4,7 @@
 packages = [
   { name = "bungibindies", version = "1.1.4", build_tools = ["gleam"], requirements = ["gleam_javascript", "gleam_stdlib"], otp_app = "bungibindies", source = "hex", outer_checksum = "59F8E1D7807961E66DC88C2F38411AC1F48869C754AA3C8C14F3E8BBE84494DF" },
   { name = "conversation", version = "1.4.3", build_tools = ["gleam"], requirements = ["gleam_http", "gleam_javascript", "gleam_stdlib"], otp_app = "conversation", source = "hex", outer_checksum = "908B46F60444442785A495197D482558AD8B849C3714A38FAA1940358CC8CCCD" },
-  { name = "cynthia_websites_mini_shared", version = "0.1.0", build_tools = ["gleam"], requirements = ["gleam_stdlib", "plinth"], source = "local", path = "../cynthia_websites_mini_shared" },
+  { name = "cynthia_websites_mini_shared", version = "0.1.0", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib", "plinth"], source = "local", path = "../cynthia_websites_mini_shared" },
   { name = "envoy", version = "1.0.2", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "envoy", source = "hex", outer_checksum = "95FD059345AA982E89A0B6E2A3BF1CF43E17A7048DCD85B5B65D3B9E4E39D359" },
   { name = "filepath", version = "1.1.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "filepath", source = "hex", outer_checksum = "67A6D15FB39EEB69DD31F8C145BB5A421790581BD6AA14B33D64D5A55DBD6587" },
   { name = "gleam_community_colour", version = "1.4.1", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib"], otp_app = "gleam_community_colour", source = "hex", outer_checksum = "386CB9B01B33371538672EEA8A6375A0A0ADEF41F17C86DDCB81C92AD00DA610" },

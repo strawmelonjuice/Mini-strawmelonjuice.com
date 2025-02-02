@@ -26,7 +26,7 @@ pub fn main() {
     <> premixed.text_bright_orange(process.cwd())
     <> "!",
   )
-  let #(db, conf) = config.load()
+  let #(db, _conf) = config.load()
   io.println("Starting server...")
   let assert Ok(_) =
     bun.serve(ServeOptions(
@@ -34,7 +34,7 @@ pub fn main() {
       hostname: None,
       port: None,
       static_served: static_routes.static_routes(),
-      handler: web.handle_request,
+      handler: web.handle_request(_, db),
       id: None,
       reuse_port: None,
     ))
