@@ -49,16 +49,14 @@ pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
       panic as "We should not reach here"
     }
   }
-  let content =
-    case content_getter() {
-      Ok(lis) -> lis
-      Error(msg) -> {
-        io.println_error("Error: There was an error getting content:\n" <> msg)
-        process.exit(1)
-        panic as "We should not reach here"
-      }
+  let content = case content_getter() {
+    Ok(lis) -> lis
+    Error(msg) -> {
+      io.println_error("Error: There was an error getting content:\n" <> msg)
+      process.exit(1)
+      panic as "We should not reach here"
     }
-    |> io.debug()
+  }
 
   let conf =
     configtype.shared_merge_shared_cynthia_config(global_config, content)
@@ -68,9 +66,7 @@ pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
     Ok(path) -> Some(path)
   }
   let db = database.create_database(db_path_env)
-  io.println("Database configured, storing configuration...")
   store_db(db, conf)
-  io.println("Database populated.")
   #(db, conf)
 }
 

@@ -26,7 +26,6 @@ pub fn create_database(name: Option(String)) -> sqlite.Database {
   sqlite.exec(db, "PRAGMA journal_mode = WAL;")
   sqlite.exec(db, "PRAGMA foreign_keys = ON;")
   sqlite.exec(db, "PRAGMA temp_store = '2';")
-  io.println("Database configured, creating table 1/4")
   sqlite.exec(
     db,
     "
@@ -40,7 +39,6 @@ pub fn create_database(name: Option(String)) -> sqlite.Database {
     )
   ",
   )
-  io.println("Database configured, creating table 2/4")
   sqlite.exec(
     db,
     "
@@ -59,8 +57,6 @@ pub fn create_database(name: Option(String)) -> sqlite.Database {
     )
   ",
   )
-
-  io.println("Database configured, creating table 3/4")
   sqlite.exec(
     db,
     "
@@ -72,7 +68,6 @@ pub fn create_database(name: Option(String)) -> sqlite.Database {
       )
     ",
   )
-  io.println("Database configured, creating table 4/4")
   sqlite.exec(
     db,
     "
@@ -84,7 +79,6 @@ pub fn create_database(name: Option(String)) -> sqlite.Database {
       )
     ",
   )
-  io.println("Database configured, tables created.")
   db
 }
 
