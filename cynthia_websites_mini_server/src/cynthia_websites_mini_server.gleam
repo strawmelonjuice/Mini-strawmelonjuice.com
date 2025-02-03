@@ -2,7 +2,6 @@ import bungibindies
 import bungibindies/bun
 import bungibindies/bun/http/serve.{ServeOptions}
 import cynthia_websites_mini_server/config
-import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/static_routes
 import cynthia_websites_mini_server/web
 import gleam/io
@@ -30,6 +29,7 @@ pub fn main() {
   io.println("Starting server...")
   let assert Ok(_) =
     bun.serve(ServeOptions(
+      // TODO: Add hostname and port to the config file once flat config turns 3d
       development: Some(True),
       hostname: None,
       port: None,
@@ -38,4 +38,5 @@ pub fn main() {
       id: None,
       reuse_port: None,
     ))
+  io.println("Server started!")
 }
