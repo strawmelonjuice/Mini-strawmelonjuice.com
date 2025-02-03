@@ -144,9 +144,9 @@ fn dialog_initcfg() {
   io.println("No Cynthia Mini configuration found...")
   case
     prompts.for_confirmation(
-      "CynthiaMini can create a "
-        <> premixed.text_orange("cynthia-mini.toml")
-        <> " file and some sample content.\n"
+      "CynthiaMini can create \n"
+        <> premixed.text_orange(process.cwd() <> "/cynthia-mini.toml")
+        <> "\n ...and some sample content.\n"
         <> premixed.text_magenta(
         "Do you want to initialise new config at this location?",
       ),
