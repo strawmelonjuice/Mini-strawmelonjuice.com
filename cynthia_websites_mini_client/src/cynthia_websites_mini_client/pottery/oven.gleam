@@ -9,7 +9,7 @@ pub fn error(msg: String) -> Nil {
       html.div(
         [
           attribute.class(
-            "absolute right-[40VW] left-[40VW] bottom-[40VH] top-[40VH] w-fit h-fit",
+            "absolute mr-auto ml-auto right-0 left-0 bottom-[40VH] top-[40VH] w-fit h-fit",
           ),
         ],
         [
