@@ -20,7 +20,7 @@
     "format": "bun ./build.ts fmt",
     "dev": "bun nodemon --ext gleam,ts --ignore ./cynthia_websites_mini_client/build/ --ignore ./cynthia_websites_mini_server/build/ --ignore prelude.ts --ignore cynthia_websites_mini_server/src/client_code_generated_ffi.ts  --exec bun ./build.ts run",
     "prepack": "bun run bundle",
-    "run-in-test": "bun run bundle && cd ./test && bun ../dist/cynthia_websites_mini_server.js"
+    "run-in-test": "bun ./build.ts run-cd './test'"
   },
   "dependencies": {
     "autoprefixer": "^10.4.20",

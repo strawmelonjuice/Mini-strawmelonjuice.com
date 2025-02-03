@@ -1,5 +1,5 @@
 import themeconf from "./themes.json";
-
+import path from "path";
 if (process.argv[2].toLowerCase() === "clean") {
   console.log("Cleaning up...");
   {
@@ -388,6 +388,25 @@ switch (process.argv[2].toLowerCase()) {
           process.exit(1);
         }
       }
+    }
+    break;
+  case "run-cd":
+    {
+      console.log("Running server...");
+      // Run the server
+      Bun.spawnSync({
+        cmd: [
+          "bun",
+          path.join(
+            __dirname,
+            "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
+          ),
+        ],
+        stdout: "inherit",
+        stderr: "inherit",
+        stdin: "inherit",
+        cwd: process.argv[3],
+      });
     }
     break;
   case "run":
