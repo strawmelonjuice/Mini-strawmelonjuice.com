@@ -1,4 +1,4 @@
-import { Ok as ResultOk, Error as ResultError } from "../../prelude";
+import  * as Gleam  from "../../prelude";
 import { parse, stringify } from "smol-toml";
 import fs from "node:fs";
 interface PartialGlobalConfig {
@@ -30,7 +30,7 @@ interface flatGlobalConfig {
 export function parse_configtoml(
   tomlfile: string,
   default_config: flatGlobalConfig,
-): ResultOk<flatGlobalConfig, unknown> | ResultError<string, any> {
+): Gleam.Ok<flatGlobalConfig, unknown> | Gleam.Error<string, any> {
   try {
     const b = fs.readFileSync(tomlfile, "utf8");
     const p = parse(b).global as PartialGlobalConfig;
@@ -43,7 +43,7 @@ export function parse_configtoml(
         p.site_description ?? default_config.global_site_description,
       layout: p.layout ?? default_config.global_layout,
     };
-    return new ResultOk({
+    return new Gleam.Ok({
       global_theme: f.theme,
       global_theme_dark: f.theme_dark,
       global_colour: f.colour,
@@ -52,7 +52,7 @@ export function parse_configtoml(
       global_layout: f.layout,
     });
   } catch (e) {
-    return new ResultError(Bun.inspect(e));
+    return new Gleam.Error(Bun.inspect(e));
   }
 }
 

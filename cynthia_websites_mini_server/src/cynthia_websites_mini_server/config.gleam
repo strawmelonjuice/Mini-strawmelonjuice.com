@@ -1,5 +1,4 @@
 import bungibindies/bun
-import bungibindies/bun/bunfile
 import bungibindies/bun/sqlite
 import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/utils/files
@@ -14,6 +13,7 @@ import gleam/result
 import gleam/string
 import gleamy_lights/premixed
 import plinth/javascript/console
+import plinth/node/fs
 import plinth/node/process
 import simplifile
 
@@ -23,7 +23,8 @@ import simplifile
 /// If an override environment variable or call param is provided, it will use that database file instead, and load from
 /// there. It will not need any files to exist in the filesystem (except for the SQLite file) in that case.
 pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
-  let global_conf_filepath = process.cwd() <> "/cynthia-mini.toml"
+  let global_conf_filepath =
+    files.path_join([process.cwd(), "/cynthia-mini.toml"])
   let global_conf_filepath_exists = files.file_exist(global_conf_filepath)
   case global_conf_filepath_exists {
     True -> Nil
@@ -44,16 +45,20 @@ pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
         "Error: Could not load cynthia-mini.toml: " <> why,
       )
       |> io.println_error
-      panic as why
+      process.exit(1)
+      panic as "We should not reach here"
     }
   }
-  let content = case content_getter() {
-    Ok(lis) -> lis
-    Error(msg) -> {
-      io.println_error(msg)
-      panic as msg
+  let content =
+    case content_getter() {
+      Ok(lis) -> lis
+      Error(msg) -> {
+        io.println_error("Error: There was an error getting content:\n" <> msg)
+        process.exit(1)
+        panic as "We should not reach here"
+      }
     }
-  }
+    |> io.debug()
 
   let conf =
     configtype.shared_merge_shared_cynthia_config(global_config, content)
@@ -89,13 +94,17 @@ fn i_stringify(config: configtype.SharedCynthiaConfigGlobalOnly) -> String
 
 fn content_getter() {
   {
-    simplifile.get_files(process.cwd() <> "/content")
+    simplifile.get_files(files.path_join([process.cwd() <> "/content"]))
     |> result.unwrap([])
     |> list.filter(fn(file) { file |> string.ends_with(".meta.json") })
-    |> list.map(fn(file) { file |> string.replace(".meta.json", "") })
+    |> list.map(fn(file) {
+      file
+      |> string.replace(".meta.json", "")
+      |> files.path_normalize()
+    })
     |> list.try_map(fn(file) -> Result(configtype.Contents, String) {
       use content <- result.try({
-        simplifile.read(file <> ".meta.json")
+        fs.read_file_sync(files.path_normalize(file <> ".meta.json"))
         |> result.replace_error(
           "Error: Could not read file " <> file <> ".meta.json",
         )
@@ -111,7 +120,10 @@ fn content_getter() {
           use page <- result.try({
             json.parse(content, configtype.page_decoder(file))
             |> result.replace_error(
-              "Error: Could not decode " <> file <> ".meta.json",
+              "Error: Could not decode the page metadata in "
+              <> files.path_normalize(premixed.text_magenta(
+                file <> ".meta.json",
+              )),
             )
           })
           Ok(configtype.ContentsPage(page))
@@ -120,12 +132,19 @@ fn content_getter() {
           use post <- result.try({
             json.parse(content, configtype.post_decoder(file))
             |> result.replace_error(
-              "Error: Could not decode " <> file <> ".meta.json",
+              "Error: Could not decode the post metadata in "
+              <> files.path_normalize(premixed.text_magenta(
+                file <> ".meta.json",
+              )),
             )
           })
           Ok(configtype.ContentsPost(post))
         }
-        _ -> Error("Error: Could not decode " <> file <> ".meta.json")
+        _ ->
+          Error(
+            "Error: Could not decode "
+            <> files.path_normalize(premixed.text_magenta(file <> ".meta.json")),
+          )
       }
     })
   }
@@ -165,7 +184,111 @@ fn dialog_initcfg() {
   let assert Ok(_) =
     simplifile.create_directory_all(process.cwd() <> "/content")
   { process.cwd() <> "/cynthia-mini.toml" }
-  |> bun.file()
-  |> bun.write(new_config_toml)
+  |> fs.write_file_sync(new_config_toml)
+  |> result.map_error(fn(e) {
+    premixed.text_error_red("Error: Could not write cynthia-mini.toml: " <> e)
+    process.exit(1)
+  })
+  |> result.unwrap(Nil)
+  {
+    {
+      []
+      |> create_page(
+        "index.md",
+        configtype.Page(
+          filename: "",
+          title: "Example index",
+          description: "This is an example index page",
+          layout: "default",
+          permalink: "/",
+          page: configtype.ContentsPagePageData(menus: []),
+        ),
+        "# Hello, World!\n\nHello! This is an example page, you'll find me at `content/index.md`.",
+      )
+      |> create_post(
+        to: "example-post.md",
+        with: configtype.Post(
+          filename: "",
+          title: "An example post!",
+          description: "This is an example post",
+          layout: "default",
+          permalink: "/example-post",
+          post: configtype.PostMetaData(
+            category: "example",
+            date_posted: "2021-01-01",
+            date_updated: "2021-01-01",
+            tags: ["example"],
+          ),
+        ),
+        containing: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.md`.",
+      )
+    }
+  }
+  |> write_posts_and_pages_to_fs
   // todo as "Implement the config writer."
+}
+
+fn create_post(
+  after others: List(#(String, String)),
+  to path: String,
+  with meta: configtype.Post,
+  containing inner: String,
+) -> List(#(String, String)) {
+  let path = files.path_join([process.cwd(), "/content/", path])
+  let meta_json =
+    json.object([
+      #("title", json.string(meta.title)),
+      #("description", json.string(meta.description)),
+      #("kind", json.string("post")),
+      #("layout", json.string(meta.layout)),
+      #("permalink", json.string(meta.permalink)),
+      #(
+        "post",
+        json.object([
+          #("category", json.string(meta.post.category)),
+          #("date-posted", json.string(meta.post.date_posted)),
+          #("date-updated", json.string(meta.post.date_updated)),
+          #("tags", json.array(meta.post.tags, json.string)),
+        ]),
+      ),
+    ])
+    |> json.to_string()
+  let meta_path = path <> ".meta.json"
+  [#(meta_path, meta_json), #(path, inner)]
+  |> list.append(others)
+}
+
+fn create_page(
+  after others: List(#(String, String)),
+  to path: String,
+  with meta: configtype.Page,
+  containing inner: String,
+) -> List(#(String, String)) {
+  let path = files.path_join([process.cwd(), "/content/", path])
+  let meta_json =
+    json.object([
+      #("title", json.string(meta.title)),
+      #("description", json.string(meta.description)),
+      #("kind", json.string("page")),
+      #("layout", json.string(meta.layout)),
+      #("permalink", json.string(meta.permalink)),
+      #(
+        "page",
+        json.object([#("menus", json.array(meta.page.menus, json.int))]),
+      ),
+    ])
+    |> json.to_string()
+  let meta_path = path <> ".meta.json"
+  [#(meta_path, meta_json), #(path, inner)]
+  |> list.append(others)
+}
+
+// What? The function name is descriptive!
+fn write_posts_and_pages_to_fs(items: List(#(String, String))) -> Nil {
+  items
+  |> list.each(fn(set) {
+    let #(path, content) = set
+    path
+    |> fs.write_file_sync(content)
+  })
 }

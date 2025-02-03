@@ -113,6 +113,10 @@ pub type PostMetaData {
     date_posted: String,
     /// Date in the  ISO 8601 date format (EG: 2025-01-22T12:12:07+0000)
     date_updated: String,
+    /// Category this post belongs to
+    category: String,
+    /// Tags that belong to this post
+    tags: List(String),
   )
 }
 
@@ -124,9 +128,11 @@ pub fn post_decoder(filename) -> decode.Decoder(Post) {
   use post <- decode.field(
     "post",
     fn() -> decode.Decoder(PostMetaData) {
-      use date_posted <- decode.field("date_posted", decode.string)
-      use date_updated <- decode.field("date_updated", decode.string)
-      decode.success(PostMetaData(date_posted:, date_updated:))
+      use date_posted <- decode.field("date-posted", decode.string)
+      use date_updated <- decode.field("date-updated", decode.string)
+      use category <- decode.field("category", decode.string)
+      use tags <- decode.field("tags", decode.list(decode.string))
+      decode.success(PostMetaData(date_posted:, date_updated:, category:, tags:))
     }(),
   )
   decode.success(Post(
