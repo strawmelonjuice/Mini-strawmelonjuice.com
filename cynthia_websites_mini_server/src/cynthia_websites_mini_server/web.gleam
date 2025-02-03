@@ -6,7 +6,6 @@ import cynthia_websites_mini_server/database/content_data
 import gleam/javascript/array
 import gleam/javascript/promise
 import gleam/json
-import gleam/result
 import gleam/uri
 
 pub fn handle_request(req: Request, db: sqlite.Database) {
