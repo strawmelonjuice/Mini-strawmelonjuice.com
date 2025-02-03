@@ -28,7 +28,7 @@ fn main() {
   <body>
     <div id='viewable' class='bg-base-100 w-[100VW] h-[100VH]'>
     </div>
-   " <> ui.footer <> " 
+   " <> ui.footer <> "
   </body>
   </html>
 ")
@@ -52,7 +52,7 @@ fn notfound() {
   </head>
   <body>
     <div
-class =        'absolute right-[40VW] left-[40VW] bottom-[40VH] top-[40VH] w-fit h-fit',>
+class =        'absolute mr-auto ml-auto right-0 left-0 bottom-[40VH] top-[40VH] w-fit h-fit',>
 <div class='card bg-neutral text-neutral-content w-96'>
   <div class='card-body items-center text-center'>
     <h2 class='card-title'>404!</h2>
@@ -63,7 +63,7 @@ class =        'absolute right-[40VW] left-[40VW] bottom-[40VH] top-[40VH] w-fit
     </div>
   </div>
 </div>
-    </div>   
+    </div>
     " <> ui.footer <> "
   </body>
   </html>

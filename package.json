@@ -12,7 +12,7 @@
     "nodemon": "^3.1.9"
   },
   "scripts": {
-    "preinstall": "npx only-allow bun",
+    // "preinstall": "npx only-allow bun",
     "bundle": "bun ./build.ts bundle",
     "check": "bun ./build.ts check",
     "clean": "bun ./build.ts clean",
