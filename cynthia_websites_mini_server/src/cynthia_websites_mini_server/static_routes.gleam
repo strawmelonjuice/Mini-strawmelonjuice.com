@@ -1,5 +1,5 @@
 import bungibindies/bun/http/serve/response
-import cynthia_websites_mini_client as client
+import cynthia_websites_mini_server/utils/files.{client_css, client_js}
 import cynthia_websites_mini_shared/ui
 import gleam/javascript/array
 import gleam/javascript/map
@@ -21,9 +21,9 @@ fn main() {
   <meta charset='utf-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <script type='module'>
-  " <> client.js() <> "
+  " <> client_js() <> "
   </script>
-  <style>" <> client.css() <> "</style>
+  <style>" <> client_css() <> "</style>
   </head>
   <body>
     <div id='viewable' class='bg-base-100 w-[100VW] h-[100VH]'>
@@ -48,11 +48,10 @@ fn notfound() {
   <meta charset='utf-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1'>
 
-  <style>" <> client.css() <> "</style>
+  <style>" <> client_css() <> "</style>
   </head>
   <body>
-    <div
-class =        'absolute mr-auto ml-auto right-0 left-0 bottom-[40VH] top-[40VH] w-fit h-fit',>
+    <div class='absolute mr-auto ml-auto right-0 left-0 bottom-[40VH] top-[40VH] w-fit h-fit'>
 <div class='card bg-neutral text-neutral-content w-96'>
   <div class='card-body items-center text-center'>
     <h2 class='card-title'>404!</h2>
