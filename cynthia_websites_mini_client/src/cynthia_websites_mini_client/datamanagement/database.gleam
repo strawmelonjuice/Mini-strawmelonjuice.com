@@ -8,13 +8,21 @@ import gleam/javascript/array.{type Array}
 pub fn init() {
   let db = new()
   // Prepare for usage
+  exec(db, "PRAGMA journal_mode = WAL;", [] |> array.from_list())
+  exec(db, "PRAGMA foreign_keys = ON;", [] |> array.from_list())
+
   db
   |> run(
-    "CREATE TABLE IF NOT EXISTS `content_cache` (
-      id TEXT PRIMARY KEY,
-      html TEXT,
-      last_update INTEGER
-      );",
+    "
+  CREATE TABLE IF NOT EXISTS globalConfig (
+        site_name TEXT NOT NULL,
+        site_colour TEXT NOT NULL,
+        site_description TEXT NOT NULL,
+        theme TEXT NOT NULL,
+        theme_dark TEXT NOT NULL,
+        layout TEXT NOT NULL
+    )
+",
     [] |> array.from_list(),
   )
   db
