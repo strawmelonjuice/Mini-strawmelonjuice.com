@@ -1,0 +1,16 @@
+{
+  "ext": "ts,gleam",
+  "ignoreRoot": [
+    "./*/build",
+    "./cynthia_websites_mini_client/build",
+    "./cynthia_websites_mini_server/build"
+  ],
+  "pollingInterval": 1000,
+  "watch": [
+    "./cynthia_websites_mini_client/src",
+    "./cynthia_websites_mini_server/src"
+  ],
+  "ignore": [
+    "./cynthia_websites_mini_server/src/client_code_generated_ffi.ts"
+  ]
+}
