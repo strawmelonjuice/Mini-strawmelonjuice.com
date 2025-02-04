@@ -155,7 +155,6 @@ pub fn store_db(
 }
 
 fn dialog_initcfg() {
-  console.clear()
   io.println("No Cynthia Mini configuration found...")
   case
     prompts.for_confirmation(

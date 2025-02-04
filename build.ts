@@ -8,84 +8,141 @@ if (process.argv[2] == "prereqs") {
   process.exit(0);
 }
 
+function help() {
+  console.log("To build, run: bun `./build.ts bundle`");
+  console.log("To run, run: bun `./build.ts run`");
+  console.log("To test, run: bun `./build.ts test`");
+  console.log("To check, run: bun `./build.ts check`");
+  console.log("To clean, run: bun `./build.ts clean`");
+  console.log("To format, run: bun `./build.ts fmt`");
+  console.log(
+    "To run gleam commands on one or both ends, run: bun `./build.ts [client-|server-]gleam <subcommand>`",
+  );
+}
+
+let executed = true;
 import themeconf from "./themes.json";
 import path from "path";
-if (process.argv[2].toLowerCase() === "clean") {
-  console.log("Cleaning up...");
-  {
-    const results: boolean[] = [];
-    results.push(
-      Bun.spawnSync({
-        cmd: ["gleam", "clean"],
-        cwd: "./cynthia_websites_mini_client/",
-        // stderr: "inherit",
-      }).success,
-    );
-    results.push(
-      Bun.spawnSync({
-        cmd: ["gleam", "clean"],
-        cwd: "./cynthia_websites_mini_server/",
-        // stderr: "inherit",
-      }).success,
-    );
-    results.push(
-      Bun.spawnSync({
-        cmd: ["rm", "-rf", "./dist"],
-      }).success,
-    );
-    results.push(
-      Bun.spawnSync({
-        cmd: ["rm", "-rf", "./node_modules/"],
-      }).success,
-    );
-    results.push(
-      Bun.spawnSync({
-        cmd: [
-          "rm",
-          "-rf",
-          "./cynthia_websites_mini_server/src/client_code_generated_ffi.ts",
-        ],
-      }).success,
-    );
-    results.push(
-      Bun.spawnSync({
-        cmd: ["rm", "-rf", "./cynthia_websites_mini_client/prelude.ts"],
-      }).success,
-    );
-    results.push(
-      Bun.spawnSync({
-        cmd: ["rm", "-rf", "./cynthia_websites_mini_server/prelude.ts"],
-      }).success,
-    );
+switch (process.argv[2].toLowerCase()) {
+  case "clean":
+    {
+      console.log("Cleaning up...");
+      {
+        const results: boolean[] = [];
+        results.push(
+          Bun.spawnSync({
+            cmd: ["gleam", "clean"],
+            cwd: "./cynthia_websites_mini_client/",
+            // stderr: "inherit",
+          }).success,
+        );
+        results.push(
+          Bun.spawnSync({
+            cmd: ["gleam", "clean"],
+            cwd: "./cynthia_websites_mini_server/",
+            // stderr: "inherit",
+          }).success,
+        );
+        results.push(
+          Bun.spawnSync({
+            cmd: ["rm", "-rf", "./dist"],
+          }).success,
+        );
+        results.push(
+          Bun.spawnSync({
+            cmd: ["rm", "-rf", "./node_modules/"],
+          }).success,
+        );
+        results.push(
+          Bun.spawnSync({
+            cmd: [
+              "rm",
+              "-rf",
+              "./cynthia_websites_mini_server/src/client_code_generated_ffi.ts",
+            ],
+          }).success,
+        );
+        results.push(
+          Bun.spawnSync({
+            cmd: ["rm", "-rf", "./cynthia_websites_mini_client/prelude.ts"],
+          }).success,
+        );
+        results.push(
+          Bun.spawnSync({
+            cmd: ["rm", "-rf", "./cynthia_websites_mini_server/prelude.ts"],
+          }).success,
+        );
 
-    if (results.every((x) => x)) {
-      console.log("cleared.");
-      process.exit(0);
-    } else {
-      console.error("cleaning failed, aborting");
-      process.exit(1);
+        if (results.every((x) => x)) {
+          console.log("cleared.");
+        } else {
+          console.error("cleaning failed, aborting");
+          process.exit(1);
+        }
+      }
     }
-  }
-} else if (process.argv[2].toLowerCase() === "fmt") {
-  const a = Bun.spawnSync({
-    cmd: ["gleam", "format"],
-    cwd: "./cynthia_websites_mini_server/",
-    stdout: "inherit",
-    stderr: "inherit",
-  }).success;
-  const b = Bun.spawnSync({
-    cmd: ["gleam", "format"],
-    cwd: "./cynthia_websites_mini_client/",
-    stdout: "inherit",
-    stderr: "inherit",
-  }).success;
-  if (a && b) {
-    console.log("formatting successful.");
-    process.exit(0);
-  } else {
-    console.error("formatting failed, aborting");
-    process.exit(1);
-  }
+    break;
+  case "fmt":
+    {
+      const a = Bun.spawnSync({
+        cmd: ["gleam", "format"],
+        cwd: "./cynthia_websites_mini_server/",
+        stdout: "inherit",
+        stderr: "inherit",
+      }).success;
+      const b = Bun.spawnSync({
+        cmd: ["gleam", "format"],
+        cwd: "./cynthia_websites_mini_client/",
+        stdout: "inherit",
+        stderr: "inherit",
+      }).success;
+      if (a && b) {
+        console.log("formatting successful.");
+      } else {
+        console.error("formatting failed, aborting");
+        process.exit(1);
+      }
+    }
+    break;
+  case "check":
+    {
+      console.log("Checking code...");
+      {
+        // Check the code
+        console.log("Checking server code:");
+        const a = Bun.spawnSync({
+          cmd: ["gleam", "check"],
+          cwd: "./cynthia_websites_mini_server/",
+          stdout: "inherit",
+          stderr: "inherit",
+        }).success;
+        console.log("Checking client code:");
+        const b = Bun.spawnSync({
+          cmd: ["gleam", "check"],
+          cwd: "./cynthia_websites_mini_client/",
+          stdout: "inherit",
+          stderr: "inherit",
+        }).success;
+        if (a && b) {
+          console.log("checks successful.");
+        } else {
+          console.error("checks failed, aborting");
+          process.exit(1);
+        }
+      }
+    }
+    break;
+  case "":
+    help();
+    break;
+  default:
+    {
+      executed = false;
+    }
+    break;
+}
+if (executed == true) {
+  process.exit(0);
 }
 // Create links to the Gleam preludes, so that we can import them in FFI code.
 // This is a workaround for the fact that Bun somehow doesn't seem to be respecting TSConfig rootdir paths.
@@ -207,17 +264,17 @@ console.log("Building and bundling client code...");
     process.exit(1);
   }
 
-  await Bun.file(
+  const z = await Bun.file(
     "./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/gleam.ts",
-  )
-    .unlink()
-    .catch((e) => {
+  );
+  if (await z.exists()) {
+    z.unlink().catch((e) => {
       console.log(
         "Failed to remove ./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/gleam.ts",
       );
       console.error(e);
     });
-
+  }
   await Bun.write(
     "./cynthia_websites_mini_client/build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts",
     `import { main } from "./cynthia_websites_mini_client.mjs";document.addEventListener("DOMContentLoaded", main());`,
@@ -285,16 +342,17 @@ console.log("Building and bundling server code...");
     console.error("server build failed, aborting");
     process.exit(1);
   }
-  await Bun.file(
+  const z = await Bun.file(
     "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/gleam.ts",
-  )
-    .unlink()
-    .catch((e) => {
+  );
+  if (await z.exists()) {
+    z.unlink().catch((e) => {
       console.log(
         "Failed to remove ./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/gleam.ts",
       );
       console.error(e);
     });
+  }
   // Create entry point for the server
   await Bun.write(
     "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
@@ -396,6 +454,7 @@ switch (process.argv[2].toLowerCase()) {
     break;
   case "run-cd":
     {
+      console.clear();
       console.log("Running server...");
       // Run the server
       Bun.spawnSync({
@@ -415,6 +474,7 @@ switch (process.argv[2].toLowerCase()) {
     break;
   case "run":
     {
+      console.clear();
       console.log("Running server...");
       // Run the server
       Bun.spawnSync({
@@ -471,44 +531,8 @@ switch (process.argv[2].toLowerCase()) {
       }
     }
     break;
-  case "check":
-    {
-      console.log("Checking code...");
-      {
-        // Check the code
-        console.log("Checking server code:");
-        const a = Bun.spawnSync({
-          cmd: ["gleam", "check"],
-          cwd: "./cynthia_websites_mini_server/",
-          stdout: "inherit",
-          stderr: "inherit",
-        }).success;
-        console.log("Checking client code:");
-        const b = Bun.spawnSync({
-          cmd: ["gleam", "check"],
-          cwd: "./cynthia_websites_mini_client/",
-          stdout: "inherit",
-          stderr: "inherit",
-        }).success;
-        if (a && b) {
-          console.log("checks successful.");
-        } else {
-          console.error("checks failed, aborting");
-          process.exit(1);
-        }
-      }
-    }
-    break;
-  default: {
-    console.log("To build, run: bun `./build.ts bundle`");
-    console.log("To run, run: bun `./build.ts run`");
-    console.log("To test, run: bun `./build.ts test`");
-    console.log("To check, run: bun `./build.ts check`");
-    console.log("To clean, run: bun `./build.ts clean`");
-    console.log("To format, run: bun `./build.ts fmt`");
-    console.log(
-      "To run gleam commands on one or both ends, run: bun `./build.ts [client-|server-]gleam <subcommand>`",
-    );
-  }
+
+  default:
+    help();
 }
 process.exit(0);
