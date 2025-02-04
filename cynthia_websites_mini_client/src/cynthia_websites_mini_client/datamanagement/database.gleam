@@ -4,13 +4,16 @@
 
 import gleam/dynamic.{type Dynamic}
 import gleam/javascript/array.{type Array}
+import plinth/javascript/console
 
-pub fn init() {
+pub fn init() -> SQLiteDB {
   let db = new()
+  console.log("Prepping database")
   // Prepare for usage
   exec(db, "PRAGMA journal_mode = WAL;", [] |> array.from_list())
   exec(db, "PRAGMA foreign_keys = ON;", [] |> array.from_list())
 
+  console.log("Creating globalConfig table")
   db
   |> run(
     "
@@ -21,13 +24,19 @@ pub fn init() {
         theme TEXT NOT NULL,
         theme_dark TEXT NOT NULL,
         layout TEXT NOT NULL
-    )
+    );
 ",
     [] |> array.from_list(),
   )
+  console.log("Creating content table")
   db
   |> run(
-    "CREATE TABLE IF NOT EXISTS `content` (id TEXT PRIMARY KEY, html TEXT, last_update: INTEGER);",
+    "
+  CREATE TABLE IF NOT EXISTS `content` (
+    id TEXT PRIMARY KEY, 
+    html TEXT, 
+    last_update INTEGER
+  );",
     [] |> array.from_list(),
   )
   db
