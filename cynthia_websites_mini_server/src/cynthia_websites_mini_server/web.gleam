@@ -3,15 +3,34 @@ import bungibindies/bun/http/serve/response
 import bungibindies/bun/sqlite
 import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/database/content_data
+import cynthia_websites_mini_server/static_routes
 import gleam/javascript/array
+import gleam/javascript/map
 import gleam/javascript/promise
 import gleam/json
+import gleam/option.{type Option, None, Some}
+import gleam/result
 import gleam/uri
+import gleamy_lights/console
+import gleamy_lights/premixed
 
 pub fn handle_request(req: Request, db: sqlite.Database) {
   let assert Ok(req_uri) = req |> request.url() |> uri.parse()
   let path = req_uri.path
+  let assert Some(dynastatic) = static_routes.static_routes()
   case path {
+    "/" -> {
+      console.log(
+        premixed.text_ok_green("[ 200 ]\t")
+        <> premixed.text_blue("/")
+        <> " "
+        <> premixed.text_cyan("(client-side is now loading a web page)"),
+      )
+      dynastatic
+      |> map.get("/index.html")
+      |> result.unwrap(response.new())
+      |> promise.resolve()
+    }
     "/fetch/minimal-content-list" -> {
       promise.resolve(
         response.new()
@@ -28,16 +47,14 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
     "/fetch/global-site-config" -> {
       promise.resolve(send_global_site_config(db))
     }
-    _ -> {
-      promise.resolve(
-        response.new()
-        |> response.set_body("{ \"message\": \"Hello, world!\" }")
-        |> response.set_status(303)
-        |> response.set_headers(
-          [#("Location", "/404")]
-          |> array.from_list(),
-        ),
+    f -> {
+      console.error(
+        premixed.text_error_red("[ 404 ] ") <> premixed.text_blue(f),
       )
+      dynastatic
+      |> map.get("/404")
+      |> result.unwrap(response.new())
+      |> promise.resolve()
     }
   }
 }
