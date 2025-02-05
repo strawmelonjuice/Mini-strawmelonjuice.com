@@ -194,7 +194,7 @@ fn dialog_initcfg() {
           filename: "",
           title: "Example index",
           description: "This is an example index page",
-          layout: "default",
+          layout: "theme",
           permalink: "/",
           page: configtype.ContentsPagePageData(menus: []),
         ),
@@ -206,7 +206,7 @@ fn dialog_initcfg() {
           filename: "",
           title: "An example post!",
           description: "This is an example post",
-          layout: "default",
+          layout: "theme",
           permalink: "/example-post",
           post: configtype.PostMetaData(
             category: "example",
