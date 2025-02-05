@@ -25,7 +25,7 @@ pub fn loading_screen() -> Nil {
                 html.p([], [html.text("Loading the page you want...")]),
                 html.div([attribute.class("card-actions justify-end")], [
                   html.span(
-                    [attribute.class("loading loading-infinity loading-lg")],
+                    [attribute.class("loading loading-bars loading-lg")],
                     [],
                   ),
                 ]),
