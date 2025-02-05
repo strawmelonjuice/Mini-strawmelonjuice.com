@@ -2,12 +2,14 @@ import cynthia_websites_mini_client/utils
 import cynthia_websites_mini_shared/configtype.{
   type SharedCynthiaConfigGlobalOnly, default_shared_cynthia_config_global_only,
 }
+import cynthia_websites_mini_shared/contenttypes
 import gleam/dynamic/decode
 import gleam/fetch
 import gleam/http
 import gleam/http/request
 import gleam/javascript/array.{type Array}
 import gleam/javascript/promise
+import gleam/list
 import gleam/result
 
 pub fn pull_from_global_config_table(
@@ -16,6 +18,36 @@ pub fn pull_from_global_config_table(
 ) -> Result(String, Nil) {
   iget(store, what) |> array.get(0)
 }
+
+pub fn update_content_queue(store: ClientStore) {
+  let res =
+    utils.phone_home()
+    |> request.set_method(http.Get)
+    |> request.set_path("/fetch/minimal-content-list")
+    |> fetch.send()
+    |> promise.try_await(fetch.read_json_body)
+  use res <- promise.await(res)
+  {
+    use res <- result.try(result.replace_error(res, Nil))
+
+    decode.run(res.body, {
+      {
+        use data <- decode.field(
+          "data",
+          decode.list(contenttypes.minimal_aliased_decoder()),
+        )
+        decode.success(data)
+      }
+    })
+    |> result.unwrap([])
+    |> list.each(fn(item) { add_to_content_queue(store, item) })
+    Ok(Nil)
+  }
+  |> promise.resolve
+}
+
+@external(javascript, "./datamanagement_ffi.ts", "add_to_content_queue")
+fn add_to_content_queue(store: ClientStore, data: contenttypes.Minimal) -> Nil
 
 @external(javascript, "./datamanagement_ffi.ts", "get_config_item")
 fn iget(store: ClientStore, what: String) -> Array(String)

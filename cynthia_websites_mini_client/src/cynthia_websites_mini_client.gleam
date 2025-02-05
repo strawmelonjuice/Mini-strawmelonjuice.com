@@ -11,5 +11,6 @@ pub fn main() {
   // Initialise database
   let clientstore = datamanagement.init()
   let _ = realtime.main(clientstore)
+  datamanagement.update_content_queue(clientstore)
   todo as "Nothing after the loading screen yet!"
 }

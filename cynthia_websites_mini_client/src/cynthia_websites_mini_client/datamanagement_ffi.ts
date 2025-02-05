@@ -14,6 +14,12 @@ class ClientStore {
     site_name: string;
     site_description: string;
   };
+  private contentQueue: {
+    html: string;
+    permalink: string;
+    type: number;
+    filename: string;
+  }[];
   private contentStore: Map<
     string,
     { html: string; permalink: string; type: number; filename: string }
@@ -26,9 +32,17 @@ class ClientStore {
       site_name: global_config.global_site_name,
       site_description: global_config.global_site_description,
     };
+    this.contentQueue = [];
     this.contentStore = new Map();
   }
-
+  add_to_content_queue(content: {
+    html: string;
+    permalink: string;
+    type: number;
+    filename: string;
+  }) {
+    this.contentQueue.push(content);
+  }
   update(global_config: flatGlobalConfig) {
     this.global = {
       theme: global_config.global_theme,
@@ -67,4 +81,17 @@ export function get_config_item(store: ClientStore, item: string): string[] {
     default:
       return [];
   }
+}
+
+export function add_to_content_queue(
+  store: ClientStore,
+  content: {
+    html: string;
+    permalink: string;
+    type: number;
+    filename: string;
+  },
+): void {
+  store.add_to_content_queue(content);
+  console.log(store);
 }
