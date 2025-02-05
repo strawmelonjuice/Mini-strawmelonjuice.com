@@ -43,7 +43,7 @@ pub fn shared_cynthia_config_global_only_decoder() -> decode.Decoder(
 
 pub const default_shared_cynthia_config_global_only: SharedCynthiaConfigGlobalOnly = SharedCynthiaConfigGlobalOnly(
   global_theme: "autumn",
-  global_theme_dark: "coffee",
+  global_theme_dark: "night",
   global_colour: "#FFFFFF",
   global_site_name: "My Site",
   global_site_description: "A big site on a mini Cynthia!",

@@ -1,5 +1,6 @@
 import cynthia_websites_mini_client/datamanagement.{type ClientStore}
 import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/ui/themes_generated
 import gleam/io
 import gleam/list
@@ -12,14 +13,18 @@ pub fn get_sytheme(store: ClientStore) {
       |> result.map_error(fn(_) {
         io.print_error("Error getting light color scheme from database")
       })
-      |> result.unwrap("autumn")
+      |> result.unwrap(
+        configtype.default_shared_cynthia_config_global_only.global_theme,
+      )
     }
     "dark" -> {
       datamanagement.pull_from_global_config_table(store, "theme_dark")
       |> result.map_error(fn(_) {
         io.print_error("Error getting dark color scheme from database")
       })
-      |> result.unwrap("coffee")
+      |> result.unwrap(
+        configtype.default_shared_cynthia_config_global_only.global_theme_dark,
+      )
     }
     _ -> {
       panic
