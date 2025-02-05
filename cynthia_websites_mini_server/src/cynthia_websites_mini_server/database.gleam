@@ -34,8 +34,7 @@ pub fn create_database(name: Option(String)) -> sqlite.Database {
         site_colour TEXT NOT NULL,
         site_description TEXT NOT NULL,
         theme TEXT NOT NULL,
-        theme_dark TEXT NOT NULL,
-        layout TEXT NOT NULL
+        theme_dark TEXT NOT NULL
     )
   ",
   )
@@ -96,10 +95,9 @@ pub fn save_complete_config(
         site_colour,
         site_description,
         theme,
-        theme_dark,
-        layout
+        theme_dark
       )
-      VALUES (?, ?, ?, ?, ?, ?);
+      VALUES (?, ?, ?, ?, ?);
     ",
     )
 
@@ -110,7 +108,6 @@ pub fn save_complete_config(
     |> param_array.push(conf.global_site_description)
     |> param_array.push(conf.global_theme)
     |> param_array.push(conf.global_theme_dark)
-    |> param_array.push(conf.global_layout)
   sqlite.run(statement, params)
   // Now, save the content
   conf.content
@@ -268,7 +265,7 @@ pub fn get__entire_global_config(
     sqlite.prepare(
       db,
       "
-      SELECT site_name, site_colour, site_description, theme, theme_dark, layout
+      SELECT site_name, site_colour, site_description, theme, theme_dark
       FROM globalConfig
     ",
     )
@@ -280,14 +277,12 @@ pub fn get__entire_global_config(
       use site_description <- decode.field("site_description", decode.string)
       use theme <- decode.field("theme", decode.string)
       use theme_dark <- decode.field("theme_dark", decode.string)
-      use layout <- decode.field("layout", decode.string)
       decode.success(configtype.SharedCynthiaConfigGlobalOnly(
         global_site_name: site_name,
         global_colour: site_colour,
         global_site_description: site_description,
         global_theme: theme,
         global_theme_dark: theme_dark,
-        global_layout: layout,
       ))
     })
   case res |> result.is_error() {

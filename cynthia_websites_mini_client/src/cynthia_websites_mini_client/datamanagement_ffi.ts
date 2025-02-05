@@ -4,7 +4,6 @@ interface flatGlobalConfig {
   global_colour: string;
   global_site_name: string;
   global_site_description: string;
-  global_layout: string;
 }
 
 class ClientStore {
@@ -14,7 +13,6 @@ class ClientStore {
     colour: string;
     site_name: string;
     site_description: string;
-    layout: string;
   };
   private contentStore: Map<
     string,
@@ -27,7 +25,6 @@ class ClientStore {
       colour: global_config.global_colour,
       site_name: global_config.global_site_name,
       site_description: global_config.global_site_description,
-      layout: global_config.global_layout,
     };
     this.contentStore = new Map();
   }
@@ -39,7 +36,6 @@ class ClientStore {
       colour: global_config.global_colour,
       site_name: global_config.global_site_name,
       site_description: global_config.global_site_description,
-      layout: global_config.global_layout,
     };
   }
 }
@@ -68,8 +64,6 @@ export function get_config_item(store: ClientStore, item: string): string[] {
       return [store.global.site_name];
     case "site_description":
       return [store.global.site_description];
-    case "layout":
-      return [store.global.layout];
     default:
       return [];
   }

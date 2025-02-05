@@ -53,7 +53,6 @@ fn send_global_site_config(db: sqlite.Database) {
           #("site_description", json.string(data.global_site_description)),
           #("global_theme", json.string(data.global_theme)),
           #("global_theme_dark", json.string(data.global_theme_dark)),
-          #("global_layout", json.string(data.global_layout)),
         ])
         |> json.to_string()
       })

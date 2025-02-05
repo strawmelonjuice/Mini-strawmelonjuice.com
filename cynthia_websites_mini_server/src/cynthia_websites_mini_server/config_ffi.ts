@@ -1,4 +1,4 @@
-import  * as Gleam  from "../../prelude";
+import * as Gleam from "../../prelude";
 import { parse, stringify } from "smol-toml";
 import fs from "node:fs";
 interface PartialGlobalConfig {
@@ -7,7 +7,6 @@ interface PartialGlobalConfig {
   colour?: string;
   site_name?: string;
   site_description?: string;
-  layout?: string;
 }
 interface GlobaConfig extends PartialGlobalConfig {
   theme: string;
@@ -15,7 +14,6 @@ interface GlobaConfig extends PartialGlobalConfig {
   colour: string;
   site_name: string;
   site_description: string;
-  layout: string;
 }
 
 interface flatGlobalConfig {
@@ -24,7 +22,6 @@ interface flatGlobalConfig {
   global_colour: string;
   global_site_name: string;
   global_site_description: string;
-  global_layout: string;
 }
 
 export function parse_configtoml(
@@ -41,7 +38,6 @@ export function parse_configtoml(
       site_name: p.site_name ?? default_config.global_site_name,
       site_description:
         p.site_description ?? default_config.global_site_description,
-      layout: p.layout ?? default_config.global_layout,
     };
     return new Gleam.Ok({
       global_theme: f.theme,
@@ -49,7 +45,6 @@ export function parse_configtoml(
       global_colour: f.colour,
       global_site_name: f.site_name,
       global_site_description: f.site_description,
-      global_layout: f.layout,
     });
   } catch (e) {
     return new Gleam.Error(Bun.inspect(e));
@@ -64,7 +59,6 @@ export function config_to_toml(config: flatGlobalConfig): string {
       colour: config.global_colour,
       site_name: config.global_site_name,
       site_description: config.global_site_description,
-      layout: config.global_layout,
     },
   };
   return stringify(c);
