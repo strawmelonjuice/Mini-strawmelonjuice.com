@@ -220,7 +220,6 @@ fn dialog_initcfg() {
     }
   }
   |> write_posts_and_pages_to_fs
-  // todo as "Implement the config writer."
 }
 
 fn create_post(
