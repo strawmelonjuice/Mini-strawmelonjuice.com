@@ -12,7 +12,6 @@ import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleamy_lights/premixed
-import plinth/javascript/console
 import plinth/node/fs
 import plinth/node/process
 import simplifile

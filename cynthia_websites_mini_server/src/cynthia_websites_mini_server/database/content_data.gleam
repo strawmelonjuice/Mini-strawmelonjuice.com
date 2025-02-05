@@ -2,6 +2,7 @@ import bungibindies/bun/sqlite
 import bungibindies/bun/sqlite/param_array
 import cynthia_websites_mini_shared/contenttypes
 import gleam/dynamic/decode
+import gleam/int
 import gleam/io
 import gleam/javascript/array
 import gleam/json
@@ -46,19 +47,20 @@ pub fn minimal_json_encoder(what contents: List(contenttypes.Minimal)) -> String
       #("meta_description", json.string(content.meta_description)),
       #(
         "meta_kind",
-        json.int(content.meta_kind),
+        // json.int(content.meta_kind),
         // -- Deviates from the shared type, but would be preferred if not.
-      // json.string({
-      //   case content.meta_kind {
-      //     0 -> "page"
-      //     1 -> "post"
-      //     f -> "unknown " <> int.to_string(f)
-      //   }
-      // }),
+        // -- Update: Why not hahah!
+        json.string({
+          case content.meta_kind {
+            0 -> "page"
+            1 -> "post"
+            f -> "custom " <> int.to_string(f)
+          }
+        }),
       ),
       #("meta_permalink", json.string(content.meta_permalink)),
       #("last_inserted_at", json.string(content.last_inserted_at)),
-      #("filename", json.string(content.filename)),
+      #("original_filename", json.string(content.original_filename)),
     ])
   })
   |> json.preprocessed_array
