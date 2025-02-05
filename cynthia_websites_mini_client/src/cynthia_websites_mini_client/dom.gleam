@@ -1,9 +1,22 @@
+import gleam/bool
+import gleam/io
 import gleam/result
+import gleam/string
 import lustre/element as le_element
 import plinth/browser/document
 import plinth/browser/element
 
 pub fn push(title: String, body: le_element.Element(a)) {
+  let isnotfound =
+    document.body()
+    |> element.get_attribute("data-404")
+    |> result.unwrap("")
+    |> string.is_empty()
+    |> bool.negate()
+  use <- bool.lazy_guard(isnotfound, fn() {
+    io.println("404 page -- will not push content")
+    Ok(Nil)
+  })
   use title_element <- result.then(
     document.query_selector("title")
     |> result.replace_error("No title element found"),
