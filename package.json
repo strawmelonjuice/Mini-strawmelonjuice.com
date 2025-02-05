@@ -23,7 +23,9 @@
     "run-in-test": "bun ./build.ts run-cd './test'"
   },
   "dependencies": {
+    "@types/clean-css": "^4.2.11",
     "autoprefixer": "^10.4.20",
+    "clean-css": "^5.3.3",
     "daisyui": "^4.12.23",
     "moment": "^2.30.1",
     "postcss": "^8.5.1",

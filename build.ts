@@ -23,6 +23,7 @@ function help() {
 let executed = true;
 import themeconf from "./themes.json";
 import path from "path";
+import CleanCSS from "clean-css";
 switch (process.argv[2].toLowerCase()) {
   case "clean":
     {
@@ -313,7 +314,11 @@ console.log("Building and bundling client code...");
     .catch((err: any) => {
       console.error(err);
     });
-  const client_styles = JSON.stringify(css);
+  const client_styles = JSON.stringify(
+    new CleanCSS({
+      level: 2,
+    }).minify(css).styles,
+  );
 
   const client_script = JSON.stringify(
     await Bun.file(
