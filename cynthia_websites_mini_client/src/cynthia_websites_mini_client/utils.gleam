@@ -1,7 +1,5 @@
 import gleam/http
 import gleam/http/request.{type Request}
-import gleam/string
-import plinth/browser/element.{type Element}
 import plinth/browser/window
 
 pub fn phone_home() -> Request(String) {

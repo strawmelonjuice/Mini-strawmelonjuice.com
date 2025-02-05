@@ -1,24 +1,29 @@
-import cynthia_websites_mini_client/datamanagement/database
 import cynthia_websites_mini_client/utils
-import cynthia_websites_mini_shared/configtype
+import cynthia_websites_mini_shared/configtype.{
+  type SharedCynthiaConfigGlobalOnly, default_shared_cynthia_config_global_only,
+}
 import gleam/dynamic/decode
 import gleam/fetch
-import gleam/http.{Post}
+import gleam/http
 import gleam/http/request
-import gleam/javascript/array
+import gleam/javascript/array.{type Array}
 import gleam/javascript/promise
 import gleam/result
 
-@external(javascript, "./datamanagement_ffi.ts", "get_specific_item_from_global_config")
 pub fn pull_from_global_config_table(
-  what: String,
-  db: database.SQLiteDB,
-) -> Result(String, Nil)
+  store: ClientStore,
+  item what: String,
+) -> Result(String, Nil) {
+  iget(store, what) |> array.get(0)
+}
 
-pub fn populate_global_config_table(db: database.SQLiteDB) {
+@external(javascript, "./datamanagement_ffi.ts", "get_config_item")
+fn iget(store: ClientStore, what: String) -> Array(String)
+
+pub fn populate_global_config_table(store: ClientStore) {
   let res =
     utils.phone_home()
-    |> request.set_method(Post)
+    |> request.set_method(http.Get)
     |> request.set_path("/fetch/global-site-config")
     |> fetch.send()
     |> promise.try_await(fetch.read_json_body)
@@ -31,32 +36,24 @@ pub fn populate_global_config_table(db: database.SQLiteDB) {
         configtype.shared_cynthia_config_global_only_decoder(),
       )
     use data <- result.try(result.replace_error(data, Nil))
-    database.run(db, "DELETE FROM globalConfig", [] |> array.from_list())
-    database.run(
-      db,
-      "
-INSERT INTO globalConfig (
-        site_name,
-        site_colour,
-        site_description,
-        theme,
-        theme_dark,
-        layout
-      )
-      VALUES (:name, :colour, :description, :theme, :darktheme, :layout);
-
-  ",
-      [
-        #(":name", data.global_site_name),
-        #(":colour", data.global_colour),
-        #(":description", data.global_site_description),
-        #(":theme", data.global_theme),
-        #(":darktheme", data.global_theme_dark),
-        #(":layout", data.global_layout),
-      ]
-        |> array.from_list(),
-    )
+    populate_global_config(store, data)
     Ok(Nil)
   }
   |> promise.resolve
 }
+
+@external(javascript, "./datamanagement_ffi.ts", "populate_global_config")
+fn populate_global_config(
+  store: ClientStore,
+  conf: SharedCynthiaConfigGlobalOnly,
+) -> Nil
+
+pub fn init() -> ClientStore {
+  i_init(default_shared_cynthia_config_global_only)
+}
+
+@external(javascript, "./datamanagement_ffi.ts", "initialise")
+fn i_init(p: SharedCynthiaConfigGlobalOnly) -> ClientStore
+
+/// This is a temporary solution replacing an in-browser-database for the time being.
+pub type ClientStore

@@ -1,4 +1,4 @@
-import cynthia_websites_mini_client/datamanagement/database
+import cynthia_websites_mini_client/datamanagement
 import cynthia_websites_mini_client/pottery/ceramics
 import cynthia_websites_mini_client/realtime
 import gleam/io
@@ -9,7 +9,7 @@ pub fn main() {
   ceramics.loading_screen()
   io.println(string.inspect(document.body()))
   // Initialise database
-  let db = database.init()
-  let _ = realtime.main(db)
+  let clientstore = datamanagement.init()
+  let _ = realtime.main(clientstore)
   todo as "Nothing after the loading screen yet!"
 }

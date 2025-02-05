@@ -48,6 +48,11 @@ On the client side [`SQL.js`](https://sql.js.org/) is used, on the server, the m
 [`BunSQLite`](https://bun.sh/docs/api/sqlite) is used (using [`bungibindies`](https://hex.pm/packages/bungibindies), to
 bind to Bun API's)
 
+> #### Note:
+>
+> After encountering some issues with `sql.js`, the client side for now uses in-browser object storage for caching.
+> This is a temporary solution, and will be replaced with a more robust solution in the future.
+
 #### Database-only
 
 Because Cynthia Mini first loads config to a SQLite database and then uses it, it can also run in database-only mode,

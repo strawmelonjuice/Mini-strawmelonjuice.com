@@ -1,8 +1,9 @@
 //// Functions that run every 50ms
 
 import cynthia_websites_mini_client/datamanagement
-import cynthia_websites_mini_client/datamanagement/database
 import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_client/pottery/paints
+import cynthia_websites_mini_shared/ui/themes_generated
 import gleam/bool
 import gleam/int
 import gleam/io
@@ -10,47 +11,27 @@ import gleam/javascript/promise
 import gleam/result
 import plinth/browser/document
 
-pub fn main(db: database.SQLiteDB) {
+pub fn main(store: datamanagement.ClientStore) {
   let data = #(
-    L1(0, db:, sub: L1o2(times: 0, db: db)),
-    L2(0, db:),
-    L3(0, db:),
-    L4(0, db:),
-    L5(0, db:),
+    L1(0, store:, sub: L1o2(times: 0, store:)),
+    L2(0, store:),
+    L3(0, store:),
+    L4(0, store:),
+    L5(0, store:),
   )
   let a = main_loop(data, 1)
   promise.resolve(a)
 }
 
-fn update_styles(db: database.SQLiteDB) {
-  case dom.get_color_scheme() {
-    "light" -> {
-      datamanagement.pull_from_global_config_table("daisy_color_scheme", db)
-      |> result.map_error(fn(_) {
-        io.print_error("Error getting light color scheme from database")
-      })
-      |> result.unwrap("autumn")
-      |> dom.set_data(document.body(), "theme", _)
-    }
-    "dark" -> {
-      datamanagement.pull_from_global_config_table(
-        "daisy_color_scheme_dark",
-        db,
-      )
-      |> result.map_error(fn(_) {
-        io.print_error("Error getting dark color scheme from database")
-      })
-      |> result.unwrap("coffee")
-      |> dom.set_data(document.body(), "theme", _)
-    }
-    _ -> {
-      Nil
-    }
-  }
+fn update_styles(store: datamanagement.ClientStore) {
+  paints.get_sytheme(store)
+  |> result.map(fn(theme) { theme.daisy_ui_theme_name })
+  |> result.unwrap("autumn")
+  |> dom.set_data(document.body(), "theme", _)
 }
 
-fn populate_global_config_table(db) {
-  datamanagement.populate_global_config_table(db)
+fn populate_global_config_table(store) {
+  datamanagement.populate_global_config_table(store)
 }
 
 // -- Loops and interval functions
@@ -64,33 +45,33 @@ type Ll =
   #(L1, L2, L3, L4, L5)
 
 type L1o2 {
-  L1o2(times: Int, db: database.SQLiteDB)
+  L1o2(times: Int, store: datamanagement.ClientStore)
 }
 
 type L1 {
-  L1(times: Int, db: database.SQLiteDB, sub: L1o2)
+  L1(times: Int, store: datamanagement.ClientStore, sub: L1o2)
 }
 
 type L2 {
-  L2(times: Int, db: database.SQLiteDB)
+  L2(times: Int, store: datamanagement.ClientStore)
 }
 
 type L3 {
-  L3(times: Int, db: database.SQLiteDB)
+  L3(times: Int, store: datamanagement.ClientStore)
 }
 
 type L4 {
-  L4(times: Int, db: database.SQLiteDB)
+  L4(times: Int, store: datamanagement.ClientStore)
 }
 
 type L5 {
-  L5(times: Int, db: database.SQLiteDB)
+  L5(times: Int, store: datamanagement.ClientStore)
 }
 
 /// Functions that run every 800ms
 fn level_1_2(params: L1o2) {
-  populate_global_config_table(params.db)
-  L1o2(params.times + 1, params.db)
+  populate_global_config_table(params.store)
+  L1o2(params.times + 1, params.store)
 }
 
 /// Functions that run every 400ms
@@ -100,27 +81,27 @@ fn level_1(params: L1) {
     params.times
     |> int.is_even()
     |> bool.guard(params.sub, fn() { level_1_2(params.sub) })
-  L1(params.times + 1, params.db, sub:)
+  L1(params.times + 1, params.store, sub:)
 }
 
 /// Functions that run every 300ms
 fn level_2(params: L2) {
-  L2(params.times + 1, params.db)
+  L2(params.times + 1, params.store)
 }
 
 /// Functions that run every 200ms
 fn level_3(params: L3) {
-  update_styles(params.db)
-  L3(params.times + 1, params.db)
+  update_styles(params.store)
+  L3(params.times + 1, params.store)
 }
 
 /// Functions that run every 100ms
 fn level_4(params: L4) {
-  L4(params.times + 1, params.db)
+  L4(params.times + 1, params.store)
 }
 
 fn level_5(params: L5) {
-  L5(params.times + 1, params.db)
+  L5(params.times + 1, params.store)
 }
 
 fn main_loop(datas: Ll, level: Int) {
