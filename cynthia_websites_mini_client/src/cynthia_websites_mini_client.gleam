@@ -7,7 +7,6 @@ import plinth/browser/document
 
 pub fn main() {
   ceramics.loading_screen()
-  io.println(string.inspect(document.body()))
   // Initialise database
   let clientstore = datamanagement.init()
   let _ = realtime.main(clientstore)
