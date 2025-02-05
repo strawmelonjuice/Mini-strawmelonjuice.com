@@ -7,6 +7,7 @@ import gleam/dynamic/decode
 import gleam/fetch
 import gleam/http
 import gleam/http/request
+import gleam/io
 import gleam/javascript/array.{type Array}
 import gleam/javascript/promise
 import gleam/list
@@ -30,15 +31,7 @@ pub fn update_content_queue(store: ClientStore) {
   {
     use res <- result.try(result.replace_error(res, Nil))
 
-    decode.run(res.body, {
-      {
-        use data <- decode.field(
-          "data",
-          decode.list(contenttypes.minimal_aliased_decoder()),
-        )
-        decode.success(data)
-      }
-    })
+    decode.run(res.body, decode.list(contenttypes.minimal_aliased_decoder()))
     |> result.unwrap([])
     |> list.each(fn(item) { add_to_content_queue(store, item) })
     Ok(Nil)
@@ -48,6 +41,35 @@ pub fn update_content_queue(store: ClientStore) {
 
 @external(javascript, "./datamanagement_ffi.ts", "add_to_content_queue")
 fn add_to_content_queue(store: ClientStore, data: contenttypes.Minimal) -> Nil
+
+pub fn render_next_of_content_queue(store: ClientStore) {
+  use next <- next_in_content_queue(store)
+  {
+    let res =
+      utils.phone_home()
+      |> request.set_method(http.Get)
+      |> request.set_path("/fetch/content/")
+      |> request.set_body(next.original_filename)
+      |> fetch.send()
+      |> promise.try_await(fetch.read_json_body)
+    use res <- promise.await(res)
+    {
+      use res <- result.try(result.replace_error(res, Nil))
+      decode.run(res.body, todo)
+      |> io.debug()
+      |> result.unwrap(Nil)
+      Ok(Nil)
+    }
+    |> promise.resolve
+  }
+  Nil
+}
+
+@external(javascript, "./datamanagement_ffi.ts", "next_in_content_queue")
+fn next_in_content_queue(
+  store: ClientStore,
+  callback: fn(contenttypes.Minimal) -> Nil,
+) -> Nil
 
 @external(javascript, "./datamanagement_ffi.ts", "get_config_item")
 fn iget(store: ClientStore, what: String) -> Array(String)

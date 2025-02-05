@@ -15,14 +15,24 @@ class ClientStore {
     site_description: string;
   };
   private contentQueue: {
-    html: string;
-    permalink: string;
-    type: number;
-    filename: string;
+    meta_title: string;
+    meta_description: string;
+    meta_kind: number;
+    meta_permalink: string;
+    last_inserted_at: string;
+    original_filename: string;
   }[];
   private contentStore: Map<
     string,
-    { html: string; permalink: string; type: number; filename: string }
+    {
+      html: string;
+      original_filename: string;
+      meta_title: string;
+      meta_description: string;
+      meta_kind: number;
+      meta_permalink: string;
+      last_inserted_at: string;
+    }
   >;
   constructor(global_config: flatGlobalConfig) {
     this.global = {
@@ -36,12 +46,33 @@ class ClientStore {
     this.contentStore = new Map();
   }
   add_to_content_queue(content: {
-    html: string;
-    permalink: string;
-    type: number;
-    filename: string;
+    meta_title: string;
+    meta_description: string;
+    meta_kind: number;
+    meta_permalink: string;
+    last_inserted_at: string;
+    original_filename: string;
   }) {
     this.contentQueue.push(content);
+  }
+  content_queue_next(
+    cb: (
+      arg0:
+        | {
+            meta_title: string;
+            meta_description: string;
+            meta_kind: number;
+            meta_permalink: string;
+            last_inserted_at: string;
+            original_filename: string;
+          }
+        | undefined,
+    ) => void,
+  ) {
+    if (this.contentQueue.length > 0) {
+      const content = this.contentQueue.shift();
+      cb(content);
+    }
   }
   update(global_config: flatGlobalConfig) {
     this.global = {
@@ -86,12 +117,31 @@ export function get_config_item(store: ClientStore, item: string): string[] {
 export function add_to_content_queue(
   store: ClientStore,
   content: {
-    html: string;
-    permalink: string;
-    type: number;
-    filename: string;
+    meta_title: string;
+    meta_description: string;
+    meta_kind: number;
+    meta_permalink: string;
+    last_inserted_at: string;
+    original_filename: string;
   },
 ): void {
   store.add_to_content_queue(content);
-  console.log(store);
+}
+
+export function next_in_content_queue(
+  store: ClientStore,
+  cb: (
+    arg0:
+      | {
+          meta_title: string;
+          meta_description: string;
+          meta_kind: number;
+          meta_permalink: string;
+          last_inserted_at: string;
+          original_filename: string;
+        }
+      | undefined,
+  ) => void,
+) {
+  store.content_queue_next(cb);
 }
