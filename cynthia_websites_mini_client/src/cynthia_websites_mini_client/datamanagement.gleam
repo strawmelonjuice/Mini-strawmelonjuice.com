@@ -1,3 +1,8 @@
+import cynthia_websites_mini_client/datamanagement/clientstore.{
+  type ClientStore as Store, iget, next_in_content_queue,
+}
+
+import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_client/utils
 import cynthia_websites_mini_shared/configtype.{
   type SharedCynthiaConfigGlobalOnly, default_shared_cynthia_config_global_only,
@@ -7,10 +12,10 @@ import gleam/dynamic/decode
 import gleam/fetch
 import gleam/http
 import gleam/http/request
-import gleam/io
 import gleam/javascript/array.{type Array}
 import gleam/javascript/promise
 import gleam/list
+import gleam/option.{type Option, None, Some}
 import gleam/result
 
 pub fn pull_from_global_config_table(
@@ -55,9 +60,8 @@ pub fn render_next_of_content_queue(store: ClientStore) {
     use res <- promise.await(res)
     {
       use res <- result.try(result.replace_error(res, Nil))
-      decode.run(res.body, todo)
-      |> io.debug()
-      |> result.unwrap(Nil)
+      let assert Ok(data) = decode.run(res.body, collected_content_decoder())
+      let s = pottery.render_content(store, data)
       Ok(Nil)
     }
     |> promise.resolve
@@ -65,49 +69,91 @@ pub fn render_next_of_content_queue(store: ClientStore) {
   Nil
 }
 
-@external(javascript, "./datamanagement_ffi.ts", "next_in_content_queue")
-fn next_in_content_queue(
-  store: ClientStore,
-  callback: fn(contenttypes.Minimal) -> Nil,
-) -> Nil
+/// Now, this is where I am fixing the fact I fucked up the content types in `configtypes`, should've made them be one type with multiple variants. -- And in `contenttype`, obviously.
+/// 
+/// What is done here? This is a huge type containing all the fields in both, but having the specific ones be `Option`al. This is a temporary solution, and I will fix it later. Hopefully.
+type CollectedContent {
+  CollectedContent(
+    // Common to all content
+    filename: String,
+    title: String,
+    description: String,
+    layout: String,
+    permalink: String,
+    // Unique to unspecified content
+    kind: String,
+    // Unique to page
+    page: Option(configtype.PagePageData),
+    // Unique to post
+    post: Option(configtype.PostMetaData),
+  )
+}
 
-@external(javascript, "./datamanagement_ffi.ts", "get_config_item")
-fn iget(store: ClientStore, what: String) -> Array(String)
-
-pub fn populate_global_config_table(store: ClientStore) {
-  let res =
-    utils.phone_home()
-    |> request.set_method(http.Get)
-    |> request.set_path("/fetch/global-site-config")
-    |> fetch.send()
-    |> promise.try_await(fetch.read_json_body)
-  use res <- promise.await(res)
-  {
-    use res <- result.try(result.replace_error(res, Nil))
-    let data =
-      decode.run(
-        res.body,
-        configtype.shared_cynthia_config_global_only_decoder(),
+fn collected_content_decoder() -> decode.Decoder(configtype.Contents) {
+  use filename <- decode.field("filename", decode.string)
+  use title <- decode.field("title", decode.string)
+  use description <- decode.field("description", decode.string)
+  use layout <- decode.field("layout", decode.string)
+  use permalink <- decode.field("permalink", decode.string)
+  use kind <- decode.field("kind", decode.string)
+  use page <- decode.field(
+    "page",
+    decode.optional(fn() -> decode.Decoder(configtype.PagePageData) {
+      use menus <- decode.field("menus", decode.list(decode.int))
+      decode.success(configtype.ContentsPagePageData(menus:))
+    }()),
+  )
+  use post <- decode.field(
+    "post",
+    decode.optional(fn() -> decode.Decoder(configtype.PostMetaData) {
+      use date_posted <- decode.field("date-posted", decode.string)
+      use date_updated <- decode.field("date-updated", decode.string)
+      use category <- decode.field("category", decode.string)
+      use tags <- decode.field("tags", decode.list(decode.string))
+      decode.success(configtype.PostMetaData(
+        date_posted:,
+        date_updated:,
+        category:,
+        tags:,
+      ))
+    }()),
+  )
+  case kind {
+    "page" -> {
+      let assert Some(page) = page
+      decode.success(
+        configtype.ContentsPage(configtype.Page(
+          filename:,
+          title:,
+          description:,
+          layout:,
+          permalink:,
+          page:,
+        )),
       )
-    use data <- result.try(result.replace_error(data, Nil))
-    populate_global_config(store, data)
-    Ok(Nil)
+    }
+    "post" -> {
+      let assert Some(post) = post
+      decode.success(
+        configtype.ContentsPost(configtype.Post(
+          filename:,
+          title:,
+          description:,
+          layout:,
+          permalink:,
+          post:,
+        )),
+      )
+    }
+    _ -> panic as "Unknown kind of content"
   }
-  |> promise.resolve
 }
 
-@external(javascript, "./datamanagement_ffi.ts", "populate_global_config")
-fn populate_global_config(
-  store: ClientStore,
-  conf: SharedCynthiaConfigGlobalOnly,
-) -> Nil
+pub type ClientStore =
+  Store
 
-pub fn init() -> ClientStore {
-  i_init(default_shared_cynthia_config_global_only)
-}
+pub const populate_global_config = clientstore.populate_global_config
 
-@external(javascript, "./datamanagement_ffi.ts", "initialise")
-fn i_init(p: SharedCynthiaConfigGlobalOnly) -> ClientStore
+pub const populate_global_config_table = clientstore.populate_global_config_table
 
-/// This is a temporary solution replacing an in-browser-database for the time being.
-pub type ClientStore
+pub const init = clientstore.init
