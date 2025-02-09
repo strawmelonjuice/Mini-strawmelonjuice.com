@@ -60,8 +60,9 @@ pub fn render_next_of_content_queue(store: ClientStore) {
     use res <- promise.await(res)
     {
       use res <- result.try(result.replace_error(res, Nil))
-      let assert Ok(data) = decode.run(res.body, collected_content_decoder())
-      let s = pottery.render_content(store, data)
+      let assert Ok(#(data, innercontent)) =
+        decode.run(res.body, collected_content_decoder())
+      let s = pottery.render_content(store, data, innercontent)
       Ok(Nil)
     }
     |> promise.resolve
@@ -82,6 +83,7 @@ type CollectedContent {
     permalink: String,
     // Unique to unspecified content
     kind: String,
+    inner: String,
     // Unique to page
     page: Option(configtype.PagePageData),
     // Unique to post
@@ -89,7 +91,8 @@ type CollectedContent {
   )
 }
 
-fn collected_content_decoder() -> decode.Decoder(configtype.Contents) {
+fn collected_content_decoder() -> decode.Decoder(#(configtype.Contents, String)) {
+  use inner <- decode.field("inner", decode.string)
   use filename <- decode.field("filename", decode.string)
   use title <- decode.field("title", decode.string)
   use description <- decode.field("description", decode.string)
@@ -121,7 +124,7 @@ fn collected_content_decoder() -> decode.Decoder(configtype.Contents) {
   case kind {
     "page" -> {
       let assert Some(page) = page
-      decode.success(
+      decode.success(#(
         configtype.ContentsPage(configtype.Page(
           filename:,
           title:,
@@ -130,11 +133,12 @@ fn collected_content_decoder() -> decode.Decoder(configtype.Contents) {
           permalink:,
           page:,
         )),
-      )
+        inner,
+      ))
     }
     "post" -> {
       let assert Some(post) = post
-      decode.success(
+      decode.success(#(
         configtype.ContentsPost(configtype.Post(
           filename:,
           title:,
@@ -143,7 +147,8 @@ fn collected_content_decoder() -> decode.Decoder(configtype.Contents) {
           permalink:,
           post:,
         )),
-      )
+        inner,
+      ))
     }
     _ -> panic as "Unknown kind of content"
   }

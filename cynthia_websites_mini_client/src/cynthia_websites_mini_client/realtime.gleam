@@ -3,10 +3,8 @@
 import cynthia_websites_mini_client/datamanagement
 import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/pottery/paints
-import cynthia_websites_mini_shared/ui/themes_generated
 import gleam/bool
 import gleam/int
-import gleam/io
 import gleam/javascript/promise
 import gleam/result
 import plinth/browser/document
@@ -76,6 +74,7 @@ fn level_1_2(params: L1o2) {
 
 /// Functions that run every 400ms
 fn level_1(params: L1) {
+  datamanagement.render_next_of_content_queue(params.store)
   // -- Runs the sub function every 800ms
   let sub: L1o2 =
     params.times

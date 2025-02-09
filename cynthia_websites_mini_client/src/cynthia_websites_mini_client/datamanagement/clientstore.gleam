@@ -57,3 +57,10 @@ pub fn init() -> ClientStore {
 
 /// This is a temporary solution replacing an in-browser-database for the time being.
 pub type ClientStore
+
+pub fn pull_from_global_config_table(
+  store: ClientStore,
+  item what: String,
+) -> Result(String, Nil) {
+  iget(store, what) |> array.get(0)
+}
