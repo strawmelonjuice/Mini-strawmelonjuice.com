@@ -4,12 +4,15 @@ import bungibindies/bun/sqlite
 import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/database/content_data
 import cynthia_websites_mini_server/static_routes
+import gleam/bit_array
+import gleam/io
 import gleam/javascript/array
 import gleam/javascript/map
-import gleam/javascript/promise
+import gleam/javascript/promise.{type Promise}
 import gleam/json
 import gleam/option.{type Option, None, Some}
 import gleam/result
+import gleam/string
 import gleam/uri
 import gleamy_lights/console
 import gleamy_lights/premixed
@@ -43,6 +46,19 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
           |> array.from_list(),
         ),
       )
+    }
+    "/fetch/content/" -> {
+      let a =
+        req
+        |> get_request_body()
+      use b <- promise.await(a)
+      let assert Ok(b) = b |> bit_array.to_string()
+      io.println(string.inspect(b))
+      console.log("Returning a fake 404 cuz I don't wanna do todo")
+      dynastatic
+      |> map.get("/404")
+      |> result.unwrap(response.new())
+      |> promise.resolve()
     }
     "/fetch/global-site-config" -> {
       promise.resolve(send_global_site_config(db))
@@ -91,3 +107,6 @@ fn send_global_site_config(db: sqlite.Database) {
     }
   }
 }
+
+@external(javascript, "./request_ffi.ts", "get_request_body")
+pub fn get_request_body(req: Request) -> Promise(BitArray)

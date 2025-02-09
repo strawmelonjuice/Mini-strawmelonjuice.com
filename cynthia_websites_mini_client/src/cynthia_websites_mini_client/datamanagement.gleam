@@ -52,7 +52,7 @@ pub fn render_next_of_content_queue(store: ClientStore) {
   {
     let res =
       utils.phone_home()
-      |> request.set_method(http.Get)
+      |> request.set_method(http.Post)
       |> request.set_path("/fetch/content/")
       |> request.set_body(next.original_filename)
       |> fetch.send()
