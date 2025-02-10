@@ -1,6 +1,7 @@
 import bungibindies/bun
 import cynthia_websites_mini_shared/timestamps
 import gleam/bool
+import gleam/int
 import gleam/list
 import gleam/result
 import gleam/string
@@ -39,10 +40,15 @@ pub fn no_gleam_io_test() {
       let good = orig |> string.replace("import gleam/io", "")
       bun.deep_equals(good, orig) |> bool.negate()
     })
+    |> list.filter(string.ends_with(_, ".gleam"))
   list.is_empty(results)
   |> bool.lazy_guard(when: _, return: fn() { Nil }, otherwise: fn() {
     let f =
-      "Found usage of `gleam/io` in: \n - " <> string.join(results, "\n - ")
+      "Found usage of `gleam/io` in: \n - "
+      <> string.join(results, "\n - ")
+      <> "\n "
+      <> list.length(results) |> int.to_string()
+      <> " files affected."
     panic as f
   })
 }
