@@ -16,18 +16,21 @@ pub fn into(
     _ -> panic as "Unknown content type"
   }
   case layout {
-    "cyndy" -> {
+    "cindy" -> {
       case is_post_not_page {
         False -> cyndy_page
         True -> cyndy_post
       }
     }
-    _ -> panic as "Unknown layout name"
+    other -> {
+      let f = "Unknown layout name: " <> other
+      panic as f
+    }
   }
 }
 
 /// Cyndy layout for pages.
-/// 
+///
 /// Dict keys:
 /// - `content`
 fn cyndy_page(d: Dict(String, String)) -> element.Element(a) {
