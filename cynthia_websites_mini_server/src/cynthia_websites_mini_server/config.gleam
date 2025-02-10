@@ -5,13 +5,13 @@ import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
 import gleam/dynamic/decode
-import gleam/io
 import gleam/json
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleamy_lights/premixed
+import plinth/javascript/console
 import plinth/node/fs
 import plinth/node/process
 import simplifile
@@ -43,7 +43,7 @@ pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
       premixed.text_error_red(
         "Error: Could not load cynthia-mini.toml: " <> why,
       )
-      |> io.println_error
+      |> console.error
       process.exit(1)
       panic as "We should not reach here"
     }
@@ -51,7 +51,7 @@ pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
   let content = case content_getter() {
     Ok(lis) -> lis
     Error(msg) -> {
-      io.println_error("Error: There was an error getting content:\n" <> msg)
+      console.error("Error: There was an error getting content:\n" <> msg)
       process.exit(1)
       panic as "We should not reach here"
     }
@@ -154,7 +154,7 @@ pub fn store_db(
 }
 
 fn dialog_initcfg() {
-  io.println("No Cynthia Mini configuration found...")
+  console.log("No Cynthia Mini configuration found...")
   case
     prompts.for_confirmation(
       "CynthiaMini can create \n"
@@ -167,7 +167,7 @@ fn dialog_initcfg() {
     )
   {
     False -> {
-      io.println_error("No Cynthia Mini configuration found... Exiting.")
+      console.error("No Cynthia Mini configuration found... Exiting.")
       process.exit(1)
       panic as "We should not reach here"
     }

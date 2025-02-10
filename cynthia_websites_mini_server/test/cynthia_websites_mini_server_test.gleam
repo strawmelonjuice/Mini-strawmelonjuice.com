@@ -3,7 +3,6 @@ import cynthia_websites_mini_shared/timestamps
 import gleam/bool
 import gleam/int
 import gleam/list
-import gleam/result
 import gleam/string
 import gleeunit
 import gleeunit/should
@@ -41,6 +40,10 @@ pub fn no_gleam_io_test() {
       bun.deep_equals(good, orig) |> bool.negate()
     })
     |> list.filter(string.ends_with(_, ".gleam"))
+    |> list.filter(fn(a) {
+      a |> string.ends_with("test.gleam") |> bool.negate()
+    })
+    |> list.filter(fn(a) { a |> string.contains("build") |> bool.negate() })
   list.is_empty(results)
   |> bool.lazy_guard(when: _, return: fn() { Nil }, otherwise: fn() {
     let f =

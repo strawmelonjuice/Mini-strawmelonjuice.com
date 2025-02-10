@@ -3,7 +3,6 @@ import cynthia_websites_mini_client/pottery/molds
 import cynthia_websites_mini_client/pottery/paints
 import cynthia_websites_mini_shared/configtype
 import gleam/dict.{type Dict}
-import gleam/io
 import gleam/list
 import gleam/string
 import kirala/markdown/parser
@@ -40,9 +39,8 @@ fn parse_html(inner: String, filename: String) -> String {
   let ext = filename |> string.split(".") |> list.last
   case ext {
     Ok("md") -> {
-      let parsed =
-        parser.parse(1, inner)
-        |> io.debug
+      let parsed = parser.parse(1, inner)
+      // |> io.debug
       todo
     }
     Ok("html") -> inner

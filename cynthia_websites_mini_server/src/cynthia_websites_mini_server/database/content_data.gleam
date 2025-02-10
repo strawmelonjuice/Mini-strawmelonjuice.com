@@ -3,13 +3,13 @@ import bungibindies/bun/sqlite/param_array
 import cynthia_websites_mini_shared/contenttypes
 import gleam/dynamic/decode
 import gleam/int
-import gleam/io
 import gleam/javascript/array
 import gleam/json
 import gleam/list
 import gleam/result
 import gleam/string
 import gleamy_lights/premixed
+import plinth/javascript/console
 
 pub fn get_minimal_content_list(
   db: sqlite.Database,
@@ -34,7 +34,7 @@ pub fn get_minimal_content_list(
         |> string.inspect
       },
     )
-    |> io.println()
+    |> console.log()
     e
   })
   |> result.unwrap([])
