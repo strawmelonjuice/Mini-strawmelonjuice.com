@@ -2,7 +2,6 @@ import cynthia_websites_mini_client/datamanagement/clientstore.{type ClientStore
 import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/ui/themes_generated
-import gleam/io
 import gleam/list
 import gleam/result
 import plinth/javascript/console

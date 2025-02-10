@@ -32,7 +32,7 @@ pub fn timestamp_to_string_test() {
 
 // Make sure this workspace is free of any mentions of `gleam/io`.
 pub fn no_gleam_io_test() {
-  let assert Ok(files) = simplifile.get_files(process.cwd())
+  let assert Ok(files) = simplifile.get_files(process.cwd() <> "/..")
   let results =
     list.filter(files, fn(file) {
       let assert Ok(orig) = fs.read_file_sync(file)

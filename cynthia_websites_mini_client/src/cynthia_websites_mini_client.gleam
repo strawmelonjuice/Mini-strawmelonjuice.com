@@ -1,7 +1,6 @@
 import cynthia_websites_mini_client/datamanagement
 import cynthia_websites_mini_client/pottery/ceramics
 import cynthia_websites_mini_client/realtime
-import gleam/io
 import gleam/string
 import plinth/browser/document
 
