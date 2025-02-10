@@ -4,15 +4,15 @@ import bungibindies/bun/sqlite
 import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/database/content_data
 import cynthia_websites_mini_server/static_routes
+import cynthia_websites_mini_shared/configtype.{ContentsPage, ContentsPost}
 import gleam/bit_array
-import gleam/io
+import gleam/bool
 import gleam/javascript/array
 import gleam/javascript/map
 import gleam/javascript/promise.{type Promise}
 import gleam/json
 import gleam/option.{Some}
 import gleam/result
-import gleam/string
 import gleam/uri
 import gleamy_lights/console
 import gleamy_lights/premixed
@@ -24,10 +24,12 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
   case path {
     "/" -> {
       console.log(
-        premixed.text_ok_green("[ 200 ]\t")
-        <> premixed.text_blue("/")
+        premixed.text_ok_green("[ GET/200 ]\t")
+        <> premixed.text_lightblue("/")
         <> " "
-        <> premixed.text_cyan("(client-side is now loading a web page)"),
+        <> premixed.text_cyan(
+          "\t(this means client-side will now start loading a web page)",
+        ),
       )
       dynastatic
       |> map.get("/index.html")
@@ -48,16 +50,123 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
       )
     }
     "/fetch/content/" -> {
-      let a =
+      use <-
+        bool.lazy_guard({ { req |> request.method() } == "POST" }, _, fn() {
+          response.new()
+          |> response.set_body(
+            "{ \"message\": \"Only POST requests are allowed here\" }",
+          )
+          |> response.set_status(405)
+          |> response.set_headers(
+            [#("Content-Type", "application/json; charset=utf-8")]
+            |> array.from_list(),
+          )
+          |> promise.resolve()
+        })
+      // We get the content from the db and turn it into json, regardless of the kind. Client knows how to figure that out.
+      let promise_of_a_file_name =
         req
         |> get_request_body()
-      use b <- promise.await(a)
-      let assert Ok(b) = b |> bit_array.to_string()
-      io.println(string.inspect(b))
-      console.log("Returning a fake 404 cuz I don't wanna do todo")
-      dynastatic
-      |> map.get("/404")
-      |> result.unwrap(response.new())
+      use file_name_as_a_bitarray <- promise.await(promise_of_a_file_name)
+      let assert Ok(file_name) =
+        file_name_as_a_bitarray |> bit_array.to_string()
+      case database.get_content_by_filename(db, file_name) {
+        Error(e) -> {
+          console.error(
+            premixed.text_error_red("[ POST/500 ] ")
+            <> premixed.text_lightblue("/fetch/content/")
+            <> "{"
+            <> premixed.text_orange(file_name)
+            <> "}"
+            <> premixed.text_lightblue("/")
+            <> premixed.text_cyan(premixed.text_error_red("\t ERROR: " <> e)),
+          )
+          response.new()
+          |> response.set_body("{ \"message\": \"Error fetching content.\" }")
+          |> response.set_status(500)
+          |> response.set_headers(
+            [#("Content-Type", "application/json; charset=utf-8")]
+            |> array.from_list(),
+          )
+        }
+        Ok(#(content_record, content_inner)) -> {
+          let res =
+            case content_record {
+              ContentsPage(page_record) -> {
+                json.object([
+                  // Common to all content types
+                  #("filename", json.string(page_record.filename)),
+                  #("title", json.string(page_record.title)),
+                  #("description", json.string(page_record.description)),
+                  #("layout", json.string(page_record.layout)),
+                  #("permalink", json.string(page_record.permalink)),
+                  // Unique to unspecified content
+                  #("kind", json.string("page")),
+                  #("inner", json.string(content_inner)),
+                  // Unique to page
+                  #(
+                    "page",
+                    json.object([
+                      #("menus", json.array(page_record.page.menus, json.int)),
+                    ]),
+                  ),
+                  // Unique to post
+                  #("post", json.null()),
+                ])
+              }
+              ContentsPost(post_record) -> {
+                json.object([
+                  // Common to all content types
+                  #("filename", json.string(post_record.filename)),
+                  #("title", json.string(post_record.title)),
+                  #("description", json.string(post_record.description)),
+                  #("layout", json.string(post_record.layout)),
+                  #("permalink", json.string(post_record.permalink)),
+                  // Unique to unspecified content
+                  #("kind", json.string("page")),
+                  #("inner", json.string(content_inner)),
+                  // Unique to page
+                  #("page", json.null()),
+                  // Unique to post
+                  #(
+                    "post",
+                    json.object([
+                      #(
+                        "date_posted",
+                        json.string(post_record.post.date_posted),
+                      ),
+                      #(
+                        "date_updated",
+                        json.string(post_record.post.date_updated),
+                      ),
+                      #("category", json.string(post_record.post.category)),
+                      #("tags", json.array(post_record.post.tags, json.string)),
+                    ]),
+                  ),
+                ])
+              }
+            }
+            |> json.to_string()
+          console.log(
+            premixed.text_ok_green("[ POST/200 ]\t")
+            <> premixed.text_lightblue("/fetch/content/")
+            <> "{"
+            <> premixed.text_orange(file_name)
+            <> "}"
+            <> premixed.text_lightblue("/")
+            <> premixed.text_cyan(
+              "\t (these usually prefetch all the pages to build up a cache for quick responses!)",
+            ),
+          )
+          response.new()
+          |> response.set_body(res)
+          |> response.set_status(200)
+          |> response.set_headers(
+            [#("Content-Type", "application/json; charset=utf-8")]
+            |> array.from_list(),
+          )
+        }
+      }
       |> promise.resolve()
     }
     "/fetch/global-site-config" -> {
@@ -65,7 +174,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
     }
     f -> {
       console.error(
-        premixed.text_error_red("[ 404 ] ") <> premixed.text_blue(f),
+        premixed.text_error_red("[ GET/404 ] ") <> premixed.text_lightblue(f),
       )
       dynastatic
       |> map.get("/404")
