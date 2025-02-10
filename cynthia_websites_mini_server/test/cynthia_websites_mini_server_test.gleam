@@ -1,16 +1,17 @@
 import bungibindies/bun
 import cynthia_websites_mini_shared/timestamps
+import gleam/bool
+import gleam/list
+import gleam/result
+import gleam/string
 import gleeunit
 import gleeunit/should
+import plinth/node/fs
+import plinth/node/process
+import simplifile
 
 pub fn main() {
   gleeunit.main()
-}
-
-// gleeunit test functions end in `_test`
-pub fn hello_world_test() {
-  1
-  |> should.equal(1)
 }
 
 // Test timestamp parsing
@@ -27,4 +28,17 @@ pub fn timestamp_to_string_test() {
   let result = timestamps.parse(time) |> timestamps.create()
   result
   |> should.equal(time)
+}
+
+// Make sure this workspace is free of any mentions of `gleam/io`.
+pub fn no_gleam_io_test() {
+  let assert Ok(files) = simplifile.get_files(process.cwd())
+  use file <- list.each(files)
+  let assert Ok(orig) = fs.read_file_sync(file)
+  let good = orig |> string.replace("import gleam/io", "")
+  bun.deep_equals(good, orig)
+  |> bool.lazy_guard(when: _, return: fn() { Nil }, otherwise: fn() {
+    let f = "Found usage of `gleam/io` in " <> file
+    panic as f
+  })
 }
