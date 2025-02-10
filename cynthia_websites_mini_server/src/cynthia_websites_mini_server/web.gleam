@@ -10,7 +10,7 @@ import gleam/javascript/array
 import gleam/javascript/map
 import gleam/javascript/promise.{type Promise}
 import gleam/json
-import gleam/option.{type Option, None, Some}
+import gleam/option.{Some}
 import gleam/result
 import gleam/string
 import gleam/uri
