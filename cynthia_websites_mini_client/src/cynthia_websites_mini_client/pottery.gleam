@@ -5,7 +5,6 @@ import cynthia_websites_mini_shared/configtype
 import gleam/dict.{type Dict}
 import gleam/list
 import gleam/string
-import kirala/markdown/parser
 import lustre/internals/vdom
 
 pub fn render_content(
@@ -30,7 +29,8 @@ pub fn render_content(
         |> dict.insert("content", parse_html(inner, page_data.filename))
       #(mold, var)
     }
-    configtype.ContentsPost(_) -> todo
+    configtype.ContentsPost(_) ->
+      todo as "The post renderer is not implemented yet."
   }
   f(vars)
 }
@@ -38,13 +38,12 @@ pub fn render_content(
 fn parse_html(inner: String, filename: String) -> String {
   let ext = filename |> string.split(".") |> list.last
   case ext {
-    Ok("md") -> {
-      let parsed = parser.parse(1, inner)
-      // |> io.debug
-      todo
-    }
+    Ok("md") -> custom_md_render(inner)
     Ok("html") -> inner
     Ok(text) -> "<pre>" <> text <> "</pre>"
-    Error(_) -> "<pre>" <> string.inspect(inner) <> "</pre>"
+    Error(_) -> "<pre class='text-red-500>" <> string.inspect(inner) <> "</pre>"
   }
 }
+
+@external(javascript, "./pottery/markdown_renders_ffi.ts", "custom_render")
+pub fn custom_md_render(markdown: String) -> String
