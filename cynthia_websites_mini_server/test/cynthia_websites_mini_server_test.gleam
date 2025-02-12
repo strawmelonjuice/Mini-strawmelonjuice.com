@@ -36,8 +36,7 @@ pub fn no_gleam_io_test() {
   let results =
     list.filter(files, fn(file) {
       let assert Ok(orig) = fs.read_file_sync(file)
-      let good = orig |> string.replace("import gleam/io", "")
-      bun.deep_equals(good, orig) |> bool.negate()
+      string.contains(orig, "import gleam/io")
     })
     |> list.filter(string.ends_with(_, ".gleam"))
     |> list.filter(fn(a) {
