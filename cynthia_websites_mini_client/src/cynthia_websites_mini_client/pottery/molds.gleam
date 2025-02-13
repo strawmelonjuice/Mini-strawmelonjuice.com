@@ -8,8 +8,8 @@ import lustre/element/html
 pub fn into(
   layout layout: String,
   for theme_type: String,
-) -> fn(Dict(Int, List(#(String, String))), Element(a), Dict(String, String)) ->
-  element.Element(a) {
+  store store: clientstore.ClientStore,
+) -> fn(Element(a), Dict(String, String)) -> element.Element(a) {
   let is_post_not_page = case theme_type {
     "post" -> True
     "page" -> False
@@ -18,8 +18,12 @@ pub fn into(
   case layout {
     "cindy" -> {
       case is_post_not_page {
-        False -> cyndy_page
-        True -> cyndy_post
+        False -> fn(a: Element(a), b: Dict(String, String)) -> Element(a) {
+          cyndy_page(a, b, store)
+        }
+        True -> fn(a: Element(a), b: Dict(String, String)) -> Element(a) {
+          cyndy_post(a, b, store)
+        }
       }
     }
     other -> {
@@ -34,17 +38,18 @@ pub fn into(
 /// Dict keys:
 /// - `content`
 fn cyndy_page(
-  menus: Dict(Int, List(#(String, String))),
   from content: Element(a),
   with variables: Dict(String, String),
+  store store: clientstore.ClientStore,
 ) -> Element(a) {
+  let menus = clientstore.pull_menus(store)
   html.div([attribute.id("content")], [html.span([], [content])])
 }
 
 fn cyndy_post(
-  menus: Dict(Int, List(#(String, String))),
   from content: Element(a),
   with variables: Dict(String, String),
+  store store: clientstore.ClientStore,
 ) -> Element(a) {
   todo
 }

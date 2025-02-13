@@ -3,6 +3,7 @@ import cynthia_websites_mini_shared/configtype.{
   type SharedCynthiaConfigGlobalOnly, default_shared_cynthia_config_global_only,
 }
 import cynthia_websites_mini_shared/contenttypes
+import gleam/dict.{type Dict}
 import gleam/dynamic/decode
 import gleam/fetch
 import gleam/http
@@ -63,4 +64,8 @@ pub fn pull_from_global_config_table(
   item what: String,
 ) -> Result(String, Nil) {
   iget(store, what) |> array.get(0)
+}
+
+pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
+  todo
 }

@@ -15,28 +15,19 @@ pub fn render_content(
   inner: String,
 ) -> vdom.Element(a) {
   let assert Ok(def) = paints.get_sytheme(store)
-  let #(into, content, variables): #(
-    fn(
-      Dict(Int, List(#(String, String))),
-      vdom.Element(a),
-      Dict(String, String),
-    ) ->
-      vdom.Element(a),
-    vdom.Element(a),
-    Dict(String, String),
-  ) = case data {
+  let #(into, content, variables) = case data {
     configtype.ContentsPage(page_data) -> {
       let mold = case page_data.layout {
-        "default" | "theme" | "" -> molds.into(def.layout, "page")
-        layout -> molds.into(layout, "page")
+        "default" | "theme" | "" -> molds.into(def.layout, "page", store)
+        layout -> molds.into(layout, "page", store)
       }
       let variables = dict.new()
       #(mold, parse_html(inner, page_data.filename), variables)
     }
     configtype.ContentsPost(post_data) -> {
       let mold = case post_data.layout {
-        "default" | "theme" | "" -> molds.into(def.layout, "post")
-        layout -> molds.into(layout, "post")
+        "default" | "theme" | "" -> molds.into(def.layout, "post", store)
+        layout -> molds.into(layout, "post", store)
       }
       let variables =
         dict.new()
@@ -48,8 +39,7 @@ pub fn render_content(
     }
   }
   // Other stuff should be added to vars here, like site metadata, ~menu links~, etc. EDIT: Menu links go in their own thing.
-  let menus = dict.new()
-  into(menus, content, variables)
+  into(content, variables)
 }
 
 fn parse_html(inner: String, filename: String) -> vdom.Element(a) {
