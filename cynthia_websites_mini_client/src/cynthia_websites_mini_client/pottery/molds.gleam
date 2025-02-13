@@ -1,15 +1,15 @@
 import cynthia_websites_mini_client/datamanagement/clientstore
 import gleam/dict.{type Dict}
-import lustre
 import lustre/attribute
-import lustre/element
+import lustre/element.{type Element}
 import lustre/element/html
 
 /// Molds is the name we use for templating here.
 pub fn into(
   layout layout: String,
   for theme_type: String,
-) -> fn(Dict(String, String)) -> element.Element(a) {
+) -> fn(Dict(Int, List(#(String, String))), Element(a), Dict(String, String)) ->
+  element.Element(a) {
   let is_post_not_page = case theme_type {
     "post" -> True
     "page" -> False
@@ -33,11 +33,18 @@ pub fn into(
 ///
 /// Dict keys:
 /// - `content`
-fn cyndy_page(d: Dict(String, String)) -> element.Element(a) {
-  let assert Ok(content) = dict.get(d, "content")
-  html.div([attribute.id("content")], [html.span([], [html.text(content)])])
+fn cyndy_page(
+  menus: Dict(Int, List(#(String, String))),
+  from content: Element(a),
+  with variables: Dict(String, String),
+) -> Element(a) {
+  html.div([attribute.id("content")], [html.span([], [content])])
 }
 
-fn cyndy_post(d: Dict(String, String)) -> element.Element(a) {
+fn cyndy_post(
+  menus: Dict(Int, List(#(String, String))),
+  from content: Element(a),
+  with variables: Dict(String, String),
+) -> Element(a) {
   todo
 }
