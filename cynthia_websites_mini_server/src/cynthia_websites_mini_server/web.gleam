@@ -24,7 +24,8 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
   case path {
     "/" -> {
       console.log(
-        premixed.text_ok_green("[ GET/200 ]\t")
+        premixed.text_ok_green("[ 200 ]\t")
+        <> "(GET)\t"
         <> premixed.text_lightblue("/")
         <> " "
         <> premixed.text_cyan(
@@ -37,6 +38,11 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
       |> promise.resolve()
     }
     "/fetch/minimal-content-list" -> {
+      console.log(
+        premixed.text_ok_green("[ 200 ]\t")
+        <> "(GET)\t"
+        <> premixed.text_lightblue("/fetch/minimal-content-list"),
+      )
       promise.resolve(
         response.new()
         |> response.set_body(
@@ -52,6 +58,13 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
     "/fetch/content/" -> {
       use <-
         bool.lazy_guard({ { req |> request.method() } == "POST" }, _, fn() {
+          console.error(
+            premixed.text_error_red("[ 405 ] ")
+            <> "("
+            <> req |> request.method
+            <> ")\t"
+            <> premixed.text_lightblue("/fetch/content/"),
+          )
           response.new()
           |> response.set_body(
             "{ \"message\": \"Only POST requests are allowed here\" }",
@@ -73,7 +86,8 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
       case database.get_content_by_filename(db, file_name) {
         Error(e) -> {
           console.error(
-            premixed.text_error_red("[ POST/500 ] ")
+            premixed.text_error_red("[ 500 ] ")
+            <> "(POST)\t"
             <> premixed.text_lightblue("/fetch/content/")
             <> "{"
             <> premixed.text_orange(file_name)
@@ -148,7 +162,8 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
             }
             |> json.to_string()
           console.log(
-            premixed.text_ok_green("[ POST/200 ]\t")
+            premixed.text_ok_green("[ 200 ]\t")
+            <> "(POST)\t"
             <> premixed.text_lightblue("/fetch/content/")
             <> "{"
             <> premixed.text_orange(file_name)
@@ -174,7 +189,11 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
     }
     f -> {
       console.error(
-        premixed.text_error_red("[ GET/404 ] ") <> premixed.text_lightblue(f),
+        premixed.text_error_red("[ 404 ] ")
+        <> "("
+        <> req |> request.method
+        <> ")\t"
+        <> premixed.text_lightblue(f),
       )
       dynastatic
       |> map.get("/404")
