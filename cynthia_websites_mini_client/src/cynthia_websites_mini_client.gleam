@@ -8,4 +8,5 @@ pub fn main() {
   let clientstore = datamanagement.init()
   let _ = realtime.main(clientstore)
   datamanagement.update_content_queue(clientstore)
+  todo as "priority loader not implemented yet!"
 }
