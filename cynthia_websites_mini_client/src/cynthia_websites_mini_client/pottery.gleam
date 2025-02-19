@@ -29,7 +29,7 @@ pub fn render_content(
         "default" | "theme" | "" -> molds.into(def.layout, "post", store)
         layout -> molds.into(layout, "post", store)
       }
-      let variables =
+      let variables: Dict(String, String) =
         dict.new()
         |> dict.insert("date_published", post_data.post.date_posted)
         |> dict.insert("date_modified", post_data.post.date_updated)
