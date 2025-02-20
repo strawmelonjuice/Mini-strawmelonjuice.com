@@ -42,3 +42,7 @@ pub fn get_color_scheme() -> String
 /// Set the data attribute of an element
 @external(javascript, "./dom.ts", "set_data")
 pub fn set_data(element: element.Element, key: String, value: String) -> Nil
+
+/// Set the hash of the window
+@external(javascript, "./dom.ts", "set_hash")
+pub fn set_hash(hash: String) -> Nil

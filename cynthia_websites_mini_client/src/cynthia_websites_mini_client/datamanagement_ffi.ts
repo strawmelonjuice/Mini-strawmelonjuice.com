@@ -71,7 +71,16 @@ class ClientStore {
   ) {
     if (this.contentQueue.length > 0) {
       const content = this.contentQueue.shift();
-      cb(content);
+      // Check if the content is already in the store
+      if (content) {
+        if (this.contentStore.has(content.original_filename)) {
+          // If it is, return the content
+          cb(this.contentStore.get(content.original_filename));
+        } else {
+          // If it isn't, return the content and add it to the store
+          cb(content);
+        }
+      }
     }
   }
   update(global_config: flatGlobalConfig) {
