@@ -242,7 +242,7 @@ const tailwindconfig: import("tailwindcss").Config = {
     themes: daisyui_themes,
   },
   content: [
-    "./cynthia_websites_mini_client/**/*.gleam",
+    "./cynthia_websites_mini_client/**/*{.gleam,.ts}",
     "./cynthia_websites_mini_server/src/cynthia_websites_mini_server/static_routes.gleam",
     "./cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui.gleam",
   ],

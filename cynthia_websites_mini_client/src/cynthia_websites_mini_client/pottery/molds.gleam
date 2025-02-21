@@ -1,8 +1,10 @@
 import cynthia_websites_mini_client/datamanagement/clientstore
 import gleam/dict.{type Dict}
+import gleam/string
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
+import plinth/javascript/console
 
 /// Molds is the name we use for templating here.
 pub fn into(
@@ -42,8 +44,11 @@ fn cyndy_page(
   with variables: Dict(String, String),
   store store: clientstore.ClientStore,
 ) -> Element(a) {
+  console.info("Variables: \n\t" <> string.inspect(variables))
   let menus = clientstore.pull_menus(store)
-  html.div([attribute.id("content")], [html.span([], [content])])
+  html.div([attribute.id("content"), attribute.class("w-full mb-2")], [
+    html.span([], [content, html.br([])]),
+  ])
 }
 
 fn cyndy_post(
