@@ -1,10 +1,14 @@
 import cynthia_websites_mini_client/datamanagement/clientstore
 import gleam/dict.{type Dict}
+import gleam/io
 import gleam/list
 import gleam/string
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
+import plinth/browser/document as plinth_document
+import plinth/browser/element as plinth_element
+import plinth/browser/window as plinth_window
 import plinth/javascript/console
 
 /// Molds is the name we use for templating here.
@@ -22,10 +26,10 @@ pub fn into(
     "cindy" -> {
       case is_post_not_page {
         False -> fn(a: Element(a), b: Dict(String, String)) -> Element(a) {
-          cyndy_page(a, b, store)
+          cindy_page(a, b, store)
         }
         True -> fn(a: Element(a), b: Dict(String, String)) -> Element(a) {
-          cyndy_post(a, b, store)
+          cindy_post(a, b, store)
         }
       }
     }
@@ -36,89 +40,178 @@ pub fn into(
   }
 }
 
-/// Cyndy layout for pages.
+/// Update the menu in the layout without rerendering the whole page.
+pub fn retroactive_menu_update(store: clientstore.ClientStore) {
+  case plinth_document.query_selector("#content") {
+    Ok(elm) -> {
+      let assert Ok(layout_name) = plinth_element.dataset_get(elm, "layout")
+      let res = clientstore.pull_menus(store)
+      case layout_name {
+        "cindy" -> {
+          let menu =
+            res |> cindy_menu_1() |> html.div([], _) |> element.to_string()
+          let assert Ok(menu_1) =
+            plinth_document.query_selector("#menu_1_inside")
+          plinth_element.set_inner_html(menu_1, menu)
+        }
+        other -> {
+          let f = "Unknown layout name: " <> other
+          panic as f
+        }
+      }
+    }
+    Error(_) -> {
+      console.error("No content element found (yet).")
+    }
+  }
+}
+
+/// cindy layout for pages.
 ///
 /// Dict keys:
 /// - `content`
-fn cyndy_page(
+fn cindy_page(
   from content: Element(a),
   with variables: Dict(String, String),
   store store: clientstore.ClientStore,
 ) -> Element(a) {
   console.info("Variables: \n\t" <> string.inspect(variables))
-  let menus = clientstore.pull_menus(store)
-  html.div([attribute.id("content"), attribute.class("w-full mb-2")], [
-    html.span([], [
-      html.div(
-        [
-          attribute.class(
-            "grid grid-cols-5 grid-rows-12 gap-2 w-screen h-screen",
-          ),
-        ],
-        [
-          html.div(
-            [
-              attribute.class(
-                "col-span-4 row-span-11 col-start-2 row-start-2 overflow-auto min-h-full relative m-0",
-              ),
-            ],
-            [content],
-          ),
-          html.div([attribute.class("col-span-5 p-0 m-0")], [
-            html.text("Menu 1 goes here"),
-          ]),
-          html.div(
-            [attribute.class("row-span-8 col-start-1 row-start-2 min-h-full")],
-            [html.text("Post-meta (if any) goes here")],
-          ),
-        ],
+  let menu =
+    clientstore.pull_menus(store)
+    |> cindy_menu_1()
+  let assert Ok(title) = dict.get(variables, "title")
+  let assert Ok(description) = dict.get(variables, "description_html")
+  cindy_common(
+    content,
+    menu,
+    html.div([], [
+      html.h3(
+        [attribute.class("font-bold text-2xl text-center text-base-content")],
+        [html.text(title)],
       ),
+      html.p([attribute.attribute("dangerous-unescaped-html", description)], []),
     ]),
-  ])
+    variables,
+  )
 }
 
-fn cyndy_post(
+fn cindy_post(
   from content: Element(a),
   with variables: Dict(String, String),
   store store: clientstore.ClientStore,
 ) -> Element(a) {
   console.info("Variables: \n\t" <> string.inspect(variables))
-  let menus = clientstore.pull_menus(store)
-  html.div([attribute.id("content"), attribute.class("w-full mb-2")], [
-    html.span([], [
-      html.div(
-        [
-          attribute.class(
-            "grid grid-cols-5 grid-rows-12 gap-2 w-screen h-screen",
-          ),
-        ],
-        [
-          html.div(
-            [
-              attribute.class(
-                "col-span-4 row-span-11 col-start-2 row-start-2 overflow-auto min-h-full relative m-0",
-              ),
-            ],
-            [content],
-          ),
-          html.div([attribute.class("col-span-5 p-0 m-0")], [
-            html.text("Menu 1 goes here"),
-          ]),
-          html.div(
-            [attribute.class("row-span-8 col-start-1 row-start-2 min-h-full")],
-            [html.text("Post-meta (if any) goes here")],
-          ),
-        ],
-      ),
-    ]),
-  ])
+  let menu =
+    clientstore.pull_menus(store)
+    |> cindy_menu_1()
+  cindy_common(
+    content,
+    menu,
+    html.text("Post-meta (if any) goes here"),
+    variables,
+  )
 }
 
-fn cyndy_menu_1(from content: Dict(Int, List(#(String, String)))) {
+fn cindy_common(
+  content: Element(a),
+  menu: List(Element(a)),
+  post_meta: Element(a),
+  variables: Dict(String, String),
+) {
+  let assert Ok(site_name) = dict.get(variables, "global_site_name")
+  html.div(
+    [
+      attribute.id("content"),
+      attribute.attribute("data-layout", "cindy"),
+      attribute.class("w-full mb-2"),
+    ],
+    [
+      html.span([], [
+        html.div(
+          [
+            attribute.class(
+              "grid grid-cols-5 grid-rows-12 gap-0 w-screen h-screen",
+            ),
+          ],
+          [
+            // Menu and site name
+            html.div([attribute.class("col-span-5 p-2 m-0 bg-base-300 flex")], [
+              html.div(
+                [attribute.class("flex-auto w-3/12 flex items-stretch")],
+                [
+                  html.span(
+                    [
+                      attribute.class(
+                        "text-center self-center font-bold btn btn-ghost text-xl",
+                      ),
+                    ],
+                    [html.text(site_name)],
+                  ),
+                ],
+              ),
+              html.div([attribute.class("flex-auto w-9/12")], [
+                html.menu([attribute.class("text-right")], [
+                  html.ul(
+                    [
+                      attribute.id("menu_1_inside"),
+                      attribute.class("menu menu-horizontal"),
+                    ],
+                    menu,
+                  ),
+                ]),
+              ]),
+            ]),
+            // Content
+            html.div(
+              [
+                attribute.class(
+                  "col-span-5 row-span-9 row-start-2 md:col-span-4 md:row-span-11 md:col-start-2 md:row-start-2 overflow-auto min-h-full p-4",
+                ),
+              ],
+              [content, html.br([])],
+            ),
+            // Post meta
+            html.div(
+              [
+                attribute.class(
+                  "col-span-5 row-span-2 row-start-11 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:p-2",
+                ),
+              ],
+              [post_meta],
+            ),
+          ],
+        ),
+      ]),
+    ],
+  )
+}
+
+fn cindy_menu_1(
+  from content: Dict(Int, List(#(String, String))),
+) -> List(Element(b)) {
+  let assert Ok(hash) = plinth_window.get_hash()
   case dict.get(content, 1) {
     Error(_) -> []
     Ok(dookie) -> {
-      list.map(dookie, fn(a) { html.a([attribute.href(a.1)], [html.text(a.0)]) })
+      list.map(dookie, fn(a) {
+        html.li([attribute.class("")], [
+          html.a(
+            [
+              attribute.href("/#" <> a.1),
+              attribute.class(
+                {
+                  case hash == a.1 {
+                    True -> "active "
+                    False -> ""
+                  }
+                }
+                <> "bg-secondary link-secondary border-solid border-2 border-primary-content",
+              ),
+            ],
+            [html.text(a.0)],
+          ),
+        ])
+      })
     }
   }
 }

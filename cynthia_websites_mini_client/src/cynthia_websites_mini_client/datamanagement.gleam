@@ -1,6 +1,10 @@
 import cynthia_websites_mini_client/datamanagement/clientstore.{
   type ClientStore as Store, iget, next_in_content_queue,
 }
+import cynthia_websites_mini_client/pottery/molds
+import gleam/io
+import lustre
+import lustre/element
 
 import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_client/utils
@@ -47,6 +51,22 @@ pub fn update_content_queue(store: ClientStore) {
 @external(javascript, "./datamanagement_ffi.ts", "add_to_content_queue")
 fn add_to_content_queue(store: ClientStore, data: contenttypes.Minimal) -> Nil
 
+@external(javascript, "./datamanagement_ffi.ts", "add_to_content_store")
+fn add_to_content_store(store: ClientStore, data: ContentStoreItem) -> Nil
+
+type ContentStoreItem {
+  ContentStoreItem(
+    html: String,
+    original_filename: String,
+    meta_title: String,
+    meta_description: String,
+    meta_kind: Int,
+    meta_permalink: String,
+    last_inserted_at: String,
+    meta_in_menus: Array(Int),
+  )
+}
+
 pub fn render_next_of_content_queue(store: ClientStore) {
   use next <- next_in_content_queue(store)
   {
@@ -63,7 +83,25 @@ pub fn render_next_of_content_queue(store: ClientStore) {
       let assert Ok(#(data, innercontent)) =
         decode.run(res.body, collected_content_decoder())
       let s = pottery.render_content(store, data, innercontent)
-      todo as "Save the rendered content to the store"
+      add_to_content_store(
+        store,
+        ContentStoreItem(
+          html: s |> element.to_string(),
+          original_filename: next.original_filename,
+          meta_title: next.meta_title,
+          meta_description: next.meta_description,
+          meta_kind: next.meta_kind,
+          meta_permalink: next.meta_permalink,
+          last_inserted_at: next.last_inserted_at,
+          meta_in_menus: case data {
+            configtype.ContentsPage(a) -> {
+              a.page.menus |> array.from_list
+            }
+            configtype.ContentsPost(_) -> [] |> array.from_list
+          },
+        ),
+      )
+      molds.retroactive_menu_update(store)
       Ok(Nil)
     }
     |> promise.resolve
@@ -126,6 +164,7 @@ pub fn collected_content_decoder() -> decode.Decoder(
   )
   case kind {
     "page" -> {
+      io.debug("Decoding page")
       let assert Some(page) = page
       decode.success(#(
         configtype.ContentsPage(configtype.Page(
@@ -140,6 +179,7 @@ pub fn collected_content_decoder() -> decode.Decoder(
       ))
     }
     "post" -> {
+      io.debug("Decoding post")
       let assert Some(post) = post
       decode.success(#(
         configtype.ContentsPost(configtype.Post(

@@ -1,3 +1,5 @@
+import * as Gleam from "../../prelude.ts";
+
 interface flatGlobalConfig {
   global_theme: string;
   global_theme_dark: string;
@@ -22,7 +24,8 @@ class ClientStore {
     last_inserted_at: string;
     original_filename: string;
   }[];
-  private contentStore: Map<
+  contentStore: Map<
+    // filename, not to match on, but to keep unique
     string,
     {
       html: string;
@@ -32,6 +35,7 @@ class ClientStore {
       meta_kind: number;
       meta_permalink: string;
       last_inserted_at: string;
+      meta_in_menus: number[];
     }
   >;
   constructor(global_config: flatGlobalConfig) {
@@ -54,6 +58,18 @@ class ClientStore {
     original_filename: string;
   }) {
     this.contentQueue.push(content);
+  }
+  add_to_content_store(content: {
+    html: string;
+    original_filename: string;
+    meta_title: string;
+    meta_description: string;
+    meta_kind: number;
+    meta_permalink: string;
+    last_inserted_at: string;
+    meta_in_menus: number[];
+  }) {
+    this.contentStore.set(content.original_filename, content);
   }
   content_queue_next(
     cb: (
@@ -136,7 +152,21 @@ export function add_to_content_queue(
 ): void {
   store.add_to_content_queue(content);
 }
-
+export function add_to_content_store(
+  store: ClientStore,
+  content: {
+    html: string;
+    original_filename: string;
+    meta_title: string;
+    meta_description: string;
+    meta_kind: number;
+    meta_permalink: string;
+    last_inserted_at: string;
+    meta_in_menus: number[];
+  },
+): void {
+  store.add_to_content_store(content);
+}
 export function next_in_content_queue(
   store: ClientStore,
   cb: (
@@ -153,4 +183,30 @@ export function next_in_content_queue(
   ) => void,
 ) {
   store.content_queue_next(cb);
+}
+// Dict(Int, List(#(String, String)))
+export function get_menu_items(
+  store: ClientStore,
+): Map<number, [string, string]> {
+  let v: string[][][] = [[], [], [], [], []];
+  store.contentStore.forEach((item, _) => {
+    if (item.meta_kind == 1) return;
+    if (item.meta_in_menus.includes(1))
+      v[0].push([item.meta_title, item.meta_permalink]);
+    if (item.meta_in_menus.includes(2))
+      v[1].push([item.meta_title, item.meta_permalink]);
+    if (item.meta_in_menus.includes(3))
+      v[2].push([item.meta_title, item.meta_permalink]);
+    if (item.meta_in_menus.includes(4))
+      v[3].push([item.meta_title, item.meta_permalink]);
+    if (item.meta_in_menus.includes(5))
+      v[4].push([item.meta_title, item.meta_permalink]);
+  });
+  let res = new Map();
+  res.set(1, v[0]);
+  res.set(2, v[1]);
+  res.set(3, v[2]);
+  res.set(4, v[3]);
+  res.set(5, v[4]);
+  return res;
 }

@@ -9,8 +9,12 @@ import gleam/fetch
 import gleam/http
 import gleam/http/request
 import gleam/javascript/array.{type Array}
+import gleam/javascript/map.{type Map}
 import gleam/javascript/promise
+import gleam/list
 import gleam/result
+import gleam/string
+import plinth/javascript/console
 
 pub fn populate_global_config_table(store: ClientStore) {
   let res =
@@ -66,7 +70,57 @@ pub fn pull_from_global_config_table(
   iget(store, what) |> array.get(0)
 }
 
+@external(javascript, "../datamanagement_ffi.ts", "get_menu_items")
+pub fn i_pull_menus(store: ClientStore) -> Map(Int, Array(#(String, String)))
+
 pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
-  //todo: implement me
-  dict.from_list([])
+  let a = i_pull_menus(store)
+  console.log("Unconverted menu items: " <> string.inspect(a))
+  console.debug(a)
+  let b = dict.new()
+  console.log("Converted menu items: (0)" <> string.inspect(b))
+  let c = 1
+  let b = case a |> map.get(c) {
+    Error(_) -> b
+    Ok(d) -> {
+      dict.insert(b, c, array.to_list(d))
+    }
+  }
+  let c = 2
+  console.log("Converted menu items: (1)" <> string.inspect(b))
+  let b = case a |> map.get(c) {
+    Error(_) -> b
+    Ok(d) -> {
+      dict.insert(b, c, array.to_list(d))
+    }
+  }
+
+  console.log("Converted menu items (2): " <> string.inspect(b))
+  let c = 3
+  let b = case a |> map.get(c) {
+    Error(_) -> b
+    Ok(d) -> {
+      dict.insert(b, c, array.to_list(d))
+    }
+  }
+
+  console.log("Converted menu items: (3)" <> string.inspect(b))
+  let c = 4
+  let b = case a |> map.get(c) {
+    Error(_) -> b
+    Ok(d) -> {
+      dict.insert(b, c, array.to_list(d))
+    }
+  }
+
+  let c = 5
+  console.log("Converted menu items: (4)" <> string.inspect(b))
+  let b = case a |> map.get(c) {
+    Error(_) -> b
+    Ok(d) -> {
+      dict.insert(b, c, array.to_list(d))
+    }
+  }
+  console.log("Converted menu items: (5)" <> string.inspect(b))
+  b
 }

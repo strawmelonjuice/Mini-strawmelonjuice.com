@@ -26,7 +26,7 @@ fn main() {
   <style>" <> client_css() <> "</style>
   </head>
   <body>
-    <div id='viewable' class='bg-base-100 w-full h-10/12 mb-6'>
+    <div id='viewable' class='bg-base-100 w-screen h-screen'>
     </div>
    " <> ui.footer <> "
   </body>

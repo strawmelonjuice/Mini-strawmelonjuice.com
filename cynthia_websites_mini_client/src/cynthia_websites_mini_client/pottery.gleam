@@ -4,8 +4,10 @@ import cynthia_websites_mini_client/pottery/paints
 import cynthia_websites_mini_shared/configtype
 import gleam/dict.{type Dict}
 import gleam/list
+import gleam/result
 import gleam/string
 import lustre/attribute.{attribute}
+import lustre/element
 import lustre/element/html
 import lustre/internals/vdom
 
@@ -21,7 +23,15 @@ pub fn render_content(
         "default" | "theme" | "" -> molds.into(def.layout, "page", store)
         layout -> molds.into(layout, "page", store)
       }
-      let variables = dict.new()
+      let description =
+        page_data.description
+        |> parse_html("descr.md")
+        |> element.to_string
+      let variables =
+        dict.new()
+        |> dict.insert("title", page_data.title)
+        |> dict.insert("description_html", description)
+        |> dict.insert("description", page_data.description)
       #(mold, parse_html(inner, page_data.filename), variables)
     }
     configtype.ContentsPost(post_data) -> {
@@ -29,8 +39,15 @@ pub fn render_content(
         "default" | "theme" | "" -> molds.into(def.layout, "post", store)
         layout -> molds.into(layout, "post", store)
       }
-      let variables: Dict(String, String) =
+      let description =
+        post_data.description
+        |> parse_html("descr.md")
+        |> element.to_string
+      let variables =
         dict.new()
+        |> dict.insert("title", post_data.title)
+        |> dict.insert("description_html", description)
+        |> dict.insert("description", post_data.description)
         |> dict.insert("date_published", post_data.post.date_posted)
         |> dict.insert("date_modified", post_data.post.date_updated)
         |> dict.insert("category", post_data.post.category)
@@ -39,7 +56,10 @@ pub fn render_content(
     }
   }
   // Other stuff should be added to vars here, like site metadata, ~menu links~, etc. EDIT: Menu links go in their own thing.
-  into(content, variables)
+  let site_name =
+    clientstore.pull_from_global_config_table(store, "site_name")
+    |> result.unwrap("My Site Name")
+  into(content, variables |> dict.insert("global_site_name", site_name))
 }
 
 fn parse_html(inner: String, filename: String) -> vdom.Element(a) {
