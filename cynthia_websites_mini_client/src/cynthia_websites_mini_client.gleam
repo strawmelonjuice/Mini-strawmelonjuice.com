@@ -10,7 +10,6 @@ import gleam/dynamic/decode
 import gleam/fetch
 import gleam/http
 import gleam/http/request
-import gleam/io
 import gleam/javascript/promise
 import gleam/result
 import plinth/browser/window
