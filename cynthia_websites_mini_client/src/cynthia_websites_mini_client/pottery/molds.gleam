@@ -1,6 +1,5 @@
 import cynthia_websites_mini_client/datamanagement/clientstore
 import gleam/dict.{type Dict}
-import gleam/io
 import gleam/list
 import gleam/result
 import gleam/string
@@ -133,7 +132,6 @@ fn cindy_post(
       html.div([], []),
       html.div([], []),
       // ----------------------
-
       html.b([attribute.class("font-bold")], [html.text("Published")]),
       html.div([], [
         html.text(

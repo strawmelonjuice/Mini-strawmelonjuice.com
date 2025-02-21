@@ -2,15 +2,11 @@ import cynthia_websites_mini_client/datamanagement/clientstore.{
   type ClientStore as Store, iget, next_in_content_queue,
 }
 import cynthia_websites_mini_client/pottery/molds
-import gleam/io
-import lustre
 import lustre/element
 
 import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_client/utils
-import cynthia_websites_mini_shared/configtype.{
-  type SharedCynthiaConfigGlobalOnly, default_shared_cynthia_config_global_only,
-}
+import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/contenttypes
 import gleam/dynamic/decode
 import gleam/fetch
@@ -19,7 +15,7 @@ import gleam/http/request
 import gleam/javascript/array.{type Array}
 import gleam/javascript/promise
 import gleam/list
-import gleam/option.{type Option, None, Some}
+import gleam/option.{type Option, Some}
 import gleam/result
 
 pub fn pull_from_global_config_table(
@@ -164,7 +160,6 @@ pub fn collected_content_decoder() -> decode.Decoder(
   )
   case kind {
     "page" -> {
-      io.debug("Decoding page")
       let assert Some(page) = page
       decode.success(#(
         configtype.ContentsPage(configtype.Page(
@@ -179,7 +174,6 @@ pub fn collected_content_decoder() -> decode.Decoder(
       ))
     }
     "post" -> {
-      io.debug("Decoding post")
       let assert Some(post) = post
       decode.success(#(
         configtype.ContentsPost(configtype.Post(
