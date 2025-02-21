@@ -57,8 +57,12 @@ fn parse_html(inner: String, filename: String) -> vdom.Element(a) {
     Ok("txt") -> html.pre([], [html.text(inner)])
     // Anything else is wrapped in a <pre> tag with a red color. Then it can be pasted into the template. This shows that the file type is not supported.
     _ ->
-      html.pre([attribute.class("text-red-500")], [
-        html.text(string.inspect(inner)),
+      html.div([], [
+        html.text("Unsupported file type: "),
+        html.text(filename),
+        html.pre([attribute.class("text-red-500")], [
+          html.text(string.inspect(inner)),
+        ]),
       ])
   }
 }

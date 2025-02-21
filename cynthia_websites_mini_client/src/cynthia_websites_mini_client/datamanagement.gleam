@@ -63,6 +63,7 @@ pub fn render_next_of_content_queue(store: ClientStore) {
       let assert Ok(#(data, innercontent)) =
         decode.run(res.body, collected_content_decoder())
       let s = pottery.render_content(store, data, innercontent)
+      todo as "Save the rendered content to the store"
       Ok(Nil)
     }
     |> promise.resolve
@@ -91,7 +92,9 @@ type CollectedContent {
   )
 }
 
-fn collected_content_decoder() -> decode.Decoder(#(configtype.Contents, String)) {
+pub fn collected_content_decoder() -> decode.Decoder(
+  #(configtype.Contents, String),
+) {
   use inner <- decode.field("inner", decode.string)
   use filename <- decode.field("filename", decode.string)
   use title <- decode.field("title", decode.string)

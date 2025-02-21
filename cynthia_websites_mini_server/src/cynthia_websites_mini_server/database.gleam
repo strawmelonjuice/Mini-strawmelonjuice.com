@@ -474,3 +474,161 @@ pub fn get_content_by_filename(
   use metadata <- result.try(meta)
   Ok(#(metadata, res.2))
 }
+
+// Wasting lines just to do the same thing as above, but with a different query? Yeah. This might get more complex later on, so I'm keeping it separate.
+pub fn get_content_by_permalink(db: sqlite.Database, permalink: String) {
+  let statement =
+    sqlite.prepare(
+      db,
+      "
+    SELECT content_id, content, extension, meta_title, meta_description, meta_kind, meta_layout, meta_permalink, meta_original_file_path FROM contentStore
+    WHERE meta_permalink = ?;
+    ",
+    )
+  let params = param_array.new() |> param_array.push(permalink)
+  let row = sqlite.get(statement, params)
+  let resu =
+    decode.run(
+      row,
+      fn() {
+        use content_id <- decode.field("content_id", decode.int)
+        use content <- decode.field("content", decode.string)
+        use meta_title <- decode.field("meta_title", decode.string)
+        use meta_description <- decode.field("meta_description", decode.string)
+        use meta_kind <- decode.field("meta_kind", decode.int)
+        use meta_layout <- decode.field("meta_layout", decode.string)
+        use meta_original_file_path <- decode.field(
+          "meta_original_file_path",
+          decode.string,
+        )
+        decode.success(#(
+          // 0
+          meta_kind,
+          // 1
+          content_id,
+          // 2
+          content,
+          // 3
+          meta_title,
+          // 4
+          meta_description,
+          // 5
+          meta_layout,
+          // 6
+          meta_original_file_path,
+        ))
+      }(),
+    )
+    |> result.map_error(fn(e) {
+      "Error decoding content from the database:\n\n"
+      <> string.inspect(e)
+      <> "\n\n"
+    })
+  // Used a result.try here earlier, but it gave me the wrong return type
+  use res <- result.try(resu)
+  let meta = case res.0 {
+    0 -> {
+      let statement =
+        sqlite.prepare(
+          db,
+          "
+        SELECT meta_menus FROM pageMetaData
+        WHERE page_id = ?
+        ",
+        )
+      let params = param_array.new() |> param_array.push(res.1)
+      let row = sqlite.get(statement, params)
+      let lres =
+        decode.run(
+          row,
+          fn() {
+            use meta_menus_str <- decode.field("meta_menus", decode.string)
+            let meta_menus = case meta_menus_str |> string.is_empty() {
+              True -> Ok([])
+              False -> {
+                meta_menus_str
+                |> string.split(", ")
+                |> list.map(fn(menu) { menu |> int.parse })
+                |> result.all()
+              }
+            }
+            let assert Ok(meta_menus) = meta_menus
+              as "menu IDs from the database should be valid integers"
+            decode.success(
+              configtype.ContentsPage(configtype.Page(
+                filename: res.6,
+                title: res.3,
+                description: res.4,
+                layout: res.5,
+                permalink: permalink,
+                page: configtype.ContentsPagePageData(meta_menus),
+              )),
+            )
+          }(),
+        )
+        |> result.map_error(fn(e) {
+          "Error decoding page metadata from the database:\n\n"
+          <> string.inspect(e)
+          <> "\n\n"
+        })
+      lres
+    }
+    1 -> {
+      let statement =
+        sqlite.prepare(
+          db,
+          "
+        SELECT date_published, date_updated, tags, category FROM postMetaData
+        WHERE post_id = ?
+        ",
+        )
+      let params = param_array.new() |> param_array.push(res.1)
+      let row = sqlite.get(statement, params)
+      let lres =
+        decode.run(
+          row,
+          fn() {
+            use date_published <- decode.field("date_published", decode.string)
+            use date_updated <- decode.field("date_updated", decode.string)
+            use category <- decode.field("category", decode.string)
+            use tagsstr <- decode.field("tags", decode.string)
+            let tags = case tagsstr |> string.is_empty() {
+              False -> {
+                tagsstr
+                |> string.split(", ")
+                |> list.map(fn(tag) { tag |> string.trim })
+              }
+              True -> []
+            }
+            decode.success(
+              configtype.ContentsPost(configtype.Post(
+                filename: res.6,
+                title: res.3,
+                description: res.4,
+                layout: res.5,
+                permalink: permalink,
+                post: configtype.PostMetaData(
+                  date_posted: date_published,
+                  date_updated: date_updated,
+                  category: category,
+                  tags: tags,
+                ),
+              )),
+            )
+          }(),
+        )
+        |> result.map_error(fn(e) {
+          "Error decoding post metadata from the database:\n\n"
+          <> string.inspect(e)
+          <> "\n\n"
+        })
+      lres
+    }
+    d -> {
+      let a = "Unknown content kind: " <> string.inspect(d)
+      Error(a)
+    }
+  }
+  use metadata <- result.try(meta)
+  Ok(#(metadata, res.2))
+}

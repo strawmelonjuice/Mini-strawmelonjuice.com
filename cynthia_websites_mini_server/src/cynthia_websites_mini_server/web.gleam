@@ -55,6 +55,136 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
         ),
       )
     }
+
+    "/fetch/content/priority/" -> {
+      use <-
+        bool.lazy_guard({ { req |> request.method() } == "POST" }, _, fn() {
+          console.error(
+            premixed.text_error_red("[ 405 ] ")
+            <> "("
+            <> req |> request.method
+            <> ")\t"
+            <> premixed.text_lightblue("/fetch/content/priority"),
+          )
+          response.new()
+          |> response.set_body(
+            "{ \"message\": \"Only POST requests are allowed here\" }",
+          )
+          |> response.set_status(405)
+          |> response.set_headers(
+            [#("Content-Type", "application/json; charset=utf-8")]
+            |> array.from_list(),
+          )
+          |> promise.resolve()
+        })
+      // We get the content from the db and turn it into json, regardless of the kind. Client knows how to figure that out.
+      let promise_of_an_url_path =
+        req
+        |> get_request_body()
+      use url_path_as_a_bitarray <- promise.await(promise_of_an_url_path)
+      let assert Ok(url_path) = url_path_as_a_bitarray |> bit_array.to_string()
+      case database.get_content_by_permalink(db, url_path) {
+        Error(e) -> {
+          console.error(
+            premixed.text_error_red("[ 500 ] ")
+            <> "(POST)\t"
+            <> premixed.text_lightblue("/fetch/content/priority")
+            <> "{"
+            <> premixed.text_orange(url_path)
+            <> "}"
+            <> premixed.text_lightblue("/")
+            <> premixed.text_cyan(premixed.text_error_red("\t ERROR: " <> e)),
+          )
+          response.new()
+          |> response.set_body("{ \"message\": \"Error fetching content.\" }")
+          |> response.set_status(500)
+          |> response.set_headers(
+            [#("Content-Type", "application/json; charset=utf-8")]
+            |> array.from_list(),
+          )
+        }
+        Ok(#(content_record, content_inner)) -> {
+          let res =
+            case content_record {
+              ContentsPage(page_record) -> {
+                json.object([
+                  // Common to all content types
+                  #("filename", json.string(page_record.filename)),
+                  #("title", json.string(page_record.title)),
+                  #("description", json.string(page_record.description)),
+                  #("layout", json.string(page_record.layout)),
+                  #("permalink", json.string(page_record.permalink)),
+                  // Unique to unspecified content
+                  #("kind", json.string("page")),
+                  #("inner", json.string(content_inner)),
+                  // Unique to page
+                  #(
+                    "page",
+                    json.object([
+                      #("menus", json.array(page_record.page.menus, json.int)),
+                    ]),
+                  ),
+                  // Unique to post
+                  #("post", json.null()),
+                ])
+              }
+              ContentsPost(post_record) -> {
+                json.object([
+                  // Common to all content types
+                  #("filename", json.string(post_record.filename)),
+                  #("title", json.string(post_record.title)),
+                  #("description", json.string(post_record.description)),
+                  #("layout", json.string(post_record.layout)),
+                  #("permalink", json.string(post_record.permalink)),
+                  // Unique to unspecified content
+                  #("kind", json.string("page")),
+                  #("inner", json.string(content_inner)),
+                  // Unique to page
+                  #("page", json.null()),
+                  // Unique to post
+                  #(
+                    "post",
+                    json.object([
+                      #(
+                        "date_posted",
+                        json.string(post_record.post.date_posted),
+                      ),
+                      #(
+                        "date_updated",
+                        json.string(post_record.post.date_updated),
+                      ),
+                      #("category", json.string(post_record.post.category)),
+                      #("tags", json.array(post_record.post.tags, json.string)),
+                    ]),
+                  ),
+                ])
+              }
+            }
+            |> json.to_string()
+          console.log(
+            premixed.text_ok_green("[ 200 ]\t")
+            <> "(POST)\t"
+            <> premixed.text_lightblue("/fetch/content/priority")
+            <> "{"
+            <> premixed.text_orange(url_path)
+            <> "}"
+            <> premixed.text_lightblue("/")
+            <> premixed.text_cyan(
+              "\t (this is probably the page the user is currently viewing, so client fetches it first!)",
+            ),
+          )
+          response.new()
+          |> response.set_body(res)
+          |> response.set_status(200)
+          |> response.set_headers(
+            [#("Content-Type", "application/json; charset=utf-8")]
+            |> array.from_list(),
+          )
+        }
+      }
+      |> promise.resolve()
+    }
+
     "/fetch/content/" -> {
       use <-
         bool.lazy_guard({ { req |> request.method() } == "POST" }, _, fn() {

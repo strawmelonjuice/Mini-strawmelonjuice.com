@@ -67,5 +67,6 @@ pub fn pull_from_global_config_table(
 }
 
 pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
-  todo
+  //todo: implement me
+  dict.from_list([])
 }
