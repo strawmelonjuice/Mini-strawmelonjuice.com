@@ -15,13 +15,15 @@ pub fn render_content(
   store: clientstore.ClientStore,
   data: configtype.Contents,
   inner: String,
+  is priority: Bool,
 ) -> vdom.Element(a) {
   let assert Ok(def) = paints.get_sytheme(store)
   let #(into, content, variables) = case data {
     configtype.ContentsPage(page_data) -> {
       let mold = case page_data.layout {
-        "default" | "theme" | "" -> molds.into(def.layout, "page", store)
-        layout -> molds.into(layout, "page", store)
+        "default" | "theme" | "" ->
+          molds.into(def.layout, "page", store, priority)
+        layout -> molds.into(layout, "page", store, priority)
       }
       let description =
         page_data.description
@@ -36,8 +38,9 @@ pub fn render_content(
     }
     configtype.ContentsPost(post_data) -> {
       let mold = case post_data.layout {
-        "default" | "theme" | "" -> molds.into(def.layout, "post", store)
-        layout -> molds.into(layout, "post", store)
+        "default" | "theme" | "" ->
+          molds.into(def.layout, "post", store, priority)
+        layout -> molds.into(layout, "post", store, priority)
       }
       let description =
         post_data.description

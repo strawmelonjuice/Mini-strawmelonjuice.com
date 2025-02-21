@@ -12,6 +12,7 @@ import gleam/http
 import gleam/http/request
 import gleam/javascript/promise
 import gleam/result
+import gleam/string
 import plinth/browser/window
 
 pub fn main() {
@@ -59,14 +60,21 @@ fn priority_loader(store: clientstore.ClientStore) -> Nil {
     use res <- promise.await(res)
     {
       use res <- result.try(result.replace_error(res, Nil))
-      let assert Ok(#(data, innercontent)) =
+      let #(data, innercontent) = case
         decode.run(res.body, datamanagement.collected_content_decoder())
+      {
+        Error(w) -> {
+          let s = "Failed to decode content: " <> string.inspect(w)
+          panic as s
+        }
+        Ok(d) -> d
+      }
       let title = case data {
         configtype.ContentsPage(content) -> content.title
         configtype.ContentsPost(content) -> content.title
       }
       let assert Ok(_) =
-        dom.push(title, pottery.render_content(store, data, innercontent))
+        dom.push(title, pottery.render_content(store, data, innercontent, True))
       Ok(Nil)
     }
     |> promise.resolve

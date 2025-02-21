@@ -146,11 +146,11 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
                     "post",
                     json.object([
                       #(
-                        "date_posted",
+                        "date-posted",
                         json.string(post_record.post.date_posted),
                       ),
                       #(
-                        "date_updated",
+                        "date-updated",
                         json.string(post_record.post.date_updated),
                       ),
                       #("category", json.string(post_record.post.category)),
@@ -276,11 +276,11 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
                     "post",
                     json.object([
                       #(
-                        "date_posted",
+                        "date-posted",
                         json.string(post_record.post.date_posted),
                       ),
                       #(
-                        "date_updated",
+                        "date-updated",
                         json.string(post_record.post.date_updated),
                       ),
                       #("category", json.string(post_record.post.category)),

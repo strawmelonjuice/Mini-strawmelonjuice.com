@@ -82,7 +82,7 @@ pub fn render_next_of_content_queue(store: ClientStore) {
       use res <- result.try(result.replace_error(res, Nil))
       let assert Ok(#(data, innercontent)) =
         decode.run(res.body, collected_content_decoder())
-      let s = pottery.render_content(store, data, innercontent)
+      let s = pottery.render_content(store, data, innercontent, False)
       add_to_content_store(
         store,
         ContentStoreItem(

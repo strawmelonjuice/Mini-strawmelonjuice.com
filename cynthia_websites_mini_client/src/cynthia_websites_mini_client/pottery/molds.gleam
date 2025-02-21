@@ -2,6 +2,7 @@ import cynthia_websites_mini_client/datamanagement/clientstore
 import gleam/dict.{type Dict}
 import gleam/io
 import gleam/list
+import gleam/result
 import gleam/string
 import lustre/attribute
 import lustre/element.{type Element}
@@ -16,6 +17,7 @@ pub fn into(
   layout layout: String,
   for theme_type: String,
   store store: clientstore.ClientStore,
+  is priority: Bool,
 ) -> fn(Element(a), Dict(String, String)) -> element.Element(a) {
   let is_post_not_page = case theme_type {
     "post" -> True
@@ -26,10 +28,10 @@ pub fn into(
     "cindy" -> {
       case is_post_not_page {
         False -> fn(a: Element(a), b: Dict(String, String)) -> Element(a) {
-          cindy_page(a, b, store)
+          cindy_page(a, b, store, priority)
         }
         True -> fn(a: Element(a), b: Dict(String, String)) -> Element(a) {
-          cindy_post(a, b, store)
+          cindy_post(a, b, store, priority)
         }
       }
     }
@@ -74,42 +76,106 @@ fn cindy_page(
   from content: Element(a),
   with variables: Dict(String, String),
   store store: clientstore.ClientStore,
+  is priority: Bool,
 ) -> Element(a) {
   console.info("Variables: \n\t" <> string.inspect(variables))
-  let menu =
-    clientstore.pull_menus(store)
-    |> cindy_menu_1()
+  let menu = case priority {
+    False -> {
+      clientstore.pull_menus(store)
+      |> cindy_menu_1()
+    }
+    True -> []
+  }
   let assert Ok(title) = dict.get(variables, "title")
   let assert Ok(description) = dict.get(variables, "description_html")
-  cindy_common(
-    content,
-    menu,
-    html.div([], [
-      html.h3(
-        [attribute.class("font-bold text-2xl text-center text-base-content")],
-        [html.text(title)],
-      ),
-      html.p([attribute.attribute("dangerous-unescaped-html", description)], []),
-    ]),
-    variables,
-  )
+  html.div([], [
+    html.h3(
+      [attribute.class("font-bold text-2xl text-center text-base-content")],
+      [html.text(title)],
+    ),
+    html.aside(
+      [attribute.attribute("dangerous-unescaped-html", description)],
+      [],
+    ),
+  ])
+  |> cindy_common(content, menu, _, variables)
 }
 
 fn cindy_post(
   from content: Element(a),
   with variables: Dict(String, String),
   store store: clientstore.ClientStore,
+  is priority: Bool,
 ) -> Element(a) {
   console.info("Variables: \n\t" <> string.inspect(variables))
-  let menu =
-    clientstore.pull_menus(store)
-    |> cindy_menu_1()
-  cindy_common(
-    content,
-    menu,
-    html.text("Post-meta (if any) goes here"),
-    variables,
-  )
+  let menu = case priority {
+    False -> {
+      clientstore.pull_menus(store)
+      |> cindy_menu_1()
+    }
+    True -> []
+  }
+  let assert Ok(title) = dict.get(variables, "title")
+  let assert Ok(description) = dict.get(variables, "description_html")
+  html.div([], [
+    html.div([], [
+      html.h3(
+        [attribute.class("font-bold text-2xl text-center text-base-content")],
+        [html.text(title)],
+      ),
+      html.aside(
+        [attribute.attribute("dangerous-unescaped-html", description)],
+        [],
+      ),
+    ]),
+    html.div([attribute.class("grid grid-cols-2 grid-rows-4 gap-2")], [
+      // ----------------------
+      html.div([], []),
+      html.div([], []),
+      // ----------------------
+
+      html.b([attribute.class("font-bold")], [html.text("Published")]),
+      html.div([], [
+        html.text(
+          variables |> dict.get("date_published") |> result.unwrap("unknown"),
+        ),
+      ]),
+      // ----------------------
+      html.b([attribute.class("font-bold")], [html.text("Modified")]),
+      html.div([], [
+        html.text(
+          variables |> dict.get("date_modified") |> result.unwrap("unknown"),
+        ),
+      ]),
+      // ----------------------
+      html.div([], [
+        html.b([attribute.class("font-bold")], [html.text("Category")]),
+      ]),
+      html.div([], [
+        html.text(variables |> dict.get("category") |> result.unwrap("unknown")),
+      ]),
+    ]),
+    html.div([attribute.class("grid grid-cols-1 grid-rows-1 gap-2")], [
+      html.div([], [
+        html.b([attribute.class("font-bold")], [html.text("Tags")]),
+        html.div(
+          [],
+          variables
+            |> dict.get("tags")
+            |> result.unwrap("")
+            |> string.split(",")
+            |> list.map(fn(tag) {
+              let tag = tag |> string.trim()
+              html.button(
+                [attribute.class("btn btn-sm btn-outline btn-primary")],
+                [html.a([attribute.href("#!/tag/" <> tag)], [html.text(tag)])],
+              )
+            }),
+        ),
+      ]),
+    ]),
+  ])
+  |> cindy_common(content, menu, _, variables)
 }
 
 fn cindy_common(
@@ -205,7 +271,7 @@ fn cindy_menu_1(
                     False -> ""
                   }
                 }
-                <> "bg-secondary link-secondary border-solid border-2 border-primary-content",
+                <> "bg-secondary link-neutral-200 hover:link-secondary border-solid border-2 border-primary-content",
               ),
             ],
             [html.text(a.0)],
