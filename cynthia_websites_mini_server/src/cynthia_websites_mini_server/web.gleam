@@ -137,7 +137,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
                   #("layout", json.string(post_record.layout)),
                   #("permalink", json.string(post_record.permalink)),
                   // Unique to unspecified content
-                  #("kind", json.string("page")),
+                  #("kind", json.string("post")),
                   #("inner", json.string(content_inner)),
                   // Unique to page
                   #("page", json.null()),
@@ -267,7 +267,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
                   #("layout", json.string(post_record.layout)),
                   #("permalink", json.string(post_record.permalink)),
                   // Unique to unspecified content
-                  #("kind", json.string("page")),
+                  #("kind", json.string("post")),
                   #("inner", json.string(content_inner)),
                   // Unique to page
                   #("page", json.null()),
