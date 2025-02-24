@@ -77,7 +77,7 @@ class ClientStore {
         meta_title: row[2] as string,
         meta_description: row[3] as string,
         meta_kind: (() => {
-          switch (row[4].toString()) {
+          switch (row[4]!.toString()) {
             case "0":
               return "page";
             case "1":

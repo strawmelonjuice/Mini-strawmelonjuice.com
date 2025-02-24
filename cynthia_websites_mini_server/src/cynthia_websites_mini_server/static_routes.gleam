@@ -53,21 +53,9 @@ fn notfound() {
   <style>" <> client_css() <> "</style>
   </head>
   <body data-404='true' class='bg-base-100 w-[100VW] h-[100VH]'>
-    <div class='absolute mr-auto ml-auto right-0 left-0 bottom-[40VH] top-[40VH] w-fit h-fit'>
-<div class='card bg-neutral text-neutral-content w-96'>
-  <div class='card-body items-center text-center'>
-    <h2 class='card-title'>404!</h2>
-    <p>Uh-oh, that page cannot be found.</p>
-    <div class='card-actions justify-end'>
-      <button class='btn btn-primary' onclick='javascript:window.location.assign(\"/#/\")'>Go home</button>
-      <button class='btn btn-ghost' onclick='javascript:window.history.back(1)'>Go back</button>
-    </div>
-  </div>
-</div>
-    </div>
-    " <> ui.footer <> "
-  </body>
-  </html>
+    " <> ui.notfoundbody() <> "
+    </body>
+      </html>
 ")
   |> response.set_headers(
     [#("Content-Type", "text/html; charset=utf-8")]

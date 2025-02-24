@@ -23,7 +23,7 @@ pub fn error(msg: String) -> Nil {
                   html.a(
                     [
                       attribute.href("javascript:window.location.reload(1)"),
-                      attribute.class("btn btn-primary"),
+                      attribute.class("btn btn-neutral-300"),
                     ],
                     [html.text("Refresh")],
                   ),

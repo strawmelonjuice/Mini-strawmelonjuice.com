@@ -16,3 +16,9 @@ export function set_hash(hash: string) {
   // Set the hash of the page
   window.location.hash = hash;
 }
+export function set_to_404(body: string) {
+  document.body.dataset["404"] = "true";
+  document.body.classList.value = "bg-base-100 w-[100VW] h-[100VH]";
+  document.body.innerHTML = body;
+  document.title = "404 - Page Not Found";
+}
