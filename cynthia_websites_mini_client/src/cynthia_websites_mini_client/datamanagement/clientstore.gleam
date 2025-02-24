@@ -1,6 +1,7 @@
+import cynthia_websites_mini_client/errors
 import cynthia_websites_mini_client/utils
 import cynthia_websites_mini_shared/configtype.{
-  type SharedCynthiaConfigGlobalOnly, default_shared_cynthia_config_global_only,
+  type SharedCynthiaConfigGlobalOnly,
 }
 import cynthia_websites_mini_shared/contenttypes
 import gleam/dict.{type Dict}
@@ -10,32 +11,47 @@ import gleam/http
 import gleam/http/request
 import gleam/javascript/array.{type Array}
 import gleam/javascript/map.{type Map}
-import gleam/javascript/promise
-import gleam/list
+import gleam/javascript/promise.{type Promise}
 import gleam/result
 import gleam/string
 import plinth/javascript/console
 
-pub fn populate_global_config_table(store: ClientStore) {
-  let res =
-    utils.phone_home()
-    |> request.set_method(http.Get)
-    |> request.set_path("/fetch/global-site-config")
-    |> fetch.send()
-    |> promise.try_await(fetch.read_json_body)
-  use res <- promise.await(res)
+pub fn populate_global_config_table(
+  store: ClientStore,
+) -> Promise(Result(Nil, errors.AnError)) {
   {
-    use res <- result.try(result.replace_error(res, Nil))
-    let data =
-      decode.run(
-        res.body,
-        configtype.shared_cynthia_config_global_only_decoder(),
-      )
-    use data <- result.try(result.replace_error(data, Nil))
-    populate_global_config(store, data)
-    Ok(Nil)
+    let res =
+      utils.phone_home()
+      |> request.set_method(http.Get)
+      |> request.set_path("/fetch/global-site-config")
+      |> fetch.send()
+      |> promise.try_await(fetch.read_json_body)
+    use res <- promise.await(res)
+    {
+      use res <- result.try(result.map_error(res, errors.FetchError))
+      let data =
+        decode.run(
+          res.body,
+          configtype.shared_cynthia_config_global_only_decoder(),
+        )
+      use data <- result.try(result.map_error(data, errors.DecodeErrorsPlural))
+      populate_global_config(store, data)
+      Ok(Nil)
+    }
+    |> promise.resolve
   }
-  |> promise.resolve
+  |> promise.tap(fn(a) {
+    case a {
+      Ok(_) -> {
+        Nil
+      }
+      Error(a) -> {
+        console.error(
+          "Failed to populate global config table: " <> string.inspect(a),
+        )
+      }
+    }
+  })
 }
 
 @external(javascript, "../datamanagement_ffi.ts", "get_config_item")
@@ -56,8 +72,42 @@ pub fn populate_global_config(
 @external(javascript, "../datamanagement_ffi.ts", "initialise")
 pub fn i_init(p: SharedCynthiaConfigGlobalOnly) -> ClientStore
 
-pub fn init() -> ClientStore {
-  i_init(default_shared_cynthia_config_global_only)
+pub fn init(cb: fn(ClientStore) -> a) {
+  let s: Promise(Result(ClientStore, errors.AnError)) = {
+    let res =
+      utils.phone_home()
+      |> request.set_method(http.Get)
+      |> request.set_path("/fetch/global-site-config")
+      |> fetch.send()
+      |> promise.try_await(fetch.read_json_body)
+    use res <- promise.await(res)
+    {
+      use res <- result.try(result.map_error(res, errors.FetchError))
+      let data =
+        decode.run(
+          res.body,
+          configtype.shared_cynthia_config_global_only_decoder(),
+        )
+      use data <- result.try(result.map_error(data, errors.DecodeErrorsPlural))
+      i_init(data)
+      |> Ok()
+    }
+    |> promise.resolve
+  }
+  s
+  |> promise.tap(fn(poppdjidsojij) {
+    case poppdjidsojij {
+      Ok(store) -> {
+        cb(store)
+        Nil
+      }
+      Error(a) -> {
+        console.error(
+          "Failed to initialise client store: " <> string.inspect(a),
+        )
+      }
+    }
+  })
 }
 
 /// This is a temporary solution replacing an in-browser-database for the time being.

@@ -18,7 +18,7 @@ import plinth/browser/window
 pub fn main() {
   ceramics.loading_screen()
   // Initialise database
-  let clientstore = datamanagement.init()
+  use clientstore <- datamanagement.init()
   let _ = realtime.main(clientstore)
   datamanagement.update_content_queue(clientstore)
   // Check current page and priotise loading of current content

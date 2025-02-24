@@ -24,14 +24,11 @@ pub type SharedCynthiaConfigGlobalOnly {
 pub fn shared_cynthia_config_global_only_decoder() -> decode.Decoder(
   SharedCynthiaConfigGlobalOnly,
 ) {
+  use global_colour <- decode.field("site_colour", decode.string)
+  use global_site_name <- decode.field("site_name", decode.string)
+  use global_site_description <- decode.field("site_description", decode.string)
   use global_theme <- decode.field("global_theme", decode.string)
   use global_theme_dark <- decode.field("global_theme_dark", decode.string)
-  use global_colour <- decode.field("global_colour", decode.string)
-  use global_site_name <- decode.field("global_site_name", decode.string)
-  use global_site_description <- decode.field(
-    "global_site_description",
-    decode.string,
-  )
   decode.success(SharedCynthiaConfigGlobalOnly(
     global_theme:,
     global_theme_dark:,
