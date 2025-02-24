@@ -11,7 +11,7 @@ import gleam/javascript/array
 import gleam/javascript/map
 import gleam/javascript/promise.{type Promise}
 import gleam/json
-import gleam/option.{Some}
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/uri
 import gleamy_lights/console
@@ -103,7 +103,22 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
             |> array.from_list(),
           )
         }
-        Ok(#(content_record, content_inner)) -> {
+        Ok(None) -> {
+          console.error(
+            premixed.text_error_red("[ 404 ] ")
+            <> "("
+            <> req |> request.method
+            <> ")\t"
+            <> premixed.text_lightblue("/fetch/content/priority")
+            <> "{"
+            <> premixed.text_orange(url_path)
+            <> "}",
+          )
+          dynastatic
+          |> map.get("/404")
+          |> result.unwrap(response.new())
+        }
+        Ok(Some(#(content_record, content_inner))) -> {
           let res =
             case content_record {
               ContentsPage(page_record) -> {
@@ -168,7 +183,6 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
             <> "{"
             <> premixed.text_orange(url_path)
             <> "}"
-            <> premixed.text_lightblue("/")
             <> premixed.text_cyan(
               "\t (this is probably the page the user is currently viewing, so client fetches it first!)",
             ),

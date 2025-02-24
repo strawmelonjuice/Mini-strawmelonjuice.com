@@ -366,7 +366,6 @@ pub fn get_content_by_filename(
       <> string.inspect(e)
       <> "\n\n"
     })
-  // Used a result.try here earlier, but it gave me the wrong return type
   use res <- result.try(resu)
   let meta = case res.0 {
     0 -> {
@@ -524,8 +523,21 @@ pub fn get_content_by_permalink(db: sqlite.Database, permalink: String) {
       <> string.inspect(e)
       <> "\n\n"
     })
-  // Used a result.try here earlier, but it gave me the wrong return type
-  use res <- result.try(resu)
+  let ft = fn(r: Result(a, String), f) {
+    case r {
+      Ok(a) -> f(a)
+      Error(b) -> {
+        console.warn(
+          "Error retrieving '"
+          <> permalink
+          <> "' from database, assuming this means a 404: Not found. This is the error:\n"
+          <> premixed.text_error_red(b),
+        )
+        Ok(None)
+      }
+    }
+  }
+  use res <- ft(resu)
   let meta = case res.0 {
     0 -> {
       let statement =
@@ -630,5 +642,5 @@ pub fn get_content_by_permalink(db: sqlite.Database, permalink: String) {
     }
   }
   use metadata <- result.try(meta)
-  Ok(#(metadata, res.2))
+  Ok(Some(#(metadata, res.2)))
 }
