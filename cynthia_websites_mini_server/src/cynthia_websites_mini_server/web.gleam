@@ -64,7 +64,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
             <> "("
             <> req |> request.method
             <> ")\t"
-            <> premixed.text_lightblue("/fetch/content/priority"),
+            <> premixed.text_lightblue("/fetch/content/priority/"),
           )
           response.new()
           |> response.set_body(
@@ -88,7 +88,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
           console.error(
             premixed.text_error_red("[ 500 ] ")
             <> "(POST)\t"
-            <> premixed.text_lightblue("/fetch/content/priority")
+            <> premixed.text_lightblue("/fetch/content/priority/")
             <> "{"
             <> premixed.text_orange(url_path)
             <> "}"
