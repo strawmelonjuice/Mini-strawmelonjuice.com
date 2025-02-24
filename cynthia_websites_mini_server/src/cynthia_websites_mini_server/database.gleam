@@ -2,7 +2,6 @@ import bungibindies/bun/sqlite
 import bungibindies/bun/sqlite/param_array
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_shared/configtype
-import gleam/bool
 import gleam/dynamic/decode
 import gleam/int
 import gleam/list
@@ -156,7 +155,15 @@ pub fn save_complete_config(
           // 6: layout
           |> param_array.push(pg.layout)
           // 7: permalink
-          |> param_array.push(pg.permalink)
+          |> param_array.push({
+            case pg.permalink |> string.ends_with("/") {
+              True -> {
+                pg.permalink
+                |> string.drop_end(1)
+              }
+              False -> pg.permalink
+            }
+          })
           // 8: original file path
           |> param_array.push(
             pg.filename
@@ -228,7 +235,15 @@ pub fn save_complete_config(
           // 6: layout
           |> param_array.push(ps.layout)
           // 7: permalink
-          |> param_array.push(ps.permalink)
+          |> param_array.push({
+            case ps.permalink |> string.ends_with("/") {
+              True -> {
+                ps.permalink
+                |> string.drop_end(1)
+              }
+              False -> ps.permalink
+            }
+          })
           // 8: original file path
           |> param_array.push(
             ps.filename

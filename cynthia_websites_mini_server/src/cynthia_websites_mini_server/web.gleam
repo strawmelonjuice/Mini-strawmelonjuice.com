@@ -13,6 +13,7 @@ import gleam/javascript/promise.{type Promise}
 import gleam/json
 import gleam/option.{None, Some}
 import gleam/result
+import gleam/string
 import gleam/uri
 import gleamy_lights/console
 import gleamy_lights/premixed
@@ -83,6 +84,14 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
         |> get_request_body()
       use url_path_as_a_bitarray <- promise.await(promise_of_an_url_path)
       let assert Ok(url_path) = url_path_as_a_bitarray |> bit_array.to_string()
+      let url_path = case url_path |> string.ends_with("/") {
+        True -> {
+          url_path
+          |> string.drop_end(1)
+        }
+        False -> url_path
+      }
+
       case database.get_content_by_permalink(db, url_path) {
         Error(e) -> {
           console.error(
