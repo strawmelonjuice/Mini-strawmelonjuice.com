@@ -43,9 +43,10 @@ fn hash_getter() -> String {
   }
 }
 
-pub fn priority(store: clientstore.ClientStore) -> Nil {
+pub fn priority(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
   let current_hash = hash_getter()
   set_lasthash(store, current_hash)
+  use <- postlist_route(current_hash, store)
   {
     let req =
       utils.phone_home()
@@ -91,7 +92,7 @@ pub fn priority(store: clientstore.ClientStore) -> Nil {
     }
     |> promise.resolve
   }
-  Nil
+  Ok(Nil)
 }
 
 /// Load the content for the current page, checking the the database for existing content first, and updating if necessary. This should only be contacting the server if the content is not already downloaded.
@@ -99,6 +100,7 @@ pub fn now(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
   console.info("Hash change detected, refreshing content")
   let current_hash = hash_getter()
   console.log("Current hash: " <> current_hash)
+  use <- postlist_route(current_hash, store)
   case
     datamanagement.fetch_content_from_clientstore_by_permalink(
       store,
@@ -128,6 +130,54 @@ pub fn now(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
 
 @external(javascript, "./dom.ts", "set_to_404")
 fn set_to_404(body: String) -> Nil
+
+fn postlist_route(
+  hash: String,
+  store: clientstore.ClientStore,
+  not_a_postlist: fn() -> Result(Nil, errors.AnError),
+) -> Result(Nil, errors.AnError) {
+  case { hash |> string.starts_with("!") } {
+    True -> {
+      let title = "A postlist"
+      let description =
+        "A postlist of all posts (I think there are so no filters rn!)"
+      let data =
+        configtype.ContentsPage(configtype.Page(
+          title:,
+          description:,
+          layout: "default",
+          permalink: "",
+          page: configtype.ContentsPagePageData(menus: []),
+          filename: "postlist.html",
+        ))
+      let assert Ok(_) =
+        dom.push(
+          title,
+          pottery.render_content(
+            store,
+            data,
+            "This is very much in a todo phase right now!",
+            False,
+          ),
+        )
+      Ok(Nil)
+    }
+    False -> not_a_postlist()
+  }
+}
+
+fn postlist_into_pagedata(
+  title: String,
+  description: String,
+) -> configtype.Contents {
+  todo
+  //       (
+  //   store: clientstore.ClientStore,
+  //   data: configtype.Contents,
+  //   inner: String,
+  //   is priority: Bool,
+  // )
+}
 
 // @external(javascript, "./datamanagement_ffi.ts", "set_lasthash")
 // fn set_lasthash(store: clientstore.ClientStore, hash: String) -> Nil

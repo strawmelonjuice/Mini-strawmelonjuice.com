@@ -86,7 +86,7 @@ fn cindy_page(
   }
   let assert Ok(title) = dict.get(variables, "title")
   let assert Ok(description) = dict.get(variables, "description_html")
-  html.div([], [
+  html.div([attribute.class("break-all")], [
     html.h3(
       [attribute.class("font-bold text-2xl text-center text-base-content")],
       [html.text(title)],
@@ -162,9 +162,12 @@ fn cindy_post(
             |> string.split(",")
             |> list.map(fn(tag) {
               let tag = tag |> string.trim()
-              html.button(
-                [attribute.class("btn btn-sm btn-outline btn-primary")],
-                [html.a([attribute.href("#!/tag/" <> tag)], [html.text(tag)])],
+              html.a(
+                [
+                  attribute.class("btn btn-sm btn-outline btn-primary"),
+                  attribute.href("#!/tag/" <> tag),
+                ],
+                [html.text(tag)],
               )
             }),
         ),
@@ -236,7 +239,7 @@ fn cindy_common(
             html.div(
               [
                 attribute.class(
-                  "col-span-5 row-span-2 row-start-11 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:p-2",
+                  "col-span-5 row-span-2 row-start-11 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:max-w-[16VW] md:p-2 break-all",
                 ),
               ],
               [post_meta],
