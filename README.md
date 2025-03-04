@@ -50,8 +50,8 @@ bind to Bun API's)
 
 > #### Note:
 >
-> After encountering some issues with `sql.js`, the client side for now uses in-browser object storage for caching.
-> This is a temporary solution, and will be replaced with a more robust solution in the future.
+> ~~After encountering some issues with `sql.js`, the client side for now uses in-browser object storage for caching.
+> This is a temporary solution, and will be replaced with a more robust solution in the future.~~
 
 #### Database-only
 
