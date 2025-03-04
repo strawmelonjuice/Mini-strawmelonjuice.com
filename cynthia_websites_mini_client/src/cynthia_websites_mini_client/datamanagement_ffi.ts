@@ -1,4 +1,4 @@
-import * as Gleam from "../../prelude.ts";
+import * as Gleam from "../../prelude";
 
 import initSqlJs, { type Database } from "sql.js";
 // At some point, Client-side-store will also be storing and retrieving in SQLite, on the browser.
@@ -19,10 +19,13 @@ interface flatGlobalConfig {
 class ClientStore {
   private db: Database;
   constructor(global_config: flatGlobalConfig) {
-    console.log(global_config);
     // Creates database, this step might take some time.
     this.db = new SQL.Database();
     let sqlstr = `
+      CREATE TABLE IF NOT EXISTS lasthash (
+        hash TEXT NOT NULL PRIMARY KEY
+      );
+      INSERT INTO lasthash(hash) VALUES('/'); -- Default value
       CREATE TABLE IF NOT EXISTS content(
         html TEXT NOT NULL,
         original_filename TEXT NOT NULL PRIMARY KEY,
@@ -52,6 +55,46 @@ class ClientStore {
       INSERT INTO globalconfig(theme, theme_dark, colour, site_name, site_description) VALUES('${global_config.global_theme}', '${global_config.global_theme_dark}', '${global_config.global_colour}', '${global_config.global_site_name}', '${global_config.global_site_description}');
       `;
     this.db.run(sqlstr);
+  }
+  update_lasthash(hash: string) {
+    this.db.run("DELETE FROM lasthash;");
+    this.db.run(`INSERT INTO lasthash(hash) VALUES('${hash}');`);
+  }
+  get_lasthash() {
+    let res = this.db.exec("SELECT * FROM lasthash;");
+    if (res.length == 0) return "/";
+    return res[0].values[0][0]?.toString();
+  }
+  fetch_content_from_clientstore_by_permalink(
+    store: ClientStore,
+    permalink: string,
+  ) {
+    let res = store.db.exec(
+      "SELECT * FROM content WHERE meta_permalink = '" + permalink + "';",
+    );
+    if (res.length == 0) return undefined;
+    let row = res[0].values[0];
+    if (row.includes(null)) return undefined;
+    let content = {
+      html: row[0] as string,
+      original_filename: row[1] as string,
+      meta_title: row[2] as string,
+      meta_description: row[3] as string,
+      meta_kind: (() => {
+        switch (row[4]!.toString()) {
+          case "0":
+            return "page";
+          case "1":
+            return "post";
+          default:
+            return "page";
+        }
+      })(),
+      meta_permalink: row[5] as string,
+      last_inserted_at: row[6] as string,
+      meta_in_menus: (row[7] as string).split(",").map((x) => parseInt(x)),
+    };
+    return content;
   }
   return_content_store_as_array() {
     let res = this.db.exec("SELECT * FROM content;");
@@ -198,7 +241,7 @@ class ClientStore {
 }
 
 export function initialise(config: flatGlobalConfig) {
-  console.log("Initialising store with config", config);
+  // console.log("Initialising store with config", config);
   const store = new ClientStore(config);
   return store;
 }
@@ -284,4 +327,40 @@ export function get_menu_items(
   res.set(4, v[3]);
   res.set(5, v[4]);
   return res;
+}
+
+export function fetch_content_from_clientstore_by_permalink(
+  store: ClientStore,
+  permalink: string,
+) {
+  // Remove trailing slash from permalink if it exists
+  permalink = permalink.replace(/\/$/, "");
+  // console.log(list_all_permalinks_in_contentstore(store));
+  const po = store.fetch_content_from_clientstore_by_permalink(
+    store,
+    permalink,
+  );
+  if (po == undefined) return new Gleam.Error("");
+  return new Gleam.Ok(po);
+}
+
+export function update_lasthash(store: ClientStore, hash: string) {
+  store.update_lasthash(hash);
+}
+
+export function get_lasthash(store: ClientStore) {
+  let lel = store.get_lasthash();
+  if (lel == undefined) return new Gleam.Error("");
+  return new Gleam.Ok(lel);
+}
+
+export function list_all_permalinks_in_contentstore(
+  store: ClientStore,
+): string[] {
+  let content_store = store.return_content_store_as_array();
+  let permalinks: string[] = [];
+  content_store.forEach((item, _) => {
+    permalinks.push(item.meta_permalink);
+  });
+  return permalinks;
 }

@@ -62,7 +62,7 @@ pub fn retroactive_menu_update(store: clientstore.ClientStore) {
       }
     }
     Error(_) -> {
-      console.error("No content element found (yet).")
+      console.warn("No content element found (yet).")
     }
   }
 }
@@ -77,7 +77,6 @@ fn cindy_page(
   store store: clientstore.ClientStore,
   is priority: Bool,
 ) -> Element(a) {
-  console.info("Variables: \n\t" <> string.inspect(variables))
   let menu = case priority {
     False -> {
       clientstore.pull_menus(store)
@@ -106,7 +105,6 @@ fn cindy_post(
   store store: clientstore.ClientStore,
   is priority: Bool,
 ) -> Element(a) {
-  console.info("Variables: \n\t" <> string.inspect(variables))
   let menu = case priority {
     False -> {
       clientstore.pull_menus(store)
@@ -258,6 +256,10 @@ fn cindy_menu_1(
     Error(_) -> []
     Ok(dookie) -> {
       list.map(dookie, fn(a) {
+        let a = case a.1 {
+          "" -> #(a.0, "/")
+          _ -> a
+        }
         html.li([attribute.class("")], [
           html.a(
             [

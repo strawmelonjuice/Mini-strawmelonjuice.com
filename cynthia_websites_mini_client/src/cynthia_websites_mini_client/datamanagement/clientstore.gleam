@@ -125,10 +125,7 @@ pub fn i_pull_menus(store: ClientStore) -> Map(Int, Array(#(String, String)))
 
 pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
   let a = i_pull_menus(store)
-  console.log("Unconverted menu items: " <> string.inspect(a))
-  console.debug(a)
   let b = dict.new()
-  console.log("Converted menu items: (0)" <> string.inspect(b))
   let c = 1
   let b = case a |> map.get(c) {
     Error(_) -> b
@@ -137,7 +134,6 @@ pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
     }
   }
   let c = 2
-  console.log("Converted menu items: (1)" <> string.inspect(b))
   let b = case a |> map.get(c) {
     Error(_) -> b
     Ok(d) -> {
@@ -145,7 +141,6 @@ pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
     }
   }
 
-  console.log("Converted menu items (2): " <> string.inspect(b))
   let c = 3
   let b = case a |> map.get(c) {
     Error(_) -> b
@@ -154,7 +149,6 @@ pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
     }
   }
 
-  console.log("Converted menu items: (3)" <> string.inspect(b))
   let c = 4
   let b = case a |> map.get(c) {
     Error(_) -> b
@@ -164,13 +158,17 @@ pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
   }
 
   let c = 5
-  console.log("Converted menu items: (4)" <> string.inspect(b))
   let b = case a |> map.get(c) {
     Error(_) -> b
     Ok(d) -> {
       dict.insert(b, c, array.to_list(d))
     }
   }
-  console.log("Converted menu items: (5)" <> string.inspect(b))
   b
 }
+
+@external(javascript, "../datamanagement_ffi.ts", "get_lasthash")
+pub fn get_lasthash(store: ClientStore) -> Result(String, Nil)
+
+@external(javascript, "../datamanagement_ffi.ts", "set_lasthash")
+pub fn set_lasthash(store: ClientStore, hash: String) -> Nil

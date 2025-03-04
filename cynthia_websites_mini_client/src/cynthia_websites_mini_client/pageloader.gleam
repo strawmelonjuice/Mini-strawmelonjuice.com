@@ -1,7 +1,9 @@
 import cynthia_websites_mini_client/datamanagement
 import cynthia_websites_mini_client/datamanagement/clientstore
 import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_client/errors
 import cynthia_websites_mini_client/pottery
+import cynthia_websites_mini_client/pottery/molds
 import cynthia_websites_mini_client/pottery/oven
 import cynthia_websites_mini_client/utils
 import cynthia_websites_mini_shared/configtype
@@ -14,6 +16,8 @@ import gleam/http/response
 import gleam/javascript/promise
 import gleam/result
 import gleam/string
+import lustre/attribute
+import lustre/element/html
 import plinth/browser/window
 import plinth/javascript/console
 
@@ -41,6 +45,7 @@ fn hash_getter() -> String {
 
 pub fn priority(store: clientstore.ClientStore) -> Nil {
   let current_hash = hash_getter()
+  set_lasthash(store, current_hash)
   {
     let req =
       utils.phone_home()
@@ -89,5 +94,41 @@ pub fn priority(store: clientstore.ClientStore) -> Nil {
   Nil
 }
 
+/// Load the content for the current page, checking the the database for existing content first, and updating if necessary. This should only be contacting the server if the content is not already downloaded.
+pub fn now(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
+  console.info("Hash change detected, refreshing content")
+  let current_hash = hash_getter()
+  console.log("Current hash: " <> current_hash)
+  case
+    datamanagement.fetch_content_from_clientstore_by_permalink(
+      store,
+      current_hash,
+    )
+  {
+    Ok(content) -> {
+      console.info("Content already downloaded, loading into DOM")
+      let assert Ok(_) =
+        dom.push(
+          content.meta_title,
+          html.div(
+            [attribute.attribute("dangerous-unescaped-html", content.html)],
+            [],
+          ),
+        )
+      molds.retroactive_menu_update(store)
+      Ok(Nil)
+    }
+    Error(_) -> {
+      console.info("Content not downloaded, fetching from server")
+      priority(store)
+      Ok(Nil)
+    }
+  }
+}
+
 @external(javascript, "./dom.ts", "set_to_404")
 fn set_to_404(body: String) -> Nil
+
+// @external(javascript, "./datamanagement_ffi.ts", "set_lasthash")
+// fn set_lasthash(store: clientstore.ClientStore, hash: String) -> Nil
+const set_lasthash = datamanagement.update_lasthash

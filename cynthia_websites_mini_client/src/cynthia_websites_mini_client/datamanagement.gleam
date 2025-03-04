@@ -25,6 +25,12 @@ pub fn pull_from_global_config_table(
   iget(store, what) |> array.get(0)
 }
 
+@external(javascript, "./datamanagement_ffi.ts", "fetch_content_from_clientstore_by_permalink")
+pub fn fetch_content_from_clientstore_by_permalink(
+  store: ClientStore,
+  permalink: String,
+) -> Result(ContentStoreItem, Nil)
+
 pub fn update_content_queue(store: ClientStore) {
   let res =
     utils.phone_home()
@@ -50,7 +56,7 @@ fn add_to_content_queue(store: ClientStore, data: contenttypes.Minimal) -> Nil
 @external(javascript, "./datamanagement_ffi.ts", "add_to_content_store")
 fn add_to_content_store(store: ClientStore, data: ContentStoreItem) -> Nil
 
-type ContentStoreItem {
+pub type ContentStoreItem {
   ContentStoreItem(
     html: String,
     original_filename: String,
@@ -190,6 +196,12 @@ pub fn collected_content_decoder() -> decode.Decoder(
     _ -> panic as "Unknown kind of content"
   }
 }
+
+@external(javascript, "./datamanagement_ffi.ts", "get_lasthash")
+pub fn get_lasthash(store: ClientStore) -> Result(String, Nil)
+
+@external(javascript, "./datamanagement_ffi.ts", "update_lasthash")
+pub fn update_lasthash(store: ClientStore, hash: String) -> Nil
 
 pub type ClientStore =
   Store

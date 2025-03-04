@@ -8,8 +8,8 @@ pub fn notfoundbody() -> String {
     <h2 class='card-title'>404!</h2>
     <p>Uh-oh, that page cannot be found.</p>
     <div class='card-actions justify-end'>
-      <button class='btn btn-neutral-300' onclick='javascript:window.location.assign(\"/#/\")'>Go home</button>
-      <button class='btn btn-ghost' onclick='javascript:window.history.back(1)'>Go back</button>
+      <button class='btn btn-neutral-300' onclick='javascript:window.location.assign(\"/#/\");javascript:window.location.reload()'>Go home</button>
+      <button class='btn btn-ghost' onclick='javascript:window.history.back(1);javascript:window.location.reload()'>Go back</button>
     </div>
   </div>
 </div>

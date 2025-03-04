@@ -1,13 +1,16 @@
 //// Functions that run every 50ms
 
 import cynthia_websites_mini_client/datamanagement
+import cynthia_websites_mini_client/datamanagement/clientstore
 import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_client/pageloader
 import cynthia_websites_mini_client/pottery/paints
 import gleam/bool
 import gleam/int
 import gleam/javascript/promise
 import gleam/result
 import plinth/browser/document
+import plinth/browser/window
 
 pub fn main(store: datamanagement.ClientStore) {
   let data = #(
@@ -19,6 +22,20 @@ pub fn main(store: datamanagement.ClientStore) {
   )
   let a = main_loop(data, 1)
   promise.resolve(a)
+}
+
+fn hashcheck(store: datamanagement.ClientStore) {
+  let assert Ok(hash) = window.get_hash()
+  let assert Ok(last_hash) = clientstore.get_lasthash(store)
+  case hash == last_hash {
+    True -> Nil
+    False -> {
+      case pageloader.now(store) {
+        Ok(_) -> datamanagement.update_lasthash(store, hash)
+        Error(_) -> Nil
+      }
+    }
+  }
 }
 
 fn update_styles(store: datamanagement.ClientStore) {
@@ -100,7 +117,11 @@ fn level_4(params: L4) {
 }
 
 fn level_5(params: L5) {
-  L5(params.times + 1, params.store)
+  case params.times > 6 {
+    True -> hashcheck(params.store)
+    False -> Nil
+  }
+  L5(..params, times: params.times + 1)
 }
 
 fn main_loop(datas: Ll, level: Int) {

@@ -30,7 +30,9 @@ pub fn error(msg: String) -> Nil {
                   html.a(
                     [
                       attribute.class("btn btn-ghost"),
-                      attribute.href("javascript:window.history.back(1)"),
+                      attribute.href(
+                        "javascript:window.history.back(1);javascript:window.location.reload()",
+                      ),
                     ],
                     [html.text("Go back")],
                   ),

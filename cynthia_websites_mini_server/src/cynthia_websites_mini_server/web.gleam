@@ -120,7 +120,10 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
             <> ")\t"
             <> premixed.text_lightblue("/fetch/content/priority")
             <> "{"
-            <> premixed.text_orange(url_path)
+            <> premixed.text_orange(case url_path {
+              "" -> "/"
+              _ -> url_path
+            })
             <> "}",
           )
           dynastatic
@@ -190,7 +193,10 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
             <> "(POST)\t"
             <> premixed.text_lightblue("/fetch/content/priority")
             <> "{"
-            <> premixed.text_orange(url_path)
+            <> premixed.text_orange(case url_path {
+              "" -> "/"
+              _ -> url_path
+            })
             <> "}"
             <> premixed.text_cyan(
               "\t (this is probably the page the user is currently viewing, so client fetches it first!)",

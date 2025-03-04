@@ -6,4 +6,6 @@ pub type AnError {
   DecodeError(decode.DecodeError)
   DecodeErrorsPlural(List(decode.DecodeError))
   FetchError(fetch.FetchError)
+  GenericError(String)
+  Unexpectance
 }
