@@ -2,7 +2,7 @@ import cynthia_websites_mini_client/datamanagement/clientstore
 import cynthia_websites_mini_client/pottery/molds
 import cynthia_websites_mini_client/pottery/paints
 import cynthia_websites_mini_shared/configtype
-import gleam/dict.{type Dict}
+import gleam/dict
 import gleam/list
 import gleam/result
 import gleam/string

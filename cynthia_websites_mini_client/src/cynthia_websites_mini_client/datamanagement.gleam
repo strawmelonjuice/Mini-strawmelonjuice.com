@@ -15,7 +15,7 @@ import gleam/http/request
 import gleam/javascript/array.{type Array}
 import gleam/javascript/promise
 import gleam/list
-import gleam/option.{type Option, Some}
+import gleam/option.{Some}
 import gleam/result
 
 pub fn pull_from_global_config_table(
@@ -111,26 +111,26 @@ pub fn render_next_of_content_queue(store: ClientStore) {
   Nil
 }
 
-/// Now, this is where I am fixing the fact I fucked up the content types in `configtypes`, should've made them be one type with multiple variants. -- And in `contenttype`, obviously.
-/// 
-/// What is done here? This is a huge type containing all the fields in both, but having the specific ones be `Option`al. This is a temporary solution, and I will fix it later. Hopefully.
-type CollectedContent {
-  CollectedContent(
-    // Common to all content
-    filename: String,
-    title: String,
-    description: String,
-    layout: String,
-    permalink: String,
-    // Unique to unspecified content
-    kind: String,
-    inner: String,
-    // Unique to page
-    page: Option(configtype.PagePageData),
-    // Unique to post
-    post: Option(configtype.PostMetaData),
-  )
-}
+// /// Now, this is where I am fixing the fact I fucked up the content types in `configtypes`, should've made them be one type with multiple variants. -- And in `contenttype`, obviously.
+// ///
+// /// What is done here? This is a huge type containing all the fields in both, but having the specific ones be `Option`al. This is a temporary solution, and I will fix it later. Hopefully.
+// type CollectedContent {
+//   CollectedContent(
+//     // Common to all content
+//     filename: String,
+//     title: String,
+//     description: String,
+//     layout: String,
+//     permalink: String,
+//     // Unique to unspecified content
+//     kind: String,
+//     inner: String,
+//     // Unique to page
+//     page: Option(configtype.PagePageData),
+//     // Unique to post
+//     post: Option(configtype.PostMetaData),
+//   )
+// }
 
 pub fn collected_content_decoder() -> decode.Decoder(
   #(configtype.Contents, String),
