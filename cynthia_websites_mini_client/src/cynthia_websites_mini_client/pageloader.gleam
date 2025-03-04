@@ -86,9 +86,18 @@ pub fn priority(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
         configtype.ContentsPage(content) -> content.title
         configtype.ContentsPost(content) -> content.title
       }
-      let assert Ok(_) =
+      case
         dom.push(title, pottery.render_content(store, data, innercontent, True))
-      Ok(Nil)
+        |> result.map_error(errors.GenericError)
+      {
+        Ok(_) -> {
+          Ok(Nil)
+        }
+        Error(e) -> {
+          oven.error("Failed to render content: " <> string.inspect(e))
+          panic
+        }
+      }
     }
     |> promise.resolve
   }
@@ -109,7 +118,7 @@ pub fn now(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
   {
     Ok(content) -> {
       console.info("Content already downloaded, loading into DOM")
-      let assert Ok(_) =
+      let r =
         dom.push(
           content.meta_title,
           html.div(
@@ -117,13 +126,14 @@ pub fn now(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
             [],
           ),
         )
+        |> result.map_error(errors.GenericError)
+      use _ <- result.try(r)
       molds.retroactive_menu_update(store)
       Ok(Nil)
     }
     Error(_) -> {
       console.info("Content not downloaded, fetching from server")
       priority(store)
-      Ok(Nil)
     }
   }
 }
@@ -136,8 +146,54 @@ fn postlist_route(
   store: clientstore.ClientStore,
   not_a_postlist: fn() -> Result(Nil, errors.AnError),
 ) -> Result(Nil, errors.AnError) {
-  case { hash |> string.starts_with("!") } {
-    True -> {
+  case { hash } {
+    "!/tag/" <> tag -> {
+      let title = "Posts with tag: " <> tag
+      let description = "A postlist of all posts tagged with " <> tag
+      let data =
+        configtype.ContentsPage(configtype.Page(
+          title:,
+          description:,
+          layout: "default",
+          permalink: "",
+          page: configtype.ContentsPagePageData(menus: []),
+          filename: "postlist.html",
+        ))
+      dom.push(
+        title,
+        pottery.render_content(
+          store,
+          data,
+          "This is very much in a todo phase right now!",
+          False,
+        ),
+      )
+      |> result.map_error(errors.GenericError)
+    }
+    "!/category/" <> category -> {
+      let title = "Posts in category: " <> category
+      let description = "A postlist of all posts in the category: " <> category
+      let data =
+        configtype.ContentsPage(configtype.Page(
+          title:,
+          description:,
+          layout: "default",
+          permalink: "",
+          page: configtype.ContentsPagePageData(menus: []),
+          filename: "postlist.html",
+        ))
+      dom.push(
+        title,
+        pottery.render_content(
+          store,
+          data,
+          "This is very much in a todo phase right now!",
+          False,
+        ),
+      )
+      |> result.map_error(errors.GenericError)
+    }
+    "!" <> _ -> {
       let title = "A postlist"
       let description =
         "A postlist of all posts (I think there are so no filters rn!)"
@@ -150,33 +206,19 @@ fn postlist_route(
           page: configtype.ContentsPagePageData(menus: []),
           filename: "postlist.html",
         ))
-      let assert Ok(_) =
-        dom.push(
-          title,
-          pottery.render_content(
-            store,
-            data,
-            "This is very much in a todo phase right now!",
-            False,
-          ),
-        )
-      Ok(Nil)
+      dom.push(
+        title,
+        pottery.render_content(
+          store,
+          data,
+          "This is very much in a todo phase right now!",
+          False,
+        ),
+      )
+      |> result.map_error(errors.GenericError)
     }
-    False -> not_a_postlist()
+    _ -> not_a_postlist()
   }
-}
-
-fn postlist_into_pagedata(
-  title: String,
-  description: String,
-) -> configtype.Contents {
-  todo
-  //       (
-  //   store: clientstore.ClientStore,
-  //   data: configtype.Contents,
-  //   inner: String,
-  //   is priority: Bool,
-  // )
 }
 
 // @external(javascript, "./datamanagement_ffi.ts", "set_lasthash")
