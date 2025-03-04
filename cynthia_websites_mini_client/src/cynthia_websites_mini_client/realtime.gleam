@@ -14,7 +14,7 @@ import plinth/browser/window
 
 pub fn main(store: datamanagement.ClientStore) {
   let data = #(
-    L1(0, store:, sub: L1o2(times: 0, store:)),
+    L1(0, store:, sub: L1o2(times: 0, store:, one_eight: 1)),
     L2(0, store:),
     L3(0, store:),
     L4(0, store:),
@@ -60,7 +60,7 @@ type Ll =
   #(L1, L2, L3, L4, L5)
 
 type L1o2 {
-  L1o2(times: Int, store: datamanagement.ClientStore)
+  L1o2(times: Int, one_eight: Int, store: datamanagement.ClientStore)
 }
 
 type L1 {
@@ -85,8 +85,21 @@ type L5 {
 
 /// Functions that run every 800ms
 fn level_1_2(params: L1o2) {
-  populate_global_config_table(params.store)
-  L1o2(params.times + 1, params.store)
+  // Run this subfunction every 6400ms
+  let one_eight = case params.one_eight {
+    1 -> {
+      populate_global_config_table(params.store)
+      2
+    }
+    2 -> 3
+    3 -> 4
+    4 -> 5
+    5 -> 6
+    6 -> 7
+    7 -> 8
+    _ -> 1
+  }
+  L1o2(..params, times: params.times + 1, one_eight:)
 }
 
 /// Functions that run every 400ms
