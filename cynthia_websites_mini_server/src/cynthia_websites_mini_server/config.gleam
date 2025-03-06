@@ -5,6 +5,9 @@ import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
 import gleam/dynamic/decode
+import gleam/fetch
+import gleam/http/request
+import gleam/javascript/promise
 import gleam/json
 import gleam/list
 import gleam/option.{None, Some}
@@ -177,13 +180,35 @@ fn dialog_initcfg() {
     configtype.default_shared_cynthia_config_global_only |> i_stringify()
   let assert Ok(_) =
     simplifile.create_directory_all(process.cwd() <> "/content")
-  { process.cwd() <> "/cynthia-mini.toml" }
-  |> fs.write_file_sync(new_config_toml)
-  |> result.map_error(fn(e) {
-    premixed.text_error_red("Error: Could not write cynthia-mini.toml: " <> e)
-    process.exit(1)
-  })
-  |> result.unwrap(Nil)
+  let assert Ok(_) = simplifile.create_directory_all(process.cwd() <> "/assets")
+  let _ =
+    { process.cwd() <> "/cynthia-mini.toml" }
+    |> fs.write_file_sync(new_config_toml)
+    |> result.map_error(fn(e) {
+      premixed.text_error_red("Error: Could not write cynthia-mini.toml: " <> e)
+      process.exit(1)
+    })
+  {
+    console.log("Downloading default site icon...")
+    // Download https://raw.githubusercontent.com/strawmelonjuice/CynthiaWebsiteEngine-mini/refs/heads/main/asset/153916590.png to assets/site_icon.png
+    // Ignore any errors, if it fails, it fails.
+    let assert Ok(req) =
+      request.to(
+        "https://raw.githubusercontent.com/strawmelonjuice/CynthiaWebsiteEngine-mini/refs/heads/main/asset/153916590.png",
+      )
+    use resp <- promise.try_await(fetch.send(req))
+    use resp <- promise.try_await(fetch.read_bytes_body(resp))
+    case
+      simplifile.write_bits(process.cwd() <> "/assets/site_icon.png", resp.body)
+    {
+      Ok(_) -> Nil
+      Error(_) -> {
+        console.error("Error: Could not write assets/site_icon.png")
+        Nil
+      }
+    }
+    promise.resolve(Ok(Nil))
+  }
   {
     {
       []
