@@ -22,7 +22,17 @@ pub fn push(title: String, body: le_element.Element(a)) {
     |> result.replace_error("No title element found"),
   )
 
-  title_element |> element.set_inner_text(title)
+  let sitetitle =
+    {
+      use a <- result.try(document.query_selector(
+        "head>meta[property='og:site_name']",
+      ))
+      let b = a |> element.get_attribute("content")
+      b
+    }
+    |> result.map(fn(x) { x <> " — " })
+    |> result.unwrap("")
+  title_element |> element.set_inner_text(sitetitle <> title)
 
   let new_body = le_element.to_string(body)
   use body_element <- result.then(
