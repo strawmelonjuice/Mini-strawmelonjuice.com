@@ -24,6 +24,7 @@ let executed = true;
 import themeconf from "./themes.json";
 import path from "path";
 import CleanCSS from "clean-css";
+import { readdirSync, readFileSync, writeFileSync } from "fs";
 switch (process.argv[2].toLowerCase()) {
   case "clean":
     {
@@ -41,6 +42,13 @@ switch (process.argv[2].toLowerCase()) {
           Bun.spawnSync({
             cmd: ["gleam", "clean"],
             cwd: "./cynthia_websites_mini_server/",
+            // stderr: "inherit",
+          }).success,
+        );
+        results.push(
+          Bun.spawnSync({
+            cmd: ["gleam", "clean"],
+            cwd: "./cynthia_websites_mini_shared/",
             // stderr: "inherit",
           }).success,
         );
@@ -144,6 +152,40 @@ switch (process.argv[2].toLowerCase()) {
 }
 if (executed == true) {
   process.exit(0);
+}
+{
+  // Run 'gleam deps download' on both ends
+  let r = [];
+  r.push(
+    Bun.spawnSync({
+      cmd: ["gleam", "deps", "download"],
+      cwd: "./cynthia_websites_mini_shared/",
+      stdout: "inherit",
+      stderr: "inherit",
+    }).success,
+  );
+  r.push(
+    Bun.spawnSync({
+      cmd: ["gleam", "deps", "download"],
+      cwd: "./cynthia_websites_mini_client/",
+      stdout: "inherit",
+      stderr: "inherit",
+    }).success,
+  );
+  r.push(
+    Bun.spawnSync({
+      cmd: ["gleam", "deps", "download"],
+      cwd: "./cynthia_websites_mini_server/",
+      stdout: "inherit",
+      stderr: "inherit",
+    }).success,
+  );
+  if (r.every((x) => x)) {
+    console.log("Dependencies downloaded.");
+  } else {
+    console.error("Dependency download failed, aborting");
+    process.exit(1);
+  }
 }
 // Create links to the Gleam preludes, so that we can import them in FFI code.
 // This is a workaround for the fact that Bun somehow doesn't seem to be respecting TSConfig rootdir paths.

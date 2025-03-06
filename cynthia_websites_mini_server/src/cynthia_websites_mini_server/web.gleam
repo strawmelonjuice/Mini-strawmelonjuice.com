@@ -343,6 +343,14 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
       }
       |> promise.resolve()
     }
+    // "/sitemap.xml" -> {
+    //   console.log(
+    //     premixed.text_ok_green("[ 200 ]\t")
+    //     <> "(GET)\t"
+    //     <> premixed.text_lightblue("/sitemap.xml"),
+    //   )
+    //   let requrl = req |> request.url()
+    // }
     "/fetch/global-site-config" -> {
       promise.resolve(send_global_site_config(db))
     }
