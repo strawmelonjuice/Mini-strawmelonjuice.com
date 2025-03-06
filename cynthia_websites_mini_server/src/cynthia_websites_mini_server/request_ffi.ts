@@ -1,3 +1,5 @@
+import type { BunFile } from "bun";
+
 export async function get_request_body(req: Request) {
   let a = req.body!;
   const chunks: Uint8Array[] = [];
@@ -21,4 +23,8 @@ function concatArrayBuffers(chunks: Uint8Array[]): Uint8Array {
     offset += chunk.length;
   }
   return result;
+}
+
+export async function answer_bunrequest_with_file(file: BunFile) {
+  return new Response(await file.bytes());
 }

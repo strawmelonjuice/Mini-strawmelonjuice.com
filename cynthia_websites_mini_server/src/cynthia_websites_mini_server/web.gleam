@@ -1,3 +1,5 @@
+import bungibindies/bun
+import bungibindies/bun/bunfile.{type BunFile}
 import bungibindies/bun/http/serve/request.{type Request}
 import bungibindies/bun/http/serve/response
 import bungibindies/bun/sqlite
@@ -17,6 +19,8 @@ import gleam/string
 import gleam/uri
 import gleamy_lights/console
 import gleamy_lights/premixed
+import plinth/node/process
+import simplifile
 
 pub fn handle_request(req: Request, db: sqlite.Database) {
   let assert Ok(req_uri) = req |> request.url() |> uri.parse()
@@ -354,6 +358,34 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
     "/fetch/global-site-config" -> {
       promise.resolve(send_global_site_config(db))
     }
+    "/assets/" <> f -> {
+      let filepath = process.cwd() <> "/assets/" <> f
+      case simplifile.is_file(filepath) {
+        Ok(True) -> {
+          console.log(
+            premixed.text_ok_green("[ 200 ]\t")
+            <> "(GET)\t"
+            <> premixed.text_lightblue("/assets/")
+            <> premixed.text_cyan(f),
+          )
+          filepath
+          |> bun.file()
+          |> answer_bunrequest_with_file()
+        }
+        _ -> {
+          console.error(
+            premixed.text_error_red("[ 404 ] ")
+            <> "(GET)\t"
+            <> premixed.text_lightblue("/assets/")
+            <> premixed.text_cyan(f),
+          )
+          dynastatic
+          |> map.get("/404")
+          |> result.unwrap(response.new())
+          |> promise.resolve()
+        }
+      }
+    }
     f -> {
       console.error(
         premixed.text_error_red("[ 404 ] ")
@@ -405,3 +437,6 @@ fn send_global_site_config(db: sqlite.Database) {
 
 @external(javascript, "./request_ffi.ts", "get_request_body")
 pub fn get_request_body(req: Request) -> Promise(BitArray)
+
+@external(javascript, "./request_ffi.ts", "answer_bunrequest_with_file")
+pub fn answer_bunrequest_with_file(file: BunFile) -> Promise(response.Response)
