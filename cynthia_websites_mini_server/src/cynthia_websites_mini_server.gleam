@@ -33,7 +33,7 @@ pub fn main() {
       development: Some(True),
       hostname: None,
       port: None,
-      static_served: static_routes.static_routes(),
+      static_served: static_routes.static_routes(db),
       handler: web.handle_request(_, db),
       id: None,
       reuse_port: None,

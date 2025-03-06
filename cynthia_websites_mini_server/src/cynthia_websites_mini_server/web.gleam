@@ -21,7 +21,7 @@ import gleamy_lights/premixed
 pub fn handle_request(req: Request, db: sqlite.Database) {
   let assert Ok(req_uri) = req |> request.url() |> uri.parse()
   let path = req_uri.path
-  let assert Some(dynastatic) = static_routes.static_routes()
+  let assert Some(dynastatic) = static_routes.static_routes(db)
   case path {
     "/" -> {
       console.log(
