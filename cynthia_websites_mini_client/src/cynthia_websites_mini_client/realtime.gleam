@@ -88,7 +88,7 @@ fn level_1_2(params: L1o2) {
   // Run this subfunction every 6400ms
   let one_eight = case params.one_eight {
     1 -> {
-      populate_global_config_table(params.store)
+      // populate_global_config_table(params.store)
       2
     }
     2 -> 3
