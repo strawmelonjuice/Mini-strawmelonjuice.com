@@ -22,3 +22,8 @@ export function set_to_404(body: string) {
   document.body.innerHTML = body;
   document.title = "404 - Page Not Found";
 }
+
+export function get_inner_html(el: HTMLElement) {
+  // Get the innerHTML of an element
+  return el.innerHTML;
+}

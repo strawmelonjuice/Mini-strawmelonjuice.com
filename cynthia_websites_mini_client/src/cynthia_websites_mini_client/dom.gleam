@@ -56,3 +56,7 @@ pub fn set_data(element: element.Element, key: String, value: String) -> Nil
 /// Set the hash of the window
 @external(javascript, "./dom.ts", "set_hash")
 pub fn set_hash(hash: String) -> Nil
+
+/// Get innerhtml of an element
+@external(javascript, "./dom.ts", "get_inner_html")
+pub fn get_inner_html(element: element.Element) -> String

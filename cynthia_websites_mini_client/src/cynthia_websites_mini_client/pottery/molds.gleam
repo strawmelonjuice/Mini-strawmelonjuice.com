@@ -1,4 +1,5 @@
 import cynthia_websites_mini_client/datamanagement/clientstore
+import cynthia_websites_mini_client/dom
 import gleam/dict.{type Dict}
 import gleam/list
 import gleam/result
@@ -49,10 +50,29 @@ pub fn retroactive_menu_update(store: clientstore.ClientStore) {
       let res = clientstore.pull_menus(store)
       case layout_name {
         "cindy" -> {
-          let menu =
-            res |> cindy_menu_1() |> html.div([], _) |> element.to_string()
+          let temp_menu =
+            res
+            |> cindy_menu_1()
+            |> html.div(
+              [
+                attribute.id(
+                  "temporary_menu_items_while_retroactively_updating_menu",
+                ),
+                attribute.class("hidden"),
+              ],
+              _,
+            )
+            |> element.to_string()
           let assert Ok(menu_1) =
             plinth_document.query_selector("#menu_1_inside")
+          plinth_element.set_inner_html(menu_1, temp_menu)
+          let assert Ok(temp_menu) =
+            plinth_document.query_selector(
+              // Makes this quite expensive but the retroactive_menu_update is not called often for that reason already.
+              "#temporary_menu_items_while_retroactively_updating_menu",
+            )
+          let menu = dom.get_inner_html(temp_menu)
+          plinth_element.remove(temp_menu)
           plinth_element.set_inner_html(menu_1, menu)
         }
         other -> {
@@ -219,7 +239,9 @@ fn cindy_common(
                   html.ul(
                     [
                       attribute.id("menu_1_inside"),
-                      attribute.class("menu menu-horizontal"),
+                      attribute.class(
+                        "menu menu-horizontal bg-base-200 rounded-box",
+                      ),
                     ],
                     menu,
                   ),
@@ -230,7 +252,7 @@ fn cindy_common(
             html.div(
               [
                 attribute.class(
-                  "col-span-5 row-span-9 row-start-2 md:col-span-4 md:row-span-11 md:col-start-2 md:row-start-2 overflow-auto min-h-full p-4",
+                  "col-span-5 row-span-7 row-start-2 md:col-span-4 md:row-span-11 md:col-start-2 md:row-start-2 overflow-auto min-h-full p-4",
                 ),
               ],
               [content, html.br([])],
@@ -239,7 +261,7 @@ fn cindy_common(
             html.div(
               [
                 attribute.class(
-                  "col-span-5 row-span-2 row-start-11 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:max-w-[20VW] md:p-2 break-words",
+                  "col-span-5 row-span-4 row-start-9 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:max-w-[20VW] md:p-2 break-words",
                 ),
               ],
               [post_meta],
@@ -253,7 +275,7 @@ fn cindy_common(
 
 fn cindy_menu_1(
   from content: Dict(Int, List(#(String, String))),
-) -> List(Element(b)) {
+) -> List(Element(a)) {
   let assert Ok(hash) = plinth_window.get_hash()
   case dict.get(content, 1) {
     Error(_) -> []
@@ -263,19 +285,17 @@ fn cindy_menu_1(
           "" -> #(a.0, "/")
           _ -> a
         }
-        html.li([attribute.class("")], [
+        html.li([], [
           html.a(
             [
-              attribute.href("/#" <> a.1),
-              attribute.class(
-                {
-                  case hash == a.1 {
-                    True -> "active "
-                    False -> ""
-                  }
+              attribute.class({
+                case hash == a.1 {
+                  True -> "menu-active menu-focused active"
+                  False -> ""
                 }
-                <> "bg-secondary link-neutral-200 hover:link-secondary border-solid border-2 border-primary-content",
+              }// <> " bg-secondary link-neutral-200 hover:link-secondary border-solid border-2 border-primary-content",
               ),
+              attribute.href("/#" <> a.1),
             ],
             [html.text(a.0)],
           ),
