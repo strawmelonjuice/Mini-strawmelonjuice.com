@@ -220,9 +220,42 @@ fn dialog_initcfg() {
           description: "This is an example index page",
           layout: "theme",
           permalink: "/",
-          page: configtype.ContentsPagePageData(menus: []),
+          page: configtype.ContentsPagePageData(menus: [1]),
         ),
-        "# Hello, World!\n\nHello! This is an example page, you'll find me at `content/index.md`.",
+        "# Hello, World
+
+Hello! This is an example page, you'll find me at `content/index.md`.
+
+I'm written in Markdown, and I'm rendered to HTML by Cynthia Mini!
+
+Here's a list of things you can do with me:
+
+- Lists!
+- [Links](https://github.com/strawmelonjuice/CynthiaWebSiteEngine-Mini) and even [relative links](/example-post)
+- **Bold** and *italic* text
+
+1. Numbered lists
+2. Images: ![Gleam's Lucy mascot](https://gleam.run/images/lucy/lucy.svg)
+
+## The world is big
+
+### The world is a little smaller
+
+#### The world is tiny
+
+##### The world is tinier
+
+###### The world is the tiniest
+
+> Also quote blocks!
+>
+> -StrawmelonJuice
+
+```bash
+echo \"Code blocks!\"
+// - StrawmelonJuice
+```
+",
       )
       |> create_post(
         to: "example-post.md",
@@ -240,6 +273,18 @@ fn dialog_initcfg() {
           ),
         ),
         containing: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.md`.",
+      )
+      |> create_page(
+        to: "posts",
+        with: configtype.Page(
+          filename: "posts",
+          title: "Posts",
+          description: "this page is not actually shown, due to the ! prefix in the permalink",
+          layout: "default",
+          permalink: "!/",
+          page: configtype.ContentsPagePageData(menus: [1]),
+        ),
+        containing: "",
       )
     }
   }
