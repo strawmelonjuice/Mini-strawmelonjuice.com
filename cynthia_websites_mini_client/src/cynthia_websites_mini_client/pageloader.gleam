@@ -2,6 +2,7 @@ import cynthia_websites_mini_client/datamanagement
 import cynthia_websites_mini_client/datamanagement/clientstore
 import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/errors
+import cynthia_websites_mini_client/pageloader/postlistloader
 import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_client/pottery/molds
 import cynthia_websites_mini_client/pottery/oven
@@ -20,6 +21,7 @@ import lustre/attribute
 import lustre/element/html
 import plinth/browser/window
 import plinth/javascript/console
+import plinth/javascript/global
 
 fn hash_getter() -> String {
   // Load content based on current page
@@ -46,7 +48,7 @@ fn hash_getter() -> String {
 pub fn priority(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
   let current_hash = hash_getter()
   set_lasthash(store, current_hash)
-  use <- postlist_route(current_hash, store)
+  use <- postlist_route(current_hash, store, True)
   {
     let req =
       utils.phone_home()
@@ -109,7 +111,7 @@ pub fn now(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
   console.info("Hash change detected, refreshing content")
   let current_hash = hash_getter()
   console.log("Current hash: " <> current_hash)
-  use <- postlist_route(current_hash, store)
+  use <- postlist_route(current_hash, store, False)
   case
     datamanagement.fetch_content_from_clientstore_by_permalink(
       store,
@@ -144,78 +146,106 @@ fn set_to_404(body: String) -> Nil
 fn postlist_route(
   hash: String,
   store: clientstore.ClientStore,
+  prio: Bool,
   not_a_postlist: fn() -> Result(Nil, errors.AnError),
 ) -> Result(Nil, errors.AnError) {
   case { hash } {
-    "!/tag/" <> tag -> {
-      let title = "Posts with tag: " <> tag
-      let description = "A postlist of all posts tagged with " <> tag
-      let data =
-        configtype.ContentsPage(configtype.Page(
-          title:,
-          description:,
-          layout: "default",
-          permalink: "",
-          page: configtype.ContentsPagePageData(menus: []),
-          filename: "postlist.html",
-        ))
-      dom.push(
-        title,
-        pottery.render_content(
-          store,
-          data,
-          "This is very much in a todo phase right now!",
-          False,
-        ),
-      )
-      |> result.map_error(errors.GenericError)
+    "!" <> a if prio == False -> {
+      case a {
+        "/category/" <> category -> {
+          let title = "Posts in category: " <> category
+          let description =
+            "A postlist of all posts in the category: " <> category
+          let data =
+            configtype.ContentsPage(configtype.Page(
+              title:,
+              description:,
+              layout: "default",
+              permalink: "",
+              page: configtype.ContentsPagePageData(menus: []),
+              filename: "postlist.html",
+            ))
+          dom.push(
+            title,
+            pottery.render_content(
+              store,
+              data,
+              postlistloader.postlist_by_category(store, category),
+              False,
+            ),
+          )
+          |> result.map_error(errors.GenericError)
+        }
+        "/tag/" <> tag -> {
+          let title = "Posts with tag: " <> tag
+          let description = "A postlist of all posts tagged with " <> tag
+          let data =
+            configtype.ContentsPage(configtype.Page(
+              title:,
+              description:,
+              layout: "default",
+              permalink: "",
+              page: configtype.ContentsPagePageData(menus: []),
+              filename: "postlist.html",
+            ))
+          dom.push(
+            title,
+            pottery.render_content(
+              store,
+              data,
+              postlistloader.postlist_by_tag(store, tag),
+              False,
+            ),
+          )
+          |> result.map_error(errors.GenericError)
+        }
+
+        _ -> {
+          let title = "All posts"
+          let description = "A postlist of all posts."
+          let data =
+            configtype.ContentsPage(configtype.Page(
+              title:,
+              description:,
+              layout: "default",
+              permalink: "",
+              page: configtype.ContentsPagePageData(menus: []),
+              filename: "postlist.html",
+            ))
+          dom.push(
+            title,
+            pottery.render_content(
+              store,
+              data,
+              postlistloader.postlist_all(store),
+              False,
+            ),
+          )
+          |> result.map_error(errors.GenericError)
+        }
+      }
     }
-    "!/category/" <> category -> {
-      let title = "Posts in category: " <> category
-      let description = "A postlist of all posts in the category: " <> category
-      let data =
-        configtype.ContentsPage(configtype.Page(
-          title:,
-          description:,
-          layout: "default",
-          permalink: "",
-          page: configtype.ContentsPagePageData(menus: []),
-          filename: "postlist.html",
-        ))
-      dom.push(
-        title,
-        pottery.render_content(
-          store,
-          data,
-          "This is very much in a todo phase right now!",
-          False,
-        ),
+    "!" <> _ if prio == True -> {
+      // Loading a postlist as a prio is an absolute impossibility:
+      // There's no ClientStore content yet, and fetching complicated 
+      // stuff like this from the server would defeat the concept, as 
+      // well as cause _abnormal_ loads. (abnormally high, but not absolutely high)
+      //
+      // The other option? Stall. We add a timeout.
+      console.log(
+        "Delaying priority load of `"
+        <> hash
+        <> "` until Content is downloaded from the server",
       )
-      |> result.map_error(errors.GenericError)
-    }
-    "!" <> _ -> {
-      let title = "A postlist"
-      let description =
-        "A postlist of all posts (I think there are so no filters rn!)"
-      let data =
-        configtype.ContentsPage(configtype.Page(
-          title:,
-          description:,
-          layout: "default",
-          permalink: "",
-          page: configtype.ContentsPagePageData(menus: []),
-          filename: "postlist.html",
-        ))
-      dom.push(
-        title,
-        pottery.render_content(
-          store,
-          data,
-          "This is very much in a todo phase right now!",
-          False,
-        ),
-      )
-      |> result.map_error(errors.GenericError)
+      {
+        promise.wait(1200)
+        |> promise.await(fn(_) {
+          console.log("Firing the delayed priority load of `" <> hash <> "`")
+          postlist_route(hash, store, False, not_a_postlist)
+          |> promise.resolve()
+        })
+      }
+      Ok(Nil)
     }
     _ -> not_a_postlist()
   }

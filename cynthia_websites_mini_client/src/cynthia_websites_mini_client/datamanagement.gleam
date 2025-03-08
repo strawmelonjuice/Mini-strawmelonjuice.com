@@ -2,6 +2,8 @@ import cynthia_websites_mini_client/datamanagement/clientstore.{
   type ClientStore as Store, iget, next_in_content_queue,
 }
 import cynthia_websites_mini_client/pottery/molds
+import gleam/int
+import gleam/string
 import lustre/element
 
 import cynthia_websites_mini_client/pottery
@@ -65,7 +67,7 @@ pub type ContentStoreItem {
     meta_kind: Int,
     meta_permalink: String,
     last_inserted_at: String,
-    meta_in_menus: Array(Int),
+    meta_in_menus: Array(String),
   )
 }
 
@@ -97,9 +99,11 @@ pub fn render_next_of_content_queue(store: ClientStore) {
           last_inserted_at: next.last_inserted_at,
           meta_in_menus: case data {
             configtype.ContentsPage(a) -> {
-              a.page.menus |> array.from_list
+              a.page.menus |> list.map(int.to_string) |> array.from_list
             }
-            configtype.ContentsPost(_) -> [] |> array.from_list
+            configtype.ContentsPost(b) ->
+              b.post.tags
+              |> array.from_list
           },
         ),
       )
@@ -202,6 +206,19 @@ pub fn get_lasthash(store: ClientStore) -> Result(String, Nil)
 
 @external(javascript, "./datamanagement_ffi.ts", "update_lasthash")
 pub fn update_lasthash(store: ClientStore, hash: String) -> Nil
+
+pub type PostListItem {
+  PostListItem(
+    meta_permalink: String,
+    meta_description: String,
+    meta_title: String,
+    meta_tags: Array(String),
+    meta_category: String,
+  )
+}
+
+@external(javascript, "./datamanagement_ffi.ts", "fetch_post_list")
+pub fn fetch_post_list(store: ClientStore) -> Array(PostListItem)
 
 pub type ClientStore =
   Store

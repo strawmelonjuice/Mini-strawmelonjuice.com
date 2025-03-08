@@ -35,7 +35,8 @@ export function initialise(config: flatGlobalConfig): ClientStore {
         meta_kind INTEGER NOT NULL,
         meta_permalink TEXT NOT NULL,
         last_inserted_at TEXT NOT NULL,
-        meta_in_menus TEXT NOT NULL
+        meta_in_menus TEXT NOT NULL,
+        meta_category TEXT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS globalconfig(
         theme TEXT NOT NULL,
@@ -104,11 +105,12 @@ export function add_to_content_store(
     meta_kind: number;
     meta_permalink: string;
     last_inserted_at: string;
-    meta_in_menus: number[];
+    meta_in_menus: number[] | string[];
+    meta_category?: string;
   },
 ): void {
   let stmt = store.db.prepare(
-    "INSERT INTO content(html, original_filename, meta_title, meta_description, meta_kind, meta_permalink, last_inserted_at, meta_in_menus) VALUES(?, ?, ?, ?, ?, ?, ?, ?);",
+    "INSERT INTO content(html, original_filename, meta_title, meta_description, meta_kind, meta_permalink, last_inserted_at, meta_in_menus, meta_category) VALUES(?, ?, ?, ?, ?, ?, ?, ?,?);",
   );
   stmt.run([
     content.html,
@@ -119,6 +121,8 @@ export function add_to_content_store(
     content.meta_permalink,
     content.last_inserted_at,
     content.meta_in_menus.join(","),
+    // This is supposed to only result in an empty string on pages, but currently, it's not being set anywhere.
+    content.meta_category ?? "",
   ]);
 }
 export function next_in_content_queue(
@@ -183,10 +187,11 @@ export function get_menu_items(
     meta_kind: string;
     meta_permalink: string;
     last_inserted_at: string;
+    // For pages only, these are never strings.
     meta_in_menus: number[];
   }[] = [];
   {
-    let res = store.db.exec("SELECT * FROM content;");
+    let res = store.db.exec("SELECT * FROM content WHERE meta_kind = 0;");
     if (res.length == 0) content_store = [];
     else {
       let rows = res[0].values;
@@ -308,7 +313,7 @@ export function list_all_permalinks_in_contentstore(
     meta_kind: string;
     meta_permalink: string;
     last_inserted_at: string;
-    meta_in_menus: number[];
+    meta_in_menus: string[] | number[];
   }[] = [];
   {
     let res = store.db.exec("SELECT * FROM content;");
@@ -350,4 +355,26 @@ export function list_all_permalinks_in_contentstore(
     permalinks.push(item.meta_permalink);
   });
   return permalinks;
+}
+
+export function fetch_post_list(
+  store: ClientStore,
+): { meta_permalink: string; meta_description: string; meta_title: string }[] {
+  let res = store.db.exec(
+    "SELECT meta_permalink,meta_description,meta_title,meta_in_menus,meta_category FROM content WHERE meta_kind = 1;",
+  );
+  if (res.length == 0) return [];
+  let rows = res[0].values;
+  if (rows.length == 0) return [];
+  let postlist = [];
+  for (let row of rows) {
+    postlist.push({
+      meta_permalink: row[0] as string,
+      meta_description: row[1] as string,
+      meta_title: row[2] as string,
+      meta_tags: (row[3] as string).split(",").map((x) => x.trim()),
+      meta_category: row[4] as string,
+    });
+  }
+  return postlist;
 }
