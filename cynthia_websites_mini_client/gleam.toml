@@ -1,9 +1,9 @@
 name = "cynthia_websites_mini_client"
-
 target = "javascript"
+gleam = ">= 1.9.0"
+
 [javascript]
 typescript_declarations = true
-
 
 [dependencies]
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
@@ -11,7 +11,6 @@ plinth = ">= 0.5.6 and < 1.0.0"
 gleam_javascript = ">= 0.13.0 and < 1.0.0"
 lustre = ">= 4.6.3 and < 5.0.0"
 gleam_community_colour = ">= 1.4.1 and < 2.0.0"
-
 cynthia_websites_mini_shared = { path = "../cynthia_websites_mini_shared" }
 gleam_json = ">= 2.3.0 and < 3.0.0"
 gleam_http = ">= 3.7.2 and < 4.0.0"

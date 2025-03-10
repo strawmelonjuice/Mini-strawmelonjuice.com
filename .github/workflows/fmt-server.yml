@@ -15,7 +15,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - uses: gleam-lang/setup-gleam@v1.0.2
         with:
-          gleam-version: "1.7.0"
+          gleam-version: "1.9.1"
       - run: bun install
       - run: bun ./build.ts server-gleam deps download
       - run: bun ./build.ts server-gleam format --check src test

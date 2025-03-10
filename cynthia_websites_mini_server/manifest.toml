@@ -3,7 +3,7 @@
 
 packages = [
   { name = "birl", version = "1.8.0", build_tools = ["gleam"], requirements = ["gleam_regexp", "gleam_stdlib", "ranger"], otp_app = "birl", source = "hex", outer_checksum = "2AC7BA26F998E3DFADDB657148BD5DDFE966958AD4D6D6957DD0D22E5B56C400" },
-  { name = "bungibindies", version = "1.1.4", build_tools = ["gleam"], requirements = ["gleam_javascript", "gleam_stdlib"], otp_app = "bungibindies", source = "hex", outer_checksum = "59F8E1D7807961E66DC88C2F38411AC1F48869C754AA3C8C14F3E8BBE84494DF" },
+  { name = "bungibindies", version = "1.1.4", build_tools = ["gleam"], requirements = ["gleam_javascript", "gleam_stdlib"], source = "git", repo = "https://github.com/strawmelonjuice/bungibindies.git", commit = "22954761e409e062ef70cb01815a74b793a33800" },
   { name = "conversation", version = "1.4.3", build_tools = ["gleam"], requirements = ["gleam_http", "gleam_javascript", "gleam_stdlib"], otp_app = "conversation", source = "hex", outer_checksum = "908B46F60444442785A495197D482558AD8B849C3714A38FAA1940358CC8CCCD" },
   { name = "cynthia_websites_mini_shared", version = "0.1.0", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib", "plinth"], source = "local", path = "../cynthia_websites_mini_shared" },
   { name = "envoy", version = "1.0.2", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "envoy", source = "hex", outer_checksum = "95FD059345AA982E89A0B6E2A3BF1CF43E17A7048DCD85B5B65D3B9E4E39D359" },
@@ -25,7 +25,7 @@ packages = [
 ]
 
 [requirements]
-bungibindies = { version = "1.1.4" }
+bungibindies = { git = "https://github.com/strawmelonjuice/bungibindies.git", ref = "main" }
 cynthia_websites_mini_shared = { path = "../cynthia_websites_mini_shared" }
 gleam_community_colour = { version = ">= 1.4.1 and < 2.0.0" }
 gleam_fetch = { version = ">= 1.1.0 and < 2.0.0" }
