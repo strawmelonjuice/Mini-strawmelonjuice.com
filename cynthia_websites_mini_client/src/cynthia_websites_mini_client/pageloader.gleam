@@ -93,6 +93,8 @@ pub fn priority(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
         |> result.map_error(errors.GenericError)
       {
         Ok(_) -> {
+          molds.retroactive_menu_update(store)
+
           Ok(Nil)
         }
         Error(e) -> {
