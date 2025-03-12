@@ -237,7 +237,6 @@ for (const theme of themeconf) {
     prevalence = "ThemeDark";
   }
   const daisy_ui_theme_name: string = (() => {
-    console.log(typeof theme.daisyUI);
     if (typeof theme.daisyUI === "string") {
       return theme.daisyUI;
     }
@@ -501,7 +500,6 @@ switch (process.argv[2].toLowerCase()) {
     break;
   case "run-cd":
     {
-      console.clear();
       console.log("Running server...");
       // Run the server
       Bun.spawnSync({
@@ -521,7 +519,6 @@ switch (process.argv[2].toLowerCase()) {
     break;
   case "run":
     {
-      console.clear();
       console.log("Running server...");
       // Run the server
       Bun.spawnSync({
