@@ -36,7 +36,9 @@ export function initialise(config: flatGlobalConfig): ClientStore {
         meta_permalink TEXT NOT NULL,
         last_inserted_at TEXT NOT NULL,
         meta_in_menus TEXT NOT NULL,
-        meta_category TEXT NOT NULL
+        meta_category TEXT NOT NULL,
+        meta_post_published_at TEXT,
+        meta_post_updated_at TEXT
       );
       CREATE TABLE IF NOT EXISTS globalconfig(
         theme TEXT NOT NULL,
@@ -107,10 +109,31 @@ export function add_to_content_store(
     last_inserted_at: string;
     meta_in_menus: number[] | string[];
     meta_category?: string;
+    // "" for pages
+    last_updated_at: string;
+    // "" for pages
+    first_published_at: string;
   },
 ): void {
+  let published =
+    content.first_published_at == "" ? null : content.first_published_at;
+  let updated =
+    content.last_updated_at == "" ? published : content.last_updated_at;
   let stmt = store.db.prepare(
-    "INSERT INTO content(html, original_filename, meta_title, meta_description, meta_kind, meta_permalink, last_inserted_at, meta_in_menus, meta_category) VALUES(?, ?, ?, ?, ?, ?, ?, ?,?);",
+    `INSERT INTO content(
+      html,
+      original_filename, 
+      meta_title,
+      meta_description,
+      meta_kind,
+      meta_permalink, 
+      last_inserted_at, 
+      meta_in_menus, 
+      meta_category,
+      meta_post_published_at,
+      meta_post_updated_at
+    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    `,
   );
   stmt.run([
     content.html,
@@ -123,6 +146,8 @@ export function add_to_content_store(
     content.meta_in_menus.join(","),
     // This is supposed to only result in an empty string on pages, but currently, it's not being set anywhere.
     content.meta_category ?? "",
+    published,
+    updated,
   ]);
 }
 export function next_in_content_queue(
@@ -361,7 +386,7 @@ export function fetch_post_list(
   store: ClientStore,
 ): { meta_permalink: string; meta_description: string; meta_title: string }[] {
   let res = store.db.exec(
-    "SELECT meta_permalink,meta_description,meta_title,meta_in_menus,meta_category FROM content WHERE meta_kind = 1;",
+    "SELECT meta_permalink,meta_description,meta_title,meta_in_menus,meta_category,meta_post_published_at,meta_post_updated_at FROM content WHERE meta_kind = 1;",
   );
   if (res.length == 0) return [];
   let rows = res[0].values;
@@ -374,6 +399,8 @@ export function fetch_post_list(
       meta_title: row[2] as string,
       meta_tags: (row[3] as string).split(",").map((x) => x.trim()),
       meta_category: row[4] as string,
+      meta_date_posted: row[5] as string,
+      meta_date_updated: row[6] as string,
     });
   }
   return postlist;

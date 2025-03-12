@@ -1,4 +1,5 @@
 import cynthia_websites_mini_client/datamanagement
+import cynthia_websites_mini_client/pottery
 import gleam/javascript/array
 import gleam/list
 import lustre/attribute
@@ -31,6 +32,9 @@ fn postlist_to_html(posts: List(datamanagement.PostListItem)) {
   let postlist =
     posts
     |> list.map(fn(post) {
+      let description =
+        post.meta_description
+        |> pottery.parse_html("descr.md")
       html.li([attribute.class(" list-row btn-lg")], [
         html.a(
           [
@@ -38,17 +42,29 @@ fn postlist_to_html(posts: List(datamanagement.PostListItem)) {
             attribute.class("post__link"),
           ],
           [
+            html.div(
+              [attribute.class("text-xs uppercase font-semibold opacity-60")],
+              case post.meta_date_posted == post.meta_date_updated {
+                True -> [html.text(post.meta_date_posted)]
+                False -> [
+                  html.text(post.meta_date_posted),
+                  html.text(" (updated "),
+                  html.text(post.meta_date_updated),
+                  html.text(")"),
+                ]
+              },
+            ),
             html.div([attribute.class("text-center")], [
               html.text(post.meta_title),
             ]),
-            html.div(
-              [attribute.class("text-xs uppercase font-semibold opacity-60")],
-              // TODO: Add date support
-              [html.text("")],
+            html.blockquote(
+              [
+                attribute.class(
+                  "list-col-wrap text-xs border-l-2 border-accent border-dotted pl-4 bg-secondary bg-opacity-10",
+                ),
+              ],
+              [description],
             ),
-            html.p([attribute.class("list-col-wrap text-xs")], [
-              html.text(post.meta_description),
-            ]),
           ],
         ),
       ])

@@ -67,6 +67,10 @@ pub type ContentStoreItem {
     meta_kind: Int,
     meta_permalink: String,
     last_inserted_at: String,
+    // "" for pages
+    last_updated_at: String,
+    // "" for pages
+    first_published_at: String,
     meta_in_menus: Array(String),
   )
 }
@@ -102,8 +106,17 @@ pub fn render_next_of_content_queue(store: ClientStore) {
               a.page.menus |> list.map(int.to_string) |> array.from_list
             }
             configtype.ContentsPost(b) ->
+              // Tags go in here too, since posts don't have menus anyways.
               b.post.tags
               |> array.from_list
+          },
+          last_updated_at: case data {
+            configtype.ContentsPage(_) -> ""
+            configtype.ContentsPost(b) -> b.post.date_updated
+          },
+          first_published_at: case data {
+            configtype.ContentsPage(_) -> ""
+            configtype.ContentsPost(b) -> b.post.date_posted
           },
         ),
       )
@@ -214,6 +227,8 @@ pub type PostListItem {
     meta_title: String,
     meta_tags: Array(String),
     meta_category: String,
+    meta_date_posted: String,
+    meta_date_updated: String,
   )
 }
 

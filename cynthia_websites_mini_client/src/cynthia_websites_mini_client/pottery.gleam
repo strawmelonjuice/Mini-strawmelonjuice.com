@@ -75,7 +75,7 @@ pub fn render_content(
   into(content, variables |> dict.insert("global_site_name", site_name))
 }
 
-fn parse_html(inner: String, filename: String) -> vdom.Element(a) {
+pub fn parse_html(inner: String, filename: String) -> vdom.Element(a) {
   case filename |> string.split(".") |> list.last {
     // Markdown is rendered with a custom renderer. After that, it can be pasted into the template.
     Ok("md") | Ok("markdown") | Ok("mdown") ->
