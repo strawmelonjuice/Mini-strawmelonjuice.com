@@ -92,6 +92,7 @@ export function custom_render(text: string): string {
           // ignore text tokens
           break;
         case "inline":
+        case "html_inline":
           {
             // Recurse
             if (

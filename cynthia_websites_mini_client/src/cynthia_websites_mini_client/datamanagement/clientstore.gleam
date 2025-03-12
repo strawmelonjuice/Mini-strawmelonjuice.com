@@ -60,7 +60,7 @@ pub fn iget(store: ClientStore, what: String) -> Array(String)
 @external(javascript, "../datamanagement_ffi.ts", "next_in_content_queue")
 pub fn next_in_content_queue(
   store: ClientStore,
-  callback: fn(contenttypes.Minimal) -> Nil,
+  callback: fn(contenttypes.Minimal, bool) -> Nil,
 ) -> Nil
 
 @external(javascript, "../datamanagement_ffi.ts", "populate_global_config")

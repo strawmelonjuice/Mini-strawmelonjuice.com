@@ -156,6 +156,23 @@ pub fn store_db(
   database.save_complete_config(db, conf)
 }
 
+pub fn update_content_in_db(
+  db: sqlite.Database,
+  config: configtype.SharedCynthiaConfigGlobalOnly,
+) -> Nil {
+  case content_getter() {
+    Ok(content) -> {
+      let conf = configtype.shared_merge_shared_cynthia_config(config, content)
+      store_db(db, conf)
+    }
+    Error(msg) -> {
+      console.error("Error: There was an error getting content:\n" <> msg)
+      process.exit(1)
+      panic as "We should not reach here"
+    }
+  }
+}
+
 fn dialog_initcfg() {
   console.log("No Cynthia Mini configuration found...")
   case

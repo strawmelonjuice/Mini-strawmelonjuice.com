@@ -11,10 +11,11 @@ import gleam/javascript/promise
 import gleam/result
 import plinth/browser/document
 import plinth/browser/window
+import plinth/javascript/console
 
 pub fn main(store: datamanagement.ClientStore) {
   let data = #(
-    L1(0, store:, sub: L1o2(times: 0, store:, one_eight: 1)),
+    L1(0, store:, sub: L1o2(times: 0, store:, one_of: 0)),
     L2(0, store:),
     L3(0, store:),
     L4(0, store:),
@@ -60,7 +61,7 @@ type Ll =
   #(L1, L2, L3, L4, L5)
 
 type L1o2 {
-  L1o2(times: Int, one_eight: Int, store: datamanagement.ClientStore)
+  L1o2(times: Int, one_of: Int, store: datamanagement.ClientStore)
 }
 
 type L1 {
@@ -85,21 +86,24 @@ type L5 {
 
 /// Functions that run every 800ms
 fn level_1_2(params: L1o2) {
-  // Run this subfunction every 6400ms
-  let one_eight = case params.one_eight {
-    1 -> {
+  let one_of = case params.one_of {
+    // Run this subfunction every 6400ms
+    7 | 15 | 23 | 31 -> {
       // populate_global_config_table(params.store)
-      2
+      int.add(params.one_of, 1)
     }
-    2 -> 3
-    3 -> 4
-    4 -> 5
-    5 -> 6
-    6 -> 7
-    7 -> 8
-    _ -> 1
+    14 | 30 -> {
+      // Run this subfunction every 12800ms (12.8s)
+      console.log("Rebuilding content queue to update content.")
+      datamanagement.requeue_content(params.store)
+      int.add(params.one_of, 1)
+    }
+    // On the last iteration, reset to 1
+    33 -> 1
+    // Otherwise, just add 1
+    p -> int.add(p, 1)
   }
-  L1o2(..params, times: params.times + 1, one_eight:)
+  L1o2(..params, times: params.times + 1, one_of:)
 }
 
 /// Functions that run every 400ms

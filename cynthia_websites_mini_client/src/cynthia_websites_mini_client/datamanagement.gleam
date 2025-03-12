@@ -56,7 +56,11 @@ pub fn update_content_queue(store: ClientStore) {
 fn add_to_content_queue(store: ClientStore, data: contenttypes.Minimal) -> Nil
 
 @external(javascript, "./datamanagement_ffi.ts", "add_to_content_store")
-fn add_to_content_store(store: ClientStore, data: ContentStoreItem) -> Nil
+fn add_to_content_store(
+  store: ClientStore,
+  data: ContentStoreItem,
+  requeued: Bool,
+) -> Nil
 
 pub type ContentStoreItem {
   ContentStoreItem(
@@ -76,7 +80,7 @@ pub type ContentStoreItem {
 }
 
 pub fn render_next_of_content_queue(store: ClientStore) {
-  use next <- next_in_content_queue(store)
+  use next, requeue <- next_in_content_queue(store)
   {
     let res =
       utils.phone_home()
@@ -91,8 +95,7 @@ pub fn render_next_of_content_queue(store: ClientStore) {
       let assert Ok(#(data, innercontent)) =
         decode.run(res.body, collected_content_decoder())
       let s = pottery.render_content(store, data, innercontent, False)
-      add_to_content_store(
-        store,
+      let item =
         ContentStoreItem(
           html: s |> element.to_string(),
           original_filename: next.original_filename,
@@ -118,8 +121,9 @@ pub fn render_next_of_content_queue(store: ClientStore) {
             configtype.ContentsPage(_) -> ""
             configtype.ContentsPost(b) -> b.post.date_posted
           },
-        ),
-      )
+        )
+
+      add_to_content_store(store, item, requeue)
       molds.retroactive_menu_update(store)
       Ok(Nil)
     }
@@ -231,6 +235,9 @@ pub type PostListItem {
     meta_date_updated: String,
   )
 }
+
+@external(javascript, "./datamanagement_ffi.ts", "requeue_content")
+pub fn requeue_content(store: ClientStore) -> Nil
 
 @external(javascript, "./datamanagement_ffi.ts", "fetch_post_list")
 pub fn fetch_post_list(store: ClientStore) -> Array(PostListItem)

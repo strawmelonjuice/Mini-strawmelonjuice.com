@@ -2,11 +2,13 @@ import bungibindies
 import bungibindies/bun
 import bungibindies/bun/http/serve.{ServeOptions}
 import cynthia_websites_mini_server/config
+import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/static_routes
 import cynthia_websites_mini_server/web
 import gleam/option.{None, Some}
 import gleamy_lights/console
 import gleamy_lights/premixed
+import plinth/javascript/global
 import plinth/node/process
 
 pub fn main() {
@@ -39,4 +41,10 @@ pub fn main() {
       reuse_port: None,
     ))
   console.log("Server started!")
+  global.set_interval(60_000, fn() {
+    // This function is called every minute
+    let assert Ok(co) = database.get__entire_global_config(db)
+    config.update_content_in_db(db, co)
+    Nil
+  })
 }

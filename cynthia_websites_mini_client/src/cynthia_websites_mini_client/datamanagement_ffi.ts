@@ -1,6 +1,6 @@
 import * as Gleam from "../../prelude";
 
-import initSqlJs, { type Database } from "sql.js";
+import initSqlJs, { type Database, type Statement } from "sql.js";
 // At some point, Client-side-store will also be storing and retrieving in SQLite, on the browser.
 // This was earlier delayed and replaced with a class as storage method, but that is but a temporary solution.
 // If SQL.js does not work as expected, Postglide (Gleam wrapper around PGLite) should. However, that'd create a more persistent kind of storage (IndexedDB) that I do not want to tap into yet.
@@ -54,7 +54,8 @@ export function initialise(config: flatGlobalConfig): ClientStore {
         meta_kind INTEGER NOT NULL,
         meta_permalink TEXT NOT NULL,
         last_inserted_at TEXT NOT NULL,
-        original_filename TEXT NOT NULL PRIMARY KEY
+        original_filename TEXT NOT NULL PRIMARY KEY,
+        was_inserted BOOLEAN DEFAULT FALSE
       );
       INSERT INTO globalconfig(theme, theme_dark, colour, site_name, site_description) VALUES('${config.global_theme}', '${config.global_theme_dark}', '${config.global_colour}', '${config.global_site_name}', '${config.global_site_description}');
       `;
@@ -114,13 +115,17 @@ export function add_to_content_store(
     // "" for pages
     first_published_at: string;
   },
+  requeued_content: boolean,
 ): void {
   let published =
     content.first_published_at == "" ? null : content.first_published_at;
   let updated =
     content.last_updated_at == "" ? published : content.last_updated_at;
-  let stmt = store.db.prepare(
-    `INSERT INTO content(
+  let stmt: Statement;
+
+  if (!requeued_content)
+    stmt = store.db.prepare(
+      `INSERT INTO content(
       html,
       original_filename, 
       meta_title,
@@ -134,7 +139,24 @@ export function add_to_content_store(
       meta_post_updated_at
     ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `,
-  );
+    );
+  else
+    stmt = store.db.prepare(
+      `UPDATE content SET
+      html = ?,
+      original_filename = ?,
+      meta_title = ?,
+      meta_description = ?,
+      meta_kind = ?,
+      meta_permalink = ?,
+      last_inserted_at = ?,
+      meta_in_menus = ?,
+      meta_category = ?,
+      meta_post_published_at = ?,
+      meta_post_updated_at = ?
+      WHERE original_filename = '${content.original_filename}';
+`,
+    );
   stmt.run([
     content.html,
     content.original_filename,
@@ -163,6 +185,7 @@ export function next_in_content_queue(
           original_filename: string;
         }
       | undefined,
+    arg1: boolean,
   ) => void,
 ) {
   let res = store.db.exec("SELECT * FROM contentqueue LIMIT 1;");
@@ -182,16 +205,17 @@ export function next_in_content_queue(
     original_filename: row[5] as string,
   };
   // Check if the content is already in the store
+  const added = (row[6] as number) == 1;
   if (
     !(
       store.db.exec(
         "SELECT * FROM content WHERE original_filename = '" +
           content.original_filename +
           "';",
-      ).length > 0
+      ).length > 0 && !added
     )
   ) {
-    cb(content);
+    cb(content, added);
   }
   // Delete from queue
   store.db.run(
@@ -404,4 +428,48 @@ export function fetch_post_list(
     });
   }
   return postlist;
+}
+
+export function requeue_content(store: ClientStore) {
+  // Iterates through the content store and re-adds items to the queue in random order.
+  let res = store.db.exec("SELECT * FROM content;");
+  if (res.length == 0) return;
+  let content: {
+    meta_title: string;
+    meta_description: string;
+    meta_kind: number;
+    meta_permalink: string;
+    last_inserted_at: string;
+    original_filename: string;
+  }[] = [];
+  res[0].values.forEach((row) => {
+    content.push({
+      meta_title: row[2] as string,
+      meta_description: row[3] as string,
+      meta_kind: row[4] as number,
+      meta_permalink: row[5] as string,
+      last_inserted_at: row[6] as string,
+      original_filename: row[1] as string,
+    });
+  });
+  for (let i = content.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * i);
+    const temp = content[i];
+    content[i] = content[j];
+    content[j] = temp;
+  }
+  let stmt = store.db.prepare(
+    `INSERT INTO contentqueue(meta_title, meta_description, meta_kind, meta_permalink, last_inserted_at, original_filename, was_inserted) VALUES(?, ?, ?, ?, ?, ?, true);`,
+  );
+  console.log(content);
+  content.forEach((item) => {
+    stmt.run([
+      item.meta_title,
+      item.meta_description,
+      item.meta_kind,
+      item.meta_permalink,
+      item.last_inserted_at,
+      item.original_filename,
+    ]);
+  });
 }
