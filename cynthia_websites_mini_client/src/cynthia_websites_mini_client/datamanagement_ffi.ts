@@ -461,7 +461,6 @@ export function requeue_content(store: ClientStore) {
   let stmt = store.db.prepare(
     `INSERT INTO contentqueue(meta_title, meta_description, meta_kind, meta_permalink, last_inserted_at, original_filename, was_inserted) VALUES(?, ?, ?, ?, ?, ?, true);`,
   );
-  console.log(content);
   content.forEach((item) => {
     stmt.run([
       item.meta_title,

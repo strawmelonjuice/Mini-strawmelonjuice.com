@@ -110,7 +110,6 @@ pub fn priority(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
 
 /// Load the content for the current page, checking the the database for existing content first, and updating if necessary. This should only be contacting the server if the content is not already downloaded.
 pub fn now(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
-  console.info("Hash change detected, refreshing content")
   let current_hash = hash_getter()
   console.log("Current hash: " <> current_hash)
   use <- postlist_route(current_hash, store, False)
@@ -121,7 +120,6 @@ pub fn now(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
     )
   {
     Ok(content) -> {
-      console.info("Content already downloaded, loading into DOM")
       let r =
         dom.push(
           content.meta_title,
@@ -136,7 +134,6 @@ pub fn now(store: clientstore.ClientStore) -> Result(Nil, errors.AnError) {
       Ok(Nil)
     }
     Error(_) -> {
-      console.info("Content not downloaded, fetching from server")
       priority(store)
     }
   }

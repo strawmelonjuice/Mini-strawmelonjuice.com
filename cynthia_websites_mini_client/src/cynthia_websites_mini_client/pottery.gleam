@@ -11,7 +11,6 @@ import lustre/attribute.{attribute}
 import lustre/element
 import lustre/element/html
 import lustre/internals/vdom
-import plinth/javascript/console
 
 pub fn render_content(
   store: clientstore.ClientStore,
@@ -23,10 +22,7 @@ pub fn render_content(
     configtype.ContentsPage(r) -> string.starts_with(r.permalink, "!")
     configtype.ContentsPost(_) -> False
   }
-  use <- bool.lazy_guard(is_a_postlist, fn() {
-    console.log("Post list is kept unrendered for the cache")
-    html.data([], [])
-  })
+  use <- bool.lazy_guard(is_a_postlist, fn() { html.data([], []) })
   let assert Ok(def) = paints.get_sytheme(store)
   let #(into, content, variables) = case data {
     configtype.ContentsPage(page_data) -> {

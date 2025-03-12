@@ -22,7 +22,7 @@ export function custom_render(text: string): string {
             const original_href: string = current_token.attrs[0][1];
             const new_href: string = "/#" + original_href;
             current_token.attrs[0][1] = new_href;
-            console.log(original_href + " -> " + current_token.attrs[0][1]);
+            // console.log(original_href + " -> " + current_token.attrs[0][1]);
           }
           current_token.attrSet("class", "text-info underline");
           break;
