@@ -124,7 +124,10 @@ pub fn render_next_of_content_queue(store: ClientStore) {
         )
 
       add_to_content_store(store, item, requeue)
-      molds.retroactive_menu_update(store)
+      case requeue {
+        False -> molds.retroactive_menu_update(store)
+        True -> Nil
+      }
       Ok(Nil)
     }
     |> promise.resolve
