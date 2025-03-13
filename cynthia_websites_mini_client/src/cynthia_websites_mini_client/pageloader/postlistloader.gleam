@@ -32,10 +32,7 @@ fn postlist_to_html(posts: List(datamanagement.PostListItem)) {
   let postlist =
     posts
     |> list.map(fn(post) {
-      let description =
-        post.meta_description
-        |> pottery.parse_html("descr.md")
-      html.li([attribute.class(" list-row btn-lg")], [
+      html.li([attribute.class("list-row p-10")], [
         html.a(
           [
             attribute.href("/#" <> post.meta_permalink),
@@ -54,16 +51,16 @@ fn postlist_to_html(posts: List(datamanagement.PostListItem)) {
                 ]
               },
             ),
-            html.div([attribute.class("text-center")], [
+            html.div([attribute.class("text-center text-xl")], [
               html.text(post.meta_title),
             ]),
             html.blockquote(
               [
                 attribute.class(
-                  "list-col-wrap text-xs border-l-2 border-accent border-dotted pl-4 bg-secondary bg-opacity-10",
+                  "list-col-wrap text-sm border-l-2 border-accent border-dotted pl-4 bg-secondary bg-opacity-10",
                 ),
               ],
-              [description],
+              [pottery.parse_html(post.meta_description, "descr.md")],
             ),
           ],
         ),

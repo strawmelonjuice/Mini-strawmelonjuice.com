@@ -342,7 +342,19 @@ console.log("Building and bundling client code...");
   const postcss = require("postcss");
   const tailwindcss = require("tailwindcss");
 
-  const sourceCSS = "@tailwind base; @tailwind components; @tailwind utilities";
+  const sourceCSS = `
+/* Until I figure out a way to download these to the server reliably, I'm just going to import them from the web. */
+@import url('https://fontlay.com/css2?family=Quicksand:wght@300..700&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+h1, h2, h3, h4, h5, h6, .text-lg, .text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl {
+  font-family: 'Red Hat Display', sans-serif;
+}
+body, p, a, button, .text-sm, .text-base {
+  font-family: 'Quicksand', sans-serif;
+}
+`;
   const config = {
     presets: [tailwindconfig],
   };
