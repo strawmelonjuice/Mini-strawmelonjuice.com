@@ -4,6 +4,7 @@ import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
+import gleam/dict
 import gleam/dynamic/decode
 import gleam/fetch
 import gleam/http/request
@@ -18,6 +19,7 @@ import plinth/javascript/console
 import plinth/node/fs
 import plinth/node/process
 import simplifile
+import tom
 
 /// # Config.load()
 /// Loads the configuration from the `cynthia-mini.toml` file and the content from the `content` directory.
@@ -81,14 +83,126 @@ pub fn content_kind_only_decoder() -> decode.Decoder(ContentKindOnly) {
   decode.success(ContentKind(kind:))
 }
 
-@external(javascript, "./config_ffi.ts", "parse_configtoml")
-fn i_load(
-  from: String,
-  default: configtype.SharedCynthiaConfigGlobalOnly,
-) -> Result(configtype.SharedCynthiaConfigGlobalOnly, String)
+/// The old definition of parse_configtoml, used FFI. Now its just a redirect.
+// @external(javascript, "./config_ffi.ts", "parse_configtoml")
 
-@external(javascript, "./config_ffi.ts", "config_to_toml")
-fn i_stringify(config: configtype.SharedCynthiaConfigGlobalOnly) -> String
+fn i_load(
+  _: String,
+  _,
+) -> Result(configtype.SharedCynthiaConfigGlobalOnly, String) {
+  parse_configtoml()
+}
+
+fn parse_configtoml() {
+  use str <- result.try(
+    fs.read_file_sync(files.path_normalize(
+      process.cwd() <> "/cynthia-mini.toml",
+    ))
+    |> result.map_error(fn(e) {
+      premixed.text_error_red("Error: Could not read cynthia-mini.toml: " <> e)
+      process.exit(1)
+    })
+    |> result.map_error(string.inspect),
+  )
+  use res <- result.try(tom.parse(str) |> result.map_error(string.inspect))
+
+  use config <- result.try(
+    cynthia_config_global_only_exploiter(res)
+    |> result.map_error(string.inspect),
+  )
+  Ok(config)
+}
+
+type ConfigTomlDecodeError {
+  TomlGetStringError(tom.GetError)
+  TomlGetIntError(tom.GetError)
+  FieldError(String)
+}
+
+fn cynthia_config_global_only_exploiter(o: dict.Dict(String, tom.Toml)) {
+  use global_theme <- result.try({
+    use field <- result.try(
+      tom.get(o, ["global", "theme"])
+      |> result.replace_error(FieldError("config->global.theme does not exist")),
+    )
+    tom.as_string(field)
+    |> result.map_error(TomlGetStringError)
+  })
+  use global_theme_dark <- result.try({
+    use field <- result.try(
+      tom.get(o, ["global", "theme_dark"])
+      |> result.replace_error(FieldError(
+        "config->global.theme_dark does not exist",
+      )),
+    )
+    tom.as_string(field)
+    |> result.map_error(TomlGetStringError)
+  })
+  use global_colour <- result.try({
+    use field <- result.try(
+      tom.get(o, ["global", "colour"])
+      |> result.replace_error(FieldError("config->global.colour does not exist")),
+    )
+    tom.as_string(field)
+    |> result.map_error(TomlGetStringError)
+  })
+  use global_site_name <- result.try({
+    use field <- result.try(
+      tom.get(o, ["global", "site_name"])
+      |> result.replace_error(FieldError(
+        "config->global.site_name does not exist",
+      )),
+    )
+    tom.as_string(field)
+    |> result.map_error(TomlGetStringError)
+  })
+  use global_site_description <- result.try({
+    use field <- result.try(
+      tom.get(o, ["global", "site_description"])
+      |> result.replace_error(FieldError(
+        "config->global.site_description does not exist",
+      )),
+    )
+    tom.as_string(field)
+    |> result.map_error(TomlGetStringError)
+  })
+  let server_port =
+    option.from_result({
+      use field <- result.try(
+        tom.get(o, ["server", "port"])
+        |> result.replace_error(FieldError("config->server.port does not exist")),
+      )
+      tom.as_int(field)
+      |> result.map_error(TomlGetIntError)
+    })
+  let server_host =
+    option.from_result({
+      use field <- result.try(
+        tom.get(o, ["server", "host"])
+        |> result.replace_error(FieldError("config->server.host does not exist")),
+      )
+      tom.as_string(field)
+      |> result.map_error(TomlGetStringError)
+    })
+  let posts_comments = case
+    tom.get(o, ["posts", "comments"]) |> result.map(tom.as_bool)
+  {
+    Ok(Ok(field)) -> {
+      field
+    }
+    _ -> True
+  }
+  Ok(configtype.SharedCynthiaConfigGlobalOnly(
+    global_theme:,
+    global_theme_dark:,
+    global_colour:,
+    global_site_name:,
+    global_site_description:,
+    server_port:,
+    server_host:,
+    posts_comments:,
+  ))
+}
 
 fn content_getter() {
   {
@@ -193,14 +307,25 @@ fn dialog_initcfg() {
     }
     True -> Nil
   }
-  let new_config_toml =
-    configtype.default_shared_cynthia_config_global_only |> i_stringify()
   let assert Ok(_) =
     simplifile.create_directory_all(process.cwd() <> "/content")
   let assert Ok(_) = simplifile.create_directory_all(process.cwd() <> "/assets")
   let _ =
     { process.cwd() <> "/cynthia-mini.toml" }
-    |> fs.write_file_sync(new_config_toml)
+    |> fs.write_file_sync(
+      "[global]
+theme = \"autumn\"
+theme_dark = \"night\"
+colour = \"#FFFFFF\"
+site_name = \"My Site\"
+site_description = \"A big site on a mini Cynthia!\"
+[server]
+port = 8080
+host = \"localhost\"
+[posts]
+comments = false
+",
+    )
     |> result.map_error(fn(e) {
       premixed.text_error_red("Error: Could not write cynthia-mini.toml: " <> e)
       process.exit(1)

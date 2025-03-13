@@ -1,4 +1,5 @@
 import gleam/dynamic/decode
+import gleam/option.{type Option, None, Some}
 
 pub type SharedCynthiaConfig {
   SharedCynthiaConfig(
@@ -18,23 +19,39 @@ pub type SharedCynthiaConfigGlobalOnly {
     global_colour: String,
     global_site_name: String,
     global_site_description: String,
+    server_port: Option(Int),
+    server_host: Option(String),
+    posts_comments: Bool,
   )
 }
 
 pub fn shared_cynthia_config_global_only_decoder() -> decode.Decoder(
   SharedCynthiaConfigGlobalOnly,
 ) {
-  use global_colour <- decode.field("site_colour", decode.string)
-  use global_site_name <- decode.field("site_name", decode.string)
-  use global_site_description <- decode.field("site_description", decode.string)
   use global_theme <- decode.field("global_theme", decode.string)
   use global_theme_dark <- decode.field("global_theme_dark", decode.string)
+  use global_colour <- decode.field("global_colour", decode.string)
+  use global_site_name <- decode.field("global_site_name", decode.string)
+  use global_site_description <- decode.field(
+    "global_site_description",
+    decode.string,
+  )
+  use server_port <- decode.field("server_port", decode.optional(decode.int))
+  use server_host <- decode.field("server_host", decode.optional(decode.string))
+  use posts_comments <- decode.field(
+    "posts_comments",
+    decode.optional(decode.bool),
+  )
+  let posts_comments = posts_comments |> option.unwrap(False)
   decode.success(SharedCynthiaConfigGlobalOnly(
     global_theme:,
     global_theme_dark:,
     global_colour:,
     global_site_name:,
     global_site_description:,
+    server_port:,
+    server_host:,
+    posts_comments:,
   ))
 }
 
@@ -44,6 +61,9 @@ pub const default_shared_cynthia_config_global_only: SharedCynthiaConfigGlobalOn
   global_colour: "#FFFFFF",
   global_site_name: "My Site",
   global_site_description: "A big site on a mini Cynthia!",
+  server_port: None,
+  server_host: None,
+  posts_comments: False,
 )
 
 pub fn shared_merge_shared_cynthia_config(

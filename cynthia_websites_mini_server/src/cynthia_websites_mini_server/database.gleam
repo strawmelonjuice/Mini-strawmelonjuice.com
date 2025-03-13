@@ -18,8 +18,8 @@ pub fn create_database(name: Option(String)) -> sqlite.Database {
     case name {
       None -> {
         deletecachedb()
-        // sqlite.new(":memory:")
-        sqlite.new(files.path_join([process.cwd(), "/cache.db"]))
+        sqlite.new(":memory:")
+        // sqlite.new(files.path_join([process.cwd(), "/cache.db"]))
       }
       Some(n) -> sqlite.new(n)
     }
@@ -35,7 +35,10 @@ pub fn create_database(name: Option(String)) -> sqlite.Database {
         site_colour TEXT NOT NULL,
         site_description TEXT NOT NULL,
         theme TEXT NOT NULL,
-        theme_dark TEXT NOT NULL
+        theme_dark TEXT NOT NULL,
+        server_port INT,
+        server_host TEXT,
+        posts_comments BOOL
     )
   ",
   )
@@ -98,12 +101,15 @@ pub fn save_complete_config(
         site_colour,
         site_description,
         theme,
-        theme_dark
+        theme_dark,
+        server_port,
+        server_host,
+        posts_comments
       )
-      VALUES (?, ?, ?, ?, ?);
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     ",
     )
-
+  let port = conf.server_port |> nullable()
   let params =
     param_array.new()
     |> param_array.push(conf.global_site_name)
@@ -111,6 +117,9 @@ pub fn save_complete_config(
     |> param_array.push(conf.global_site_description)
     |> param_array.push(conf.global_theme)
     |> param_array.push(conf.global_theme_dark)
+    |> param_array.push(port)
+    |> param_array.push(conf.server_host)
+    |> param_array.push(conf.posts_comments)
   sqlite.run(statement, params)
   // Now, save the content
   conf.content
@@ -296,30 +305,54 @@ pub fn get__entire_global_config(
     sqlite.prepare(
       db,
       "
-      SELECT site_name, site_colour, site_description, theme, theme_dark
+      SELECT site_name, site_colour, site_description, theme, theme_dark, server_port, server_host, posts_comments
       FROM globalConfig
     ",
     )
   let row = sqlite.get(statement, param_array.new())
   let res =
     decode.run(row, {
-      use site_name <- decode.field("site_name", decode.string)
-      use site_colour <- decode.field("site_colour", decode.string)
-      use site_description <- decode.field("site_description", decode.string)
-      use theme <- decode.field("theme", decode.string)
-      use theme_dark <- decode.field("theme_dark", decode.string)
+      use global_site_name <- decode.field("site_name", decode.string)
+      use global_colour <- decode.field("site_colour", decode.string)
+      use global_site_description <- decode.field(
+        "site_description",
+        decode.string,
+      )
+      use global_theme <- decode.field("theme", decode.string)
+      use global_theme_dark <- decode.field("theme_dark", decode.string)
+      use server_port <- decode.field(
+        "server_port",
+        decode.optional(decode.int),
+      )
+      use server_host <- decode.field(
+        "server_host",
+        decode.optional(decode.string),
+      )
+      use posts_comments <- decode.field(
+        "posts_comments",
+        decode.optional(decode.int),
+      )
+      let posts_comments = case posts_comments {
+        Some(1) -> Some(True)
+        Some(_) -> Some(False)
+        None -> None
+      }
+      let posts_comments = posts_comments |> option.unwrap(False)
       decode.success(configtype.SharedCynthiaConfigGlobalOnly(
-        global_site_name: site_name,
-        global_colour: site_colour,
-        global_site_description: site_description,
-        global_theme: theme,
-        global_theme_dark: theme_dark,
+        global_site_name:,
+        global_colour:,
+        global_site_description:,
+        global_theme:,
+        global_theme_dark:,
+        server_port:,
+        server_host:,
+        posts_comments:,
       ))
     })
   case res |> result.is_error() {
     True -> {
       premixed.text_error_red(
-        "The was an error decoding the global config from the database:"
+        "There was an error decoding the global config from the database:"
         <> {
           res
           |> string.inspect
@@ -659,3 +692,6 @@ pub fn get_content_by_permalink(db: sqlite.Database, permalink: String) {
   use metadata <- result.try(meta)
   Ok(Some(#(metadata, res.2)))
 }
+
+@external(javascript, "./database_ffi.ts", "gleam_to_nullable")
+fn nullable(a: Option(a)) -> a

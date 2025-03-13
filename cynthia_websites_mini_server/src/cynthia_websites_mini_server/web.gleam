@@ -408,11 +408,17 @@ fn send_global_site_config(db: sqlite.Database) {
       response.new()
       |> response.set_body({
         json.object([
-          #("site_name", json.string(data.global_site_name)),
-          #("site_colour", json.string(data.global_colour)),
-          #("site_description", json.string(data.global_site_description)),
+          #("global_site_name", json.string(data.global_site_name)),
+          #("global_colour", json.string(data.global_colour)),
+          #(
+            "global_site_description",
+            json.string(data.global_site_description),
+          ),
           #("global_theme", json.string(data.global_theme)),
           #("global_theme_dark", json.string(data.global_theme_dark)),
+          #("server_port", data.server_port |> json.nullable(json.int)),
+          #("server_host", data.server_host |> json.nullable(json.string)),
+          #("posts_comments", json.bool(data.posts_comments)),
         ])
         |> json.to_string()
       })
