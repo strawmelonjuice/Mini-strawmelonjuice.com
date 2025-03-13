@@ -21,7 +21,6 @@ import lustre/attribute
 import lustre/element/html
 import plinth/browser/window
 import plinth/javascript/console
-import plinth/javascript/global
 
 fn hash_getter() -> String {
   // Load content based on current page

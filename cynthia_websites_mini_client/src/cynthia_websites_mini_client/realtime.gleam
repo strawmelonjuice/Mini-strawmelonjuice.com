@@ -46,9 +46,9 @@ fn update_styles(store: datamanagement.ClientStore) {
   |> dom.set_data(document.body(), "theme", _)
 }
 
-fn populate_global_config_table(store) {
-  datamanagement.populate_global_config_table(store)
-}
+// fn populate_global_config_table(store) {
+//   datamanagement.populate_global_config_table(store)
+// }
 
 // -- Loops and interval functions
 // --

@@ -3,7 +3,6 @@ import cynthia_websites_mini_client/datamanagement/clientstore.{
 }
 import cynthia_websites_mini_client/pottery/molds
 import gleam/int
-import gleam/string
 import lustre/element
 
 import cynthia_websites_mini_client/pottery
