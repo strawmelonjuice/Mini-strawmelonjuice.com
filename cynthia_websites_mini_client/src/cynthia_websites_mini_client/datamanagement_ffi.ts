@@ -5,7 +5,7 @@ import initSqlJs, { type Database, type Statement } from "sql.js";
 // This was earlier delayed and replaced with a class as storage method, but that is but a temporary solution.
 // If SQL.js does not work as expected, Postglide (Gleam wrapper around PGLite) should. However, that'd create a more persistent kind of storage (IndexedDB) that I do not want to tap into yet.
 const SQL = await initSqlJs({
-  locateFile: (file) => `https://sql.js.org/dist/${file}`,
+  locateFile: (_file) => `/assets/cynthia-mini/sql-wasm.wasm`,
 });
 
 interface flatGlobalConfig {
