@@ -9,8 +9,8 @@ import cynthia_websites_mini_server/static_routes
 import cynthia_websites_mini_shared/configtype.{ContentsPage, ContentsPost}
 import gleam/bit_array
 import gleam/bool
+import gleam/dict
 import gleam/javascript/array
-import gleam/javascript/map
 import gleam/javascript/promise.{type Promise}
 import gleam/json
 import gleam/option.{None, Some}
@@ -38,7 +38,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
         ),
       )
       dynastatic
-      |> map.get("/index.html")
+      |> dict.get("/index.html")
       |> result.unwrap(response.new())
       |> promise.resolve()
     }
@@ -131,7 +131,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
             <> "}",
           )
           dynastatic
-          |> map.get("/404")
+          |> dict.get("/404")
           |> result.unwrap(response.new())
         }
         Ok(Some(#(content_record, content_inner))) -> {
@@ -380,7 +380,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
             <> premixed.text_cyan(f),
           )
           dynastatic
-          |> map.get("/404")
+          |> dict.get("/404")
           |> result.unwrap(response.new())
           |> promise.resolve()
         }
@@ -395,7 +395,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
         <> premixed.text_lightblue(f),
       )
       dynastatic
-      |> map.get("/404")
+      |> dict.get("/404")
       |> result.unwrap(response.new())
       |> promise.resolve()
     }

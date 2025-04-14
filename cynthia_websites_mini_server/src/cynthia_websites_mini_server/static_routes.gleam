@@ -5,15 +5,15 @@ import cynthia_websites_mini_server/utils/files.{client_css, client_js}
 import cynthia_websites_mini_shared
 import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/ui
+import gleam/dict
 import gleam/javascript/array
-import gleam/javascript/map
 import gleam/option.{Some}
 
 pub fn static_routes(db: sqlite.Database) {
   let assert Ok(globalconfig) = database.get__entire_global_config(db)
-  map.new()
-  |> map.set("/index.html", main(globalconfig))
-  |> map.set("/404", notfound())
+  dict.new()
+  |> dict.insert("/index.html", main(globalconfig))
+  |> dict.insert("/404", notfound())
   |> Some
 }
 

@@ -10,7 +10,6 @@ import gleam/fetch
 import gleam/http
 import gleam/http/request
 import gleam/javascript/array.{type Array}
-import gleam/javascript/map.{type Map}
 import gleam/javascript/promise.{type Promise}
 import gleam/result
 import gleam/string
@@ -121,20 +120,20 @@ pub fn pull_from_global_config_table(
 }
 
 @external(javascript, "../datamanagement_ffi.ts", "get_menu_items")
-pub fn i_pull_menus(store: ClientStore) -> Map(Int, Array(#(String, String)))
+pub fn i_pull_menus(store: ClientStore) -> Dict(Int, Array(#(String, String)))
 
 pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
   let a = i_pull_menus(store)
   let b = dict.new()
   let c = 1
-  let b = case a |> map.get(c) {
+  let b = case a |> dict.get(c) {
     Error(_) -> b
     Ok(d) -> {
       dict.insert(b, c, array.to_list(d))
     }
   }
   let c = 2
-  let b = case a |> map.get(c) {
+  let b = case a |> dict.get(c) {
     Error(_) -> b
     Ok(d) -> {
       dict.insert(b, c, array.to_list(d))
@@ -142,7 +141,7 @@ pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
   }
 
   let c = 3
-  let b = case a |> map.get(c) {
+  let b = case a |> dict.get(c) {
     Error(_) -> b
     Ok(d) -> {
       dict.insert(b, c, array.to_list(d))
@@ -150,7 +149,7 @@ pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
   }
 
   let c = 4
-  let b = case a |> map.get(c) {
+  let b = case a |> dict.get(c) {
     Error(_) -> b
     Ok(d) -> {
       dict.insert(b, c, array.to_list(d))
@@ -158,7 +157,7 @@ pub fn pull_menus(store: ClientStore) -> Dict(Int, List(#(String, String))) {
   }
 
   let c = 5
-  let b = case a |> map.get(c) {
+  let b = case a |> dict.get(c) {
     Error(_) -> b
     Ok(d) -> {
       dict.insert(b, c, array.to_list(d))
