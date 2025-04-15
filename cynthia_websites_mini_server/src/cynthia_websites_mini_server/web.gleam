@@ -24,8 +24,10 @@ import simplifile
 
 pub fn handle_request(req: Request, db: sqlite.Database) {
   let assert Ok(req_uri) = req |> request.url() |> uri.parse()
+    as "Request URI should be valid"
   let path = req_uri.path
   let assert Some(dynastatic) = static_routes.static_routes(db)
+    as "Static routes should always be valid."
   case path {
     "/" -> {
       console.log(
@@ -88,6 +90,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
         |> get_request_body()
       use url_path_as_a_bitarray <- promise.await(promise_of_an_url_path)
       let assert Ok(url_path) = url_path_as_a_bitarray |> bit_array.to_string()
+        as "URL path should be valid"
       let url_path = case url_path |> string.ends_with("/") {
         True -> {
           url_path
@@ -246,6 +249,7 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
       use file_name_as_a_bitarray <- promise.await(promise_of_a_file_name)
       let assert Ok(file_name) =
         file_name_as_a_bitarray |> bit_array.to_string()
+        as "Could not decode filename for this request."
       case database.get_content_by_filename(db, file_name) {
         Error(e) -> {
           console.error(
