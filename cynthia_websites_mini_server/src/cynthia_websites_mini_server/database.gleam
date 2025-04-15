@@ -432,7 +432,8 @@ pub fn get_content_by_filename(
       }(),
     )
     |> result.map_error(fn(e) {
-      "Error decoding content from the database:\n\n"
+      // Add the (1) because this error message is used in the get_content_by_permalink function as well
+      "Error decoding content from the database: (1)\n\n"
       <> string.inspect(e)
       <> "\n\n"
     })
@@ -589,7 +590,8 @@ pub fn get_content_by_permalink(db: sqlite.Database, permalink: String) {
       }(),
     )
     |> result.map_error(fn(e) {
-      "Error decoding content from the database:\n\n"
+      // Add the (2) because this error message is used in the get_content_by_filename function as well
+      "Error decoding content from the database (2):\n\n"
       <> string.inspect(e)
       <> "\n\n"
     })
