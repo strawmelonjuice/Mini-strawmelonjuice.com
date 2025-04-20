@@ -87,10 +87,8 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
       // We get the content from the db and turn it into json, regardless of the kind. Client knows how to figure that out.
       let promise_of_an_url_path =
         req
-        |> get_request_body()
-      use url_path_as_a_bitarray <- promise.await(promise_of_an_url_path)
-      let assert Ok(url_path) = url_path_as_a_bitarray |> bit_array.to_string()
-        as "URL path should be valid"
+        |> get_request_body_as_text()
+      use url_path <- promise.await(promise_of_an_url_path)
       let url_path = case url_path |> string.ends_with("/") {
         True -> {
           url_path
@@ -245,11 +243,8 @@ pub fn handle_request(req: Request, db: sqlite.Database) {
       // We get the content from the db and turn it into json, regardless of the kind. Client knows how to figure that out.
       let promise_of_a_file_name =
         req
-        |> get_request_body()
-      use file_name_as_a_bitarray <- promise.await(promise_of_a_file_name)
-      let assert Ok(file_name) =
-        file_name_as_a_bitarray |> bit_array.to_string()
-        as "Could not decode filename for this request."
+        |> get_request_body_as_text()
+      use file_name <- promise.await(promise_of_a_file_name)
       case database.get_content_by_filename(db, file_name) {
         Error(e) -> {
           console.error(
@@ -447,6 +442,9 @@ fn send_global_site_config(db: sqlite.Database) {
 
 @external(javascript, "./request_ffi.ts", "get_request_body")
 pub fn get_request_body(req: Request) -> Promise(BitArray)
+
+@external(javascript, "./request_ffi.ts", "get_request_body_as_text")
+pub fn get_request_body_as_text(req: Request) -> Promise(String)
 
 @external(javascript, "./request_ffi.ts", "answer_bunrequest_with_file")
 pub fn answer_bunrequest_with_file(file: BunFile) -> Promise(response.Response)

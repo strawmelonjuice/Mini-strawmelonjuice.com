@@ -15,6 +15,12 @@ export async function get_request_body(req: Request) {
   return concatArrayBuffers(chunks);
 }
 
+export async function get_request_body_as_text(req: Request): Promise<string> {
+  const bits = await get_request_body(req);
+    const decoder = new TextDecoder("utf-8");
+    return decoder.decode(bits);
+}
+
 function concatArrayBuffers(chunks: Uint8Array[]): Uint8Array {
   const result = new Uint8Array(chunks.reduce((a, c) => a + c.length, 0));
   let offset = 0;
