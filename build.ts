@@ -512,21 +512,30 @@ switch (process.argv[2].toLowerCase()) {
     break;
   case "run-cd":
     {
-      console.log("Running server...");
-      // Run the server
-      Bun.spawnSync({
-        cmd: [
-          "bun",
-          path.join(
+      if (process.argv.includes("--direct")) {
+        console.log("Running server...");
+        // Run the server
+        process.chdir(process.argv[3])
+        const created = require(path.join(
             __dirname,
-            "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
-          ),
-        ],
-        stdout: "inherit",
-        stderr: "inherit",
-        stdin: "inherit",
-        cwd: process.argv[3],
-      });
+            "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.mjs",
+        ));
+        created.main();
+      } else {
+        Bun.spawnSync({
+          cmd: [
+            "bun",
+            path.join(
+                __dirname,
+                "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
+            ),
+          ],
+          stdout: "inherit",
+          stderr: "inherit",
+          stdin: "inherit",
+          cwd: process.argv[3],
+        });
+      }
     }
     break;
   case "run":
