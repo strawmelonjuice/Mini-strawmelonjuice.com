@@ -12,15 +12,15 @@
     "nodemon": "^3.1.9"
   },
   "scripts": {
-    "preinstall": "npx only-allow bun",
     "bundle": "bun ./build.ts bundle",
     "check": "bun ./build.ts check",
     "clean": "bun ./build.ts clean",
-    "test": "bun ./build.ts test",
-    "format": "bun ./build.ts fmt",
     "dev": "bun nodemon --exec bun ./build.ts -- run-cd './test/'",
+    "format": "bun ./build.ts fmt",
+    "preinstall": "npx only-allow bun",
     "prepack": "bun run bundle",
-    "run-in-test": "bun ./build.ts run-cd './test'"
+    "run-in-test": "bun ./build.ts run-cd './test'",
+    "test": "bun ./build.ts test"
   },
   "dependencies": {
     "@types/clean-css": "^4.2.11",
