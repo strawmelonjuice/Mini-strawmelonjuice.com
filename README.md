@@ -11,7 +11,7 @@ In return, Cynthia Mini comes with pre-made themes with each some customisable o
 
 ## Themes
 
-... Uh, well, that's awkward, I haven't come to this part yet ...
+[... Uh, well, that's awkward, I haven't come to this part yet ...](https://github.com/CynthiaWebsiteEngine/Mini/issues/1)
 
 ### Default theme
 
