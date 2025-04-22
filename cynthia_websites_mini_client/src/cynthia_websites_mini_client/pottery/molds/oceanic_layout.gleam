@@ -13,7 +13,6 @@
 //// This module is written to test the docs, it seems to be a
 //// good fit for the oceanic theme.
 
-
 import cynthia_websites_mini_client/datamanagement/clientstore.{type ClientStore}
 import cynthia_websites_mini_client/dom
 import gleam/dict.{type Dict}
