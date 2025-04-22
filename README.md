@@ -10,8 +10,9 @@ as for example custom formats are out of the optional.
 In return, Cynthia Mini comes with pre-made themes with each some customisable options!
 
 ## Themes
+A Cynthia Mini theme consists of the combination of a predefined colorscheme and layout. You can [add your own](https://github.com/CynthiaWebsiteEngine/Mini/blob/main/docs/contributing/add-theme.md) if you'd like!
 
-[... Uh, well, that's awkward, I haven't come to this part yet ...](https://github.com/CynthiaWebsiteEngine/Mini/issues/1)
+[Some themes are coming in!](https://github.com/CynthiaWebsiteEngine/Mini/issues/1)
 
 ### Default theme
 
