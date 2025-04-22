@@ -70,6 +70,9 @@ you should have no problem in either using it completely as templating language 
 
 #### #4 Create a PR
 
+> If you don't know how to create a pull request,
+> also see: <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>
+
 Of course, this one can be the most scary. But if you ran `bun run test` and the tests are passing, you should be good to go!
 Create a PR and wait for it to be reviewed. If you have any questions, feel free to put them in [issues](https://github.com/CynthiaWebsiteEngine/Mini/issues/new/) or email me at <mar@strawmelonjuice.com>.
 You can of course also put it your question in the PR, I'll be happy to help you out!
