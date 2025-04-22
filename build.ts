@@ -515,19 +515,21 @@ switch (process.argv[2].toLowerCase()) {
       if (process.argv.includes("--direct")) {
         console.log("Running server...");
         // Run the server
-        process.chdir(process.argv[3])
-        const created = require(path.join(
+        process.chdir(process.argv[3]);
+        const created = require(
+          path.join(
             __dirname,
             "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.mjs",
-        ));
+          ),
+        );
         created.main();
       } else {
         Bun.spawnSync({
           cmd: [
             "bun",
             path.join(
-                __dirname,
-                "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
+              __dirname,
+              "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
             ),
           ],
           stdout: "inherit",
@@ -578,6 +580,28 @@ switch (process.argv[2].toLowerCase()) {
           !(process.argv[3].toLowerCase() === "server")
         ) {
           console.log("Running tests for client:");
+          results.push(
+            Bun.spawnSync({
+              cmd: ["gleam", "test"],
+              cwd: "./cynthia_websites_mini_client/",
+              stdout: "inherit",
+              stderr: "inherit",
+            }).success,
+          );
+        }
+        if (
+          process.argv[3] == null ||
+          process.argv[3].toLowerCase() == "both"
+        ) {
+          console.log("Running tests for both:");
+          results.push(
+            Bun.spawnSync({
+              cmd: ["gleam", "test"],
+              cwd: "./cynthia_websites_mini_server/",
+              stdout: "inherit",
+              stderr: "inherit",
+            }).success,
+          );
           results.push(
             Bun.spawnSync({
               cmd: ["gleam", "test"],
