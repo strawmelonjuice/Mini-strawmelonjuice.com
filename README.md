@@ -14,11 +14,7 @@ A Cynthia Mini theme consists of the combination of a predefined colorscheme and
 
 [Some themes are coming in!](https://github.com/CynthiaWebsiteEngine/Mini/issues/1)
 
-### Default theme
-
-The default theme for light mode will be based on the DaisyUI "autumn" theme (light) or the "night" theme (dark), using
-Fira Sans as default font and using
-the "Cindy" layout templates.
+Also see [list of themes](https://github.com/CynthiaWebsiteEngine/Mini/blob/main/docs/themes.md)
 
 ## Functionality
 

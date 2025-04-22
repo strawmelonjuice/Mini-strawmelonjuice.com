@@ -32,19 +32,23 @@ For generating your own colorscheme instead of a daisyUI premixed colorscheme na
   "fonts-mono": ["Fira Mono", "Ubuntu Mono", "Noto Mono"],
   "font-size-mono": 14,
   "daisyUI": {
-    "primary": "#ff00ff",
-    "secondary": "#ff00ff",
-    "accent": "#00ffff",
-    "neutral": "#ff00ff",
-    "base-100": "#ff00ff",
-    "info": "#0000ff",
-    "success": "#00ff00",
-    "warning": "#00ff00",
-    "error": "#ff0000"
+    "mycolorschemename": {
+      "primary": "#ff00ff",
+      "secondary": "#ff00ff",
+      "accent": "#00ffff",
+      "neutral": "#ff00ff",
+      "base-100": "#ff00ff",
+      "info": "#0000ff",
+      "success": "#00ff00",
+      "warning": "#00ff00",
+      "error": "#ff0000"
+    }
   },
   "layout": "mylayout"
 }
 ```
+
+Please note that color scheme names need to be unique, and that when you've defined a colorscheme like above, it can be reffered to by name with other layouts.
 
 #### #3 Add your layout
 

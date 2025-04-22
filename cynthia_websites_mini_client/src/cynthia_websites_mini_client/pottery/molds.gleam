@@ -2,6 +2,7 @@
 import cynthia_websites_mini_client/datamanagement/clientstore
 import cynthia_websites_mini_client/dom
 import gleam/dict.{type Dict}
+import gleam/list
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
@@ -11,6 +12,7 @@ import plinth/javascript/console
 
 // Imports from layout modules
 import cynthia_websites_mini_client/pottery/molds/cindy_simple
+import cynthia_websites_mini_client/pottery/molds/oceanic_layout
 
 /// Molds is the name we use for templating here.
 pub fn into(
@@ -41,6 +43,21 @@ pub fn into(
           a,
         ) {
           cindy_simple.post_layout(content, metadata, store, priority)
+        }
+      }
+    }
+    "oceanic" -> {
+      // Oceanic also shows different layouts for pages and posts
+      case is_post {
+        False -> fn(content: Element(a), metadata: Dict(String, String)) -> Element(
+          a,
+        ) {
+          oceanic_layout.page_layout(content, metadata, store, priority)
+        }
+        True -> fn(content: Element(a), metadata: Dict(String, String)) -> Element(
+          a,
+        ) {
+          oceanic_layout.post_layout(content, metadata, store, priority)
         }
       }
     }
@@ -79,13 +96,17 @@ pub fn retroactive_menu_update(store: clientstore.ClientStore) {
           plinth_element.set_inner_html(menu_1, temp_menu)
           let assert Ok(temp_menu) =
             plinth_document.query_selector(
-              // Makes this quite expensive but the retroactive_menu_update is not called often for that reason already.
               "#temporary_menu_items_while_retroactively_updating_menu",
             )
+            as "Could not find temporary menu element"
+          // Makes this quite expensive but the retroactive_menu_update is not called often for that reason already.
           let menu = dom.get_inner_html(temp_menu)
           plinth_element.remove(temp_menu)
           plinth_element.set_inner_html(menu_1, menu)
         }
+        // Some layouts have advanced menu handling, and prefer to take it to their own module.
+        // This keeps the code cleaner and more readable.
+        "oceanic" -> oceanic_layout.menu_retroupdater(store, res)
         other -> {
           let f = "Unknown layout name: " <> other
           panic as f

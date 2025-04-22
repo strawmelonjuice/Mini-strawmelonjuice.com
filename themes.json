@@ -52,5 +52,37 @@
     "font-size-mono": 14,
     "daisyUI": "coffee",
     "layout": "cindy"
+  },
+  {
+    "name": "oceanic",
+    "prevalence": "dark",
+    "fonts": [
+      "Poppins",
+      "Open Sans",
+      "Roboto"
+    ],
+    "font-size": 16,
+    "fonts-mono": [
+      "Fira Code",
+      "JetBrains Mono",
+      "Consolas"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "oceanic": {
+        "primary": "#4a9df8",
+        "secondary": "#38b2ac",
+        "accent": "#805ad5",
+        "neutral": "#4a5568",
+        "base-100": "#1a202c",
+        "base-200": "#2d3748",
+        "base-300": "#4a5568",
+        "info": "#3182ce",
+        "success": "#48bb78",
+        "warning": "#ecc94b",
+        "error": "#f56565"
+      }
+    },
+    "layout": "oceanic"
   }
 ]
