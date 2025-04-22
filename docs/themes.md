@@ -4,7 +4,8 @@
 
 ## How Themes Work
 
-Cynthia Mini uses a theme system that combines color schemes with layouts to create a complete visual experience. Themes automatically adapt to your system's light/dark mode preference, but you can also explicitly set your preferred theme in the site configuration.
+Cynthia Mini uses a theme system that combines color schemes with layouts to create a complete visual experience.
+One of these themes is automatically selected based on your system's light or dark mode preference.
 
 To specify a theme in your `cynthia-mini.toml` file, edit one or both lines of:
 
@@ -13,7 +14,8 @@ theme = "autumn"
 theme_dark = "oceanic"
 ```
 
-If no theme is specified, the system will default to "autumn" for light mode and "night" for dark mode.
+If no theme is specified, the system will default to "autumn" for light mode and
+"night" for dark mode.
 
 ## Available Themes
 
@@ -23,14 +25,14 @@ Embrace the warm, inviting ambiance of fall with the Autumn theme. Features eart
 
 > **Default Light Theme** - Automatically applied when light mode is preferred
 
-| Feature | Details |
-|---------|---------|
-| Layout | cindy |
-| Mode | Light |
-| Font Family | Fira Sans, Ubuntu, Noto Sans |
-| Font Size | 15px |
+| Feature        | Details                           |
+| -------------- | --------------------------------- |
+| Layout         | cindy                             |
+| Mode           | Light                             |
+| Font Family    | Fira Sans, Ubuntu, Noto Sans      |
+| Font Size      | 15px                              |
 | Monospace Font | Fira Mono, Ubuntu Mono, Noto Mono |
-| Monospace Size | 14px |
+| Monospace Size | 14px                              |
 
 ### Night
 
@@ -38,27 +40,27 @@ A sophisticated dark mode experience that reduces eye strain while maintaining p
 
 > **Default Dark Theme** - Automatically applied when dark mode is preferred
 
-| Feature | Details |
-|---------|---------|
-| Layout | cindy |
-| Mode | Dark |
-| Font Family | Fira Sans, Ubuntu, Noto Sans |
-| Font Size | 15px |
+| Feature        | Details                           |
+| -------------- | --------------------------------- |
+| Layout         | cindy                             |
+| Mode           | Dark                              |
+| Font Family    | Fira Sans, Ubuntu, Noto Sans      |
+| Font Size      | 15px                              |
 | Monospace Font | Fira Mono, Ubuntu Mono, Noto Mono |
-| Monospace Size | 14px |
+| Monospace Size | 14px                              |
 
 ### Coffee
 
 Rich and robust like your favorite brew, the Coffee theme delivers a dark aesthetic with deep, warm undertones inspired by coffee hues.
 
-| Feature | Details |
-|---------|---------|
-| Layout | cindy |
-| Mode | Dark |
-| Font Family | Fira Sans, Ubuntu, Noto Sans |
-| Font Size | 15px |
+| Feature        | Details                           |
+| -------------- | --------------------------------- |
+| Layout         | cindy                             |
+| Mode           | Dark                              |
+| Font Family    | Fira Sans, Ubuntu, Noto Sans      |
+| Font Size      | 15px                              |
 | Monospace Font | Fira Mono, Ubuntu Mono, Noto Mono |
-| Monospace Size | 14px |
+| Monospace Size | 14px                              |
 
 ### Oceanic
 
@@ -66,12 +68,13 @@ Cool blues and calming teals create an immersive dark experience. Unlike other t
 
 Oceanic was created as a test, to check how accurate [add theme](https://github.com/CynthiaWebsiteEngine/Mini/blob/main/docs/contributing/add-theme.md) was. However, I decided to keep it.
 
-| Feature | Details |
-|---------|---------|
-| Layout | oceanic (custom) |
-| Mode | Dark |
-| Font Family | Poppins, Open Sans, Roboto |
-| Font Size | 16px |
-| Monospace Font | Fira Code, JetBrains Mono, Consolas |
-| Monospace Size | 14px |
+| Feature          | Details                                                             |
+| ---------------- | ------------------------------------------------------------------- |
+| Layout           | oceanic (custom)                                                    |
+| Mode             | Dark                                                                |
+| Font Family      | Poppins, Open Sans, Roboto                                          |
+| Font Size        | 16px                                                                |
+| Monospace Font   | Fira Code, JetBrains Mono, Consolas                                 |
+| Monospace Size   | 14px                                                                |
 | Special Features | Custom color palette, supports two menus, enhanced for code display |
+
