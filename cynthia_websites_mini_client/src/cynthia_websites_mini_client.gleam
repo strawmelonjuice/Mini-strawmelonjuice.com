@@ -3,6 +3,7 @@
 // IMPORTS ---------------------------------------------------------------------
 
 import cynthia_websites_mini_client/utils
+import cynthia_websites_mini_shared/configtype
 import gleam/dynamic/decode.{type Decoder}
 import gleam/http
 import gleam/http/request
@@ -24,6 +25,7 @@ import lustre/effect.{type Effect}
 
 // rsvp is a library for making HTTP requests specifically for Lustre. It provides
 // functions for describing requests as effects that can be executed by the runtime.
+import modem
 import rsvp
 
 // MAIN ------------------------------------------------------------------------
@@ -40,29 +42,24 @@ pub fn main() {
 
 // MODEL -----------------------------------------------------------------------
 
-type Model {
-  Model(
-    // Yeah, this should be some config custom type
-    page_title: Option(String),
-    content: Option(List(Todo)),
-  )
-}
+type Model =
+  Option(configtype.SharedCynthiaConfig)
 
-type Todo {
-  Todo(id: Int, title: String, completed: Bool)
+type Contents {
+  Contents(id: Int, title: String, completed: Bool)
 }
 
 /// Now our app can perform effects, the return type of the `init` and `update`
 /// functions changes to return a tuple.
 fn init(_) -> #(Model, Effect(Msg)) {
-  let model = Model(None, None)
+  let model = None
   let effect = fetch_all(on_response: ApiReturnedData)
 
   #(model, effect)
 }
 
 fn fetch_all(
-  on_response handle_response: fn(Result(List(Todo), rsvp.Error)) -> msg,
+  on_response handle_response: fn(Result(List(Contents), rsvp.Error)) -> msg,
 ) -> Effect(msg) {
   let url = utils.phone_home_url() <> "/fetch"
   let decoder = decode.list(data_decoder()) |> decode.map(list.take(_, 10))
@@ -73,44 +70,44 @@ fn fetch_all(
   rsvp.get(url, handler)
 }
 
-fn data_decoder() -> Decoder(Todo) {
+fn data_decoder() -> Decoder(Contents) {
   use id <- decode.field("id", decode.int)
   use title <- decode.field("title", decode.string)
   use completed <- decode.field("completed", decode.bool)
 
-  decode.success(Todo(id:, title:, completed:))
+  decode.success(Contents(id:, title:, completed:))
 }
 
 // UPDATE ----------------------------------------------------------------------
 
 type Msg {
-  ApiReturnedData(Result(List(Todo), rsvp.Error))
-  ApiUpdatedTodo(Result(Int, rsvp.Error))
+  ApiReturnedData(Result(List(Contents), rsvp.Error))
+  ApiUpdatedContents(Result(Int, rsvp.Error))
   UserClickedComplete(id: Int, completed: Bool)
 }
 
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
     // When we have no side effects to perform, we return `effect.none()`.
-    ApiReturnedTodos(Ok(todos)) -> #(todos, effect.none())
-    ApiReturnedTodos(Error(_)) -> #([], effect.none())
+    ApiReturnedContentss(Ok(todos)) -> #(todos, effect.none())
+    ApiReturnedContentss(Error(_)) -> #([], effect.none())
 
-    ApiUpdatedTodo(Ok(id)) -> {
+    ApiUpdatedContents(Ok(id)) -> {
       let todos =
         list.map(model, fn(item) {
           case item.id == id {
-            True -> Todo(..item, completed: !item.completed)
+            True -> Contents(..item, completed: !item.completed)
             False -> item
           }
         })
 
       #(todos, effect.none())
     }
-    ApiUpdatedTodo(Error(_)) -> #(model, effect.none())
+    ApiUpdatedContents(Error(_)) -> #(model, effect.none())
 
     UserClickedComplete(id, completed) -> #(
       model,
-      complete_todo(id:, completed:, on_response: ApiUpdatedTodo),
+      complete_todo(id:, completed:, on_response: ApiUpdatedContents),
     )
   }
 }
@@ -142,7 +139,9 @@ fn complete_todo(
 
 fn view(model: Model) -> Element(Msg) {
   html.div([attribute.class("p-32 mx-auto w-full max-w-2xl space-y-8")], [
-    html.h1([attribute.class("font-semibold text-2xl")], [html.text("Todo:")]),
+    html.h1([attribute.class("font-semibold text-2xl")], [
+      html.text("Contents:"),
+    ]),
     keyed.ul([attribute.class("flex flex-col gap-2")], {
       list.map(model, fn(item) {
         let key = int.to_string(item.id)
@@ -158,7 +157,7 @@ fn view(model: Model) -> Element(Msg) {
 }
 
 fn view_todo(
-  item item: Todo,
+  item item: Contents,
   on_complete handle_complete: fn(Bool) -> msg,
 ) -> Element(msg) {
   html.label([attribute.class("flex gap-2 items-baseline")], [

@@ -8,16 +8,15 @@ import gleam/list
 import gleam/result
 import gleam/string
 import lustre/attribute.{attribute}
-import lustre/element
+import lustre/element.{type Element}
 import lustre/element/html
-import lustre/internals/vdom
 
 pub fn render_content(
   store: clientstore.ClientStore,
   data: configtype.Contents,
   inner: String,
   is priority: Bool,
-) -> vdom.Element(a) {
+) -> Element(a) {
   let is_a_postlist = case data {
     configtype.ContentsPage(r) -> string.starts_with(r.permalink, "!")
     configtype.ContentsPost(_) -> False
@@ -71,7 +70,7 @@ pub fn render_content(
   into(content, variables |> dict.insert("global_site_name", site_name))
 }
 
-pub fn parse_html(inner: String, filename: String) -> vdom.Element(a) {
+pub fn parse_html(inner: String, filename: String) -> Element(a) {
   case filename |> string.split(".") |> list.last {
     // Markdown is rendered with a custom renderer. After that, it can be pasted into the template.
     Ok("md") | Ok("markdown") | Ok("mdown") ->
