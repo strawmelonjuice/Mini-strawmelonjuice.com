@@ -9,14 +9,18 @@
 //// - Wave-inspired gradients and decorative elements
 //// - Two-level menu system (primary navigation + contextual secondary navigation)
 //// - Responsive design that adapts to different screen sizes
-//// 
+////
 //// This module is written to test the docs, it seems to be a
 //// good fit for the oceanic theme.
 
-import cynthia_websites_mini_client/datamanagement/clientstore.{type ClientStore}
 import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_client/model_type
+import cynthia_websites_mini_shared/configtype
 import gleam/dict.{type Dict}
+import gleam/dynamic
+import gleam/dynamic/decode.{type Dynamic}
 import gleam/list
+import gleam/option.{None}
 import gleam/result
 import gleam/string
 import lustre/attribute
@@ -43,31 +47,24 @@ import plinth/javascript/console
 /// @return A fully constructed page layout
 pub fn page_layout(
   from content: Element(a),
-  with variables: Dict(String, String),
-  store store: clientstore.ClientStore,
-  is priority: Bool,
+  with variables: Dict(String, Dynamic),
+  store model: model_type.Model,
 ) -> Element(a) {
   // Load the primary navigation menu if not in priority mode
-  let menu = case priority {
-    False -> {
-      clientstore.pull_menus(store)
-      |> menu_1()
-    }
-    True -> []
-  }
+  let menu = menu_1(model.computed_menus)
 
   // Load the secondary navigation menu if not in priority mode
-  let secondary_menu = case priority {
-    False -> {
-      clientstore.pull_menus(store)
-      |> menu_2()
-    }
-    True -> []
-  }
+  let secondary_menu = menu_2(model.computed_menus)
 
   // Extract required metadata with assertions to ensure it exists
-  let assert Ok(title) = dict.get(variables, "title")
-  let assert Ok(description) = dict.get(variables, "description_html")
+  let assert Ok(title) =
+    dict.get(variables, "title")
+    |> result.unwrap(dynamic.from(None))
+    |> decode.run(decode.string)
+  let assert Ok(description) =
+    dict.get(variables, "description_html")
+    |> result.unwrap(dynamic.from(None))
+    |> decode.run(decode.string)
 
   // Build the page header with title and description
   let page_header =
@@ -111,8 +108,8 @@ pub fn page_layout(
   oceanic_common(
     content,
     menu,
-    html.div([], [page_header]),
     // Wrap the header in a div for consistency
+    html.div([], [page_header]),
     secondary_menu,
     variables,
   )
@@ -138,31 +135,24 @@ pub fn page_layout(
 /// @return A fully constructed post layout
 pub fn post_layout(
   from content: Element(a),
-  with variables: Dict(String, String),
-  store store: clientstore.ClientStore,
-  is priority: Bool,
+  with variables: Dict(String, Dynamic),
+  store model: model_type.Model,
 ) -> Element(a) {
   // Load the primary navigation menu if not in priority mode
-  let menu = case priority {
-    False -> {
-      clientstore.pull_menus(store)
-      |> menu_1()
-    }
-    True -> []
-  }
+  let menu = menu_1(model.computed_menus)
 
   // Load the secondary navigation menu if not in priority mode
-  let secondary_menu = case priority {
-    False -> {
-      clientstore.pull_menus(store)
-      |> menu_2()
-    }
-    True -> []
-  }
+  let secondary_menu = menu_2(model.computed_menus)
 
   // Extract required metadata with assertions
-  let assert Ok(title) = dict.get(variables, "title")
-  let assert Ok(description) = dict.get(variables, "description_html")
+  let assert Ok(title) =
+    dict.get(variables, "title")
+    |> result.unwrap(dynamic.from(None))
+    |> decode.run(decode.string)
+  let assert Ok(description) =
+    dict.get(variables, "description_html")
+    |> result.unwrap(dynamic.from(None))
+    |> decode.run(decode.string)
 
   // Build the post metadata sidebar content
   let post_meta =
@@ -217,6 +207,8 @@ pub fn post_layout(
             html.text(
               variables
               |> dict.get("date_published")
+              |> result.unwrap(dynamic.from(None))
+              |> decode.run(decode.string)
               |> result.unwrap("unknown"),
             ),
           ]),
@@ -233,7 +225,11 @@ pub fn post_layout(
           ]),
           html.div([attribute.class("text-base-content/80")], [
             html.text(
-              variables |> dict.get("date_modified") |> result.unwrap("unknown"),
+              variables
+              |> dict.get("date_modified")
+              |> result.unwrap(dynamic.from(None))
+              |> decode.run(decode.string)
+              |> result.unwrap("unknown"),
             ),
           ]),
           // Category - with category icon
@@ -249,7 +245,11 @@ pub fn post_layout(
           ]),
           html.div([attribute.class("text-base-content/80")], [
             html.text(
-              variables |> dict.get("category") |> result.unwrap("unknown"),
+              variables
+              |> dict.get("category")
+              |> result.unwrap(dynamic.from(None))
+              |> decode.run(decode.string)
+              |> result.unwrap("unknown"),
             ),
           ]),
         ],
@@ -274,29 +274,17 @@ pub fn post_layout(
           [attribute.class("flex flex-wrap gap-2")],
           variables
             |> dict.get("tags")
-            |> result.unwrap("")
-            |> string.split(",")
+            |> result.unwrap(dynamic.from([]))
+            |> decode.run(decode.list(decode.string))
+            |> result.unwrap([])
+            |> list.map(string.trim)
             |> list.map(fn(tag) {
-              let tag = tag |> string.trim()
               html.a(
                 [
-                  attribute.class(
-                    "btn btn-sm btn-outline btn-primary relative overflow-hidden group",
-                  ),
+                  attribute.class("btn btn-sm btn-outline btn-primary"),
                   attribute.href("#!/tag/" <> tag),
                 ],
-                [
-                  // Wave decoration inside tag buttons - enhances theme consistency
-                  html.span(
-                    [
-                      attribute.class(
-                        "absolute inset-0 bg-gradient-to-r from-primary via-accent to-secondary opacity-20 group-hover:opacity-40 transition-opacity",
-                      ),
-                    ],
-                    [],
-                  ),
-                  html.text(tag),
-                ],
+                [html.text(tag)],
               )
             }),
         ),
@@ -323,11 +311,20 @@ fn oceanic_common(
   menu: List(Element(a)),
   post_meta: Element(a),
   secondary_menu: List(Element(a)),
-  variables: Dict(String, String),
+  variables: Dict(String, Dynamic),
 ) -> Element(a) {
   // Extract site name and determine if this is a post
-  let assert Ok(site_name) = dict.get(variables, "global_site_name")
-  let is_post = dict.get(variables, "content_type") == Ok("post")
+  let assert Ok(site_name) =
+    dict.get(variables, "global_site_name")
+    |> result.unwrap(dynamic.from(None))
+    |> decode.run(decode.string)
+  let is_post =
+    {
+      dict.get(variables, "content_type")
+      |> result.unwrap(dynamic.from(None))
+      |> decode.run(decode.string)
+    }
+    == Ok("post")
 
   html.div(
     [
@@ -564,104 +561,4 @@ pub fn render_nav_menu(
       html.li([], [html.a([attribute.href(url)], [html.text(name)])])
     })
   })
-}
-
-/// `molds.retroactive_menu_update()` leads here for the oceanic layout.
-/// 
-/// This function updates the menu items in the layout without
-/// re-rendering the entire page.
-/// 
-/// It was exported to its own module to avoid code unreadability in the
-/// `molds` module.
-pub fn menu_retroupdater(
-  store: ClientStore,
-  res: Dict(Int, List(#(String, String))),
-) {
-  // Update primary menu
-  let temp_menu =
-    res
-    |> menu_1()
-    |> html.div(
-      [
-        attribute.id("temporary_menu_items_while_retroactively_updating_menu"),
-        attribute.class("hidden"),
-      ],
-      _,
-    )
-    |> element.to_string()
-  let assert Ok(menu_1) = plinth_document.query_selector("#menu_1_inside")
-  plinth_element.set_inner_html(menu_1, temp_menu)
-  let assert Ok(temp_menu) =
-    plinth_document.query_selector(
-      "#temporary_menu_items_while_retroactively_updating_menu",
-    )
-    as "Could not find temporary menu element"
-  // Makes this quite expensive but the retroactive_menu_update is not called often for that reason already.
-  let menu = dom.get_inner_html(temp_menu)
-  plinth_element.remove(temp_menu)
-  plinth_element.set_inner_html(menu_1, menu)
-
-  // Update secondary menu
-  let secondary_menu_items = menu_2(res)
-
-  // Check if the menu container exists
-  case plinth_document.query_selector("#menu_2_inside") {
-    Ok(menu_2_container) -> {
-      // Create temporary container for secondary menu items
-      let temp_menu_2 =
-        secondary_menu_items
-        |> html.div(
-          [
-            attribute.id(
-              "temporary_menu_items_while_retroactively_updating_menu_2",
-            ),
-            attribute.class("hidden"),
-          ],
-          _,
-        )
-        |> element.to_string()
-
-      // Update the secondary menu container
-      plinth_element.set_inner_html(menu_2_container, temp_menu_2)
-
-      // Get the generated HTML and clean up
-      case
-        plinth_document.query_selector(
-          "#temporary_menu_items_while_retroactively_updating_menu_2",
-        )
-      {
-        Ok(temp_menu_2_element) -> {
-          let menu_2 = dom.get_inner_html(temp_menu_2_element)
-          plinth_element.remove(temp_menu_2_element)
-          plinth_element.set_inner_html(menu_2_container, menu_2)
-
-          // Show/hide the parent container based on whether there are items
-          case plinth_document.query_selector("#secondary_menu_container") {
-            Ok(container) -> {
-              case list.is_empty(secondary_menu_items) {
-                True ->
-                  plinth_element.set_attribute(
-                    container,
-                    "class",
-                    "mb-4 hidden",
-                  )
-                False ->
-                  plinth_element.set_attribute(container, "class", "mb-4")
-              }
-            }
-            Error(_) -> {
-              console.log("Secondary menu container not found")
-            }
-          }
-        }
-        Error(_) -> {
-          console.warn("Could not find temporary secondary menu element")
-        }
-      }
-    }
-    Error(_) -> {
-      // No secondary menu container found, this is normal for some pages
-      console.log("No secondary menu container found, skipping update")
-    }
-  }
 }

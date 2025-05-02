@@ -1,10 +1,14 @@
-import cynthia_websites_mini_client/datamanagement/clientstore
+import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pottery/molds
 import cynthia_websites_mini_client/pottery/paints
 import cynthia_websites_mini_shared/configtype
+import cynthia_websites_mini_shared/contenttypes
 import gleam/bool
 import gleam/dict
+import gleam/dynamic
+import gleam/dynamic/decode
 import gleam/list
+import gleam/option
 import gleam/result
 import gleam/string
 import lustre/attribute.{attribute}
@@ -12,62 +16,71 @@ import lustre/element.{type Element}
 import lustre/element/html
 
 pub fn render_content(
-  store: clientstore.ClientStore,
-  data: configtype.Contents,
+  model: Model,
+  content: contenttypes.Content,
   inner: String,
-  is priority: Bool,
 ) -> Element(a) {
-  let is_a_postlist = case data {
-    configtype.ContentsPage(r) -> string.starts_with(r.permalink, "!")
-    configtype.ContentsPost(_) -> False
+  let is_a_postlist = case content.data {
+    contenttypes.PageData(..) -> string.starts_with(content.permalink, "!")
+    contenttypes.PostData(..) -> False
   }
   use <- bool.lazy_guard(is_a_postlist, fn() { html.data([], []) })
-  let assert Ok(def) = paints.get_sytheme(store)
-  let #(into, content, variables) = case data {
-    configtype.ContentsPage(page_data) -> {
-      let mold = case page_data.layout {
-        "default" | "theme" | "" ->
-          molds.into(def.layout, "page", store, priority)
-        layout -> molds.into(layout, "page", store, priority)
+  let assert Ok(def) = paints.get_sytheme(model)
+  let #(into, content, variables) = case content.data {
+    contenttypes.PageData(_) -> {
+      let mold = case content.layout {
+        "default" | "theme" | "" -> molds.into(def.layout, "page", model)
+        layout -> molds.into(layout, "page", model)
       }
       let description =
-        page_data.description
+        content.description
         |> parse_html("descr.md")
         |> element.to_string
       let variables =
         dict.new()
-        |> dict.insert("title", page_data.title)
-        |> dict.insert("description_html", description)
-        |> dict.insert("description", page_data.description)
-      #(mold, parse_html(inner, page_data.filename), variables)
+        |> dict.insert("title", content.title |> dynamic.from)
+        |> dict.insert("description_html", description |> dynamic.from)
+        |> dict.insert("description", content.description |> dynamic.from)
+      #(mold, parse_html(inner, content.filename), variables)
     }
-    configtype.ContentsPost(post_data) -> {
-      let mold = case post_data.layout {
-        "default" | "theme" | "" ->
-          molds.into(def.layout, "post", store, priority)
-        layout -> molds.into(layout, "post", store, priority)
+    contenttypes.PostData(
+      category:,
+      date_published:,
+      date_updated:,
+      comments:,
+      tags:,
+    ) -> {
+      let mold = case content.layout {
+        "default" | "theme" | "" -> molds.into(def.layout, "post", model)
+        layout -> molds.into(layout, "post", model)
       }
       let description =
-        post_data.description
+        content.description
         |> parse_html("descr.md")
         |> element.to_string
       let variables =
         dict.new()
-        |> dict.insert("title", post_data.title)
-        |> dict.insert("description_html", description)
-        |> dict.insert("description", post_data.description)
-        |> dict.insert("date_published", post_data.post.date_posted)
-        |> dict.insert("date_modified", post_data.post.date_updated)
-        |> dict.insert("category", post_data.post.category)
-        |> dict.insert("tags", post_data.post.tags |> string.join(", "))
-      #(mold, parse_html(inner, post_data.filename), variables)
+        |> dict.insert("title", dynamic.from(content.title))
+        |> dict.insert("description_html", description |> dynamic.from)
+        |> dict.insert("description", content.description |> dynamic.from)
+        |> dict.insert("date_published", date_published |> dynamic.from)
+        |> dict.insert("date_modified", date_updated |> dynamic.from)
+        |> dict.insert("comments", comments |> dynamic.from)
+        |> dict.insert("category", category |> dynamic.from)
+        |> dict.insert("tags", tags |> string.join(", ") |> dynamic.from)
+      #(mold, parse_html(inner, content.filename), variables)
     }
   }
   // Other stuff should be added to vars here, like site metadata, ~menu links~, etc. EDIT: Menu links go in their own thing.
   let site_name =
-    clientstore.pull_from_global_config_table(store, "site_name")
+    model.complete_data
+    |> option.map(fn(a) { a.global_site_name })
+    |> option.to_result(Nil)
     |> result.unwrap("My Site Name")
-  into(content, variables |> dict.insert("global_site_name", site_name))
+  into(
+    content,
+    variables |> dict.insert("global_site_name", dynamic.from(site_name)),
+  )
 }
 
 pub fn parse_html(inner: String, filename: String) -> Element(a) {

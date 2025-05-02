@@ -1,9 +1,23 @@
 import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_client/messages.{
+  type Msg, UserComment, UserNavigateTo,
+}
+import cynthia_websites_mini_client/model_type.{type Model}
+import cynthia_websites_mini_shared/configtype
+import gleam/option.{type Option, None, Some}
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
 
-pub fn initial_view() -> Element(a) {
+pub fn main(model: Model) -> Element(Msg) {
+  case model.complete_data {
+    None -> initial_view()
+    Some(p) ->
+      todo as "What to do in view when there's like... data and stuff...?..."
+  }
+}
+
+pub fn initial_view() -> Element(Msg) {
   let assert Ok(_) = dom.push_title("Cynthia Mini: Loading...")
   html.div(
     [

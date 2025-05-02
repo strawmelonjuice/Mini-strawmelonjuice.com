@@ -1,9 +1,14 @@
 //// Cindy Simple Layout module
+////
+//// Default OOTD layout for Cynthia Mini.
 
 // Common imports for layouts
-import cynthia_websites_mini_client/datamanagement/clientstore
+import cynthia_websites_mini_client/model_type
 import gleam/dict.{type Dict}
+import gleam/dynamic
+import gleam/dynamic/decode.{type Dynamic}
 import gleam/list
+import gleam/option
 import gleam/result
 import gleam/string
 import lustre/attribute
@@ -17,19 +22,23 @@ import plinth/browser/window
 /// - `content`
 pub fn page_layout(
   from content: Element(a),
-  with variables: Dict(String, String),
-  store store: clientstore.ClientStore,
-  is priority: Bool,
+  with variables: Dict(String, Dynamic),
+  store model: model_type.Model,
 ) -> Element(a) {
-  let menu = case priority {
-    False -> {
-      clientstore.pull_menus(store)
-      |> menu_1()
-    }
-    True -> []
-  }
-  let assert Ok(title) = dict.get(variables, "title")
-  let assert Ok(description) = dict.get(variables, "description_html")
+  let menu = menu_1(model.computed_menus)
+  let assert Ok(title) =
+    decode.run(
+      result.unwrap(dict.get(variables, "title"), dynamic.from(option.None)),
+      decode.string,
+    )
+  let assert Ok(description) =
+    decode.run(
+      result.unwrap(
+        dict.get(variables, "description_html"),
+        dynamic.from(option.None),
+      ),
+      decode.string,
+    )
   html.div([attribute.class("break-words")], [
     html.h3(
       [attribute.class("font-bold text-2xl text-center text-base-content")],
@@ -45,19 +54,23 @@ pub fn page_layout(
 
 pub fn post_layout(
   from content: Element(a),
-  with variables: Dict(String, String),
-  store store: clientstore.ClientStore,
-  is priority: Bool,
+  with variables: Dict(String, Dynamic),
+  store model: model_type.Model,
 ) -> Element(a) {
-  let menu = case priority {
-    False -> {
-      clientstore.pull_menus(store)
-      |> menu_1()
-    }
-    True -> []
-  }
-  let assert Ok(title) = dict.get(variables, "title")
-  let assert Ok(description) = dict.get(variables, "description_html")
+  let menu = menu_1(model.computed_menus)
+  let assert Ok(title) =
+    decode.run(
+      result.unwrap(dict.get(variables, "title"), dynamic.from(option.None)),
+      decode.string,
+    )
+  let assert Ok(description) =
+    decode.run(
+      result.unwrap(
+        dict.get(variables, "description_html"),
+        dynamic.from(option.None),
+      ),
+      decode.string,
+    )
   html.div([], [
     html.div([], [
       html.h3(
@@ -77,14 +90,32 @@ pub fn post_layout(
       html.b([attribute.class("font-bold")], [html.text("Published")]),
       html.div([], [
         html.text(
-          variables |> dict.get("date_published") |> result.unwrap("unknown"),
+          {
+            decode.run(
+              result.unwrap(
+                dict.get(variables, "date_published"),
+                dynamic.from("unknown"),
+              ),
+              decode.string,
+            )
+          }
+          |> result.unwrap("unknown"),
         ),
       ]),
       // ----------------------
       html.b([attribute.class("font-bold")], [html.text("Modified")]),
       html.div([], [
         html.text(
-          variables |> dict.get("date_modified") |> result.unwrap("unknown"),
+          {
+            decode.run(
+              result.unwrap(
+                dict.get(variables, "date_modified"),
+                dynamic.from("unknown"),
+              ),
+              decode.string,
+            )
+          }
+          |> result.unwrap("unknown"),
         ),
       ]),
       // ----------------------
@@ -92,7 +123,16 @@ pub fn post_layout(
         html.b([attribute.class("font-bold")], [html.text("Category")]),
       ]),
       html.div([], [
-        html.text(variables |> dict.get("category") |> result.unwrap("unknown")),
+        html.text(
+          decode.run(
+            result.unwrap(
+              dict.get(variables, "category"),
+              dynamic.from("unknown"),
+            ),
+            decode.string,
+          )
+          |> result.unwrap("unknown"),
+        ),
       ]),
     ]),
     html.div([attribute.class("grid grid-cols-1 grid-rows-1 gap-2")], [
@@ -102,10 +142,11 @@ pub fn post_layout(
           [],
           variables
             |> dict.get("tags")
-            |> result.unwrap("")
-            |> string.split(",")
+            |> result.unwrap(dynamic.from([]))
+            |> decode.run(decode.list(decode.string))
+            |> result.unwrap([])
+            |> list.map(string.trim)
             |> list.map(fn(tag) {
-              let tag = tag |> string.trim()
               html.a(
                 [
                   attribute.class("btn btn-sm btn-outline btn-primary"),
@@ -125,9 +166,13 @@ fn cindy_common(
   content: Element(a),
   menu: List(Element(a)),
   post_meta: Element(a),
-  variables: Dict(String, String),
+  variables: Dict(String, Dynamic),
 ) {
-  let assert Ok(site_name) = dict.get(variables, "global_site_name")
+  let assert Ok(site_name) = {
+    dict.get(variables, "global_site_name")
+    |> result.unwrap(dynamic.from(option.None))
+    |> decode.run(decode.string)
+  }
   html.div(
     [
       attribute.id("content"),

@@ -1,14 +1,8 @@
 // Imports
-import cynthia_websites_mini_client/datamanagement/clientstore
-import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_client/model_type
 import gleam/dict.{type Dict}
-import gleam/list
-import lustre/attribute
+import gleam/dynamic/decode.{type Dynamic}
 import lustre/element.{type Element}
-import lustre/element/html
-import plinth/browser/document as plinth_document
-import plinth/browser/element as plinth_element
-import plinth/javascript/console
 
 // Imports from layout modules
 import cynthia_websites_mini_client/pottery/molds/cindy_simple
@@ -18,9 +12,8 @@ import cynthia_websites_mini_client/pottery/molds/oceanic_layout
 pub fn into(
   layout layout: String,
   for theme_type: String,
-  store store: clientstore.ClientStore,
-  is priority: Bool,
-) -> fn(Element(a), Dict(String, String)) -> element.Element(a) {
+  using model: model_type.Model,
+) -> fn(Element(a), Dict(String, decode.Dynamic)) -> element.Element(a) {
   let is_post = case theme_type {
     "post" -> True
     "page" -> False
@@ -34,87 +27,36 @@ pub fn into(
       //
       // For other types of splits, you can split within the function, where you have access to the content and metadata.
       case is_post {
-        False -> fn(content: Element(a), metadata: Dict(String, String)) -> Element(
+        False -> fn(content: Element(a), metadata: Dict(String, Dynamic)) -> Element(
           a,
         ) {
-          cindy_simple.page_layout(content, metadata, store, priority)
+          cindy_simple.page_layout(content, metadata, model)
         }
-        True -> fn(content: Element(a), metadata: Dict(String, String)) -> Element(
+        True -> fn(content: Element(a), metadata: Dict(String, Dynamic)) -> Element(
           a,
         ) {
-          cindy_simple.post_layout(content, metadata, store, priority)
+          cindy_simple.post_layout(content, metadata, model)
         }
       }
     }
     "oceanic" -> {
       // Oceanic also shows different layouts for pages and posts
       case is_post {
-        False -> fn(content: Element(a), metadata: Dict(String, String)) -> Element(
+        False -> fn(content: Element(a), metadata: Dict(String, Dynamic)) -> Element(
           a,
         ) {
-          oceanic_layout.page_layout(content, metadata, store, priority)
+          oceanic_layout.page_layout(content, metadata, model)
         }
-        True -> fn(content: Element(a), metadata: Dict(String, String)) -> Element(
+        True -> fn(content: Element(a), metadata: Dict(String, Dynamic)) -> Element(
           a,
         ) {
-          oceanic_layout.post_layout(content, metadata, store, priority)
+          oceanic_layout.post_layout(content, metadata, model)
         }
       }
     }
     other -> {
       let f = "Unknown layout name: " <> other
       panic as f
-    }
-  }
-}
-
-/// Update the menu in the layout without rerendering the whole page.
-pub fn retroactive_menu_update(store: clientstore.ClientStore) {
-  case plinth_document.query_selector("#content") {
-    Ok(elm) -> {
-      let assert Ok(layout_name) = plinth_element.dataset_get(elm, "layout")
-      let res = clientstore.pull_menus(store)
-      case layout_name {
-        // Add your layout menu handler here!
-        "cindy" -> {
-          let temp_menu =
-            res
-            // This is a call to the layout function that returns the menu!
-            |> cindy_simple.menu_1()
-            |> html.div(
-              [
-                attribute.id(
-                  "temporary_menu_items_while_retroactively_updating_menu",
-                ),
-                attribute.class("hidden"),
-              ],
-              _,
-            )
-            |> element.to_string()
-          let assert Ok(menu_1) =
-            plinth_document.query_selector("#menu_1_inside")
-          plinth_element.set_inner_html(menu_1, temp_menu)
-          let assert Ok(temp_menu) =
-            plinth_document.query_selector(
-              "#temporary_menu_items_while_retroactively_updating_menu",
-            )
-            as "Could not find temporary menu element"
-          // Makes this quite expensive but the retroactive_menu_update is not called often for that reason already.
-          let menu = dom.get_inner_html(temp_menu)
-          plinth_element.remove(temp_menu)
-          plinth_element.set_inner_html(menu_1, menu)
-        }
-        // Some layouts have advanced menu handling, and prefer to take it to their own module.
-        // This keeps the code cleaner and more readable.
-        "oceanic" -> oceanic_layout.menu_retroupdater(store, res)
-        other -> {
-          let f = "Unknown layout name: " <> other
-          panic as f
-        }
-      }
-    }
-    Error(_) -> {
-      console.warn("No content element found (yet).")
     }
   }
 }

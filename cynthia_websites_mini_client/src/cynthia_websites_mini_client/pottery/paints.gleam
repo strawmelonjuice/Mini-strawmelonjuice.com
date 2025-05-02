@@ -1,15 +1,18 @@
-import cynthia_websites_mini_client/datamanagement/clientstore.{type ClientStore}
 import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/ui/themes_generated
 import gleam/list
+import gleam/option
 import gleam/result
 import plinth/javascript/console
 
-pub fn get_sytheme(store: ClientStore) {
+pub fn get_sytheme(model: Model) {
   let theme = case dom.get_color_scheme() {
     "light" -> {
-      clientstore.pull_from_global_config_table(store, "theme")
+      model.complete_data
+      |> option.map(fn(data) { data.global_theme })
+      |> option.to_result(Nil)
       |> result.map_error(fn(_) {
         console.error("Error getting light color scheme from database")
       })
@@ -18,17 +21,17 @@ pub fn get_sytheme(store: ClientStore) {
       )
     }
     "dark" -> {
-      clientstore.pull_from_global_config_table(store, "theme_dark")
+      model.complete_data
+      |> option.map(fn(data) { data.global_theme_dark })
+      |> option.to_result(Nil)
       |> result.map_error(fn(_) {
         console.error("Error getting dark color scheme from database")
       })
       |> result.unwrap(
-        configtype.default_shared_cynthia_config_global_only.global_theme_dark,
+        configtype.default_shared_cynthia_config_global_only.global_theme,
       )
     }
-    _ -> {
-      panic
-    }
+    _ -> panic as "Invalid color scheme"
   }
 
   themes_generated.themes
