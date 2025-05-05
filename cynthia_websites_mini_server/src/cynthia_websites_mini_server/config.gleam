@@ -1,9 +1,9 @@
 import bungibindies/bun
 import bungibindies/bun/sqlite
-import cynthia_websites_mini_server/database
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
+import cynthia_websites_mini_shared/contenttypes
 import gleam/dict
 import gleam/dynamic/decode
 import gleam/fetch
@@ -26,7 +26,7 @@ import tom
 /// Then saves the configuration to the database.
 /// If an override environment variable or call param is provided, it will use that database file instead, and load from
 /// there. It will not need any files to exist in the filesystem (except for the SQLite file) in that case.
-pub fn load() -> #(sqlite.Database, configtype.SharedCynthiaConfig) {
+pub fn load() {
   let global_conf_filepath =
     files.path_join([process.cwd(), "/cynthia-mini.toml"])
   let global_conf_filepath_exists = files.file_exist(global_conf_filepath)
@@ -262,14 +262,6 @@ fn content_getter() {
   }
 }
 
-pub fn store_db(
-  db: sqlite.Database,
-  conf: configtype.SharedCynthiaConfig,
-) -> Nil {
-  // Is this just going to be an alias function?
-  database.save_complete_config(db, conf)
-}
-
 pub fn update_content_in_db(
   db: sqlite.Database,
   config: configtype.SharedCynthiaConfigGlobalOnly,
@@ -353,80 +345,81 @@ comments = false
   }
   {
     {
-      []
-      |> create_page(
-        "index.md",
-        configtype.Page(
+      create_page(
+        after: [],
+        to: "index.md",
+        with: contenttypes.Content(
           filename: "",
           title: "Example index",
           description: "This is an example index page",
           layout: "theme",
           permalink: "/",
-          page: configtype.ContentsPagePageData(menus: [1]),
+          data: contenttypes.PageData(in_menus: [1]),
+          inner_plain: "# Hello, World
+
+  Hello! This is an example page, you'll find me at `content/index.md`.
+
+  I'm written in Markdown, and I'm rendered to HTML by Cynthia Mini!
+
+  Here's a list of things you can do with me:
+
+  - Lists!
+  - [Links](https://github.com/strawmelonjuice/CynthiaWebSiteEngine-Mini) and even [relative links](/example-post)
+  - **Bold** and *italic* text
+
+  1. Numbered lists
+  2. Images: ![Gleam's Lucy mascot](https://gleam.run/images/lucy/lucy.svg)
+
+  ## The world is big
+
+  ### The world is a little smaller
+
+  #### The world is tiny
+
+  ##### The world is tinier
+
+  ###### The world is the tiniest
+
+  > Also quote blocks!
+  >
+  > -StrawmelonJuice
+
+  ```bash
+  echo \"Code blocks!\"
+  // - StrawmelonJuice
+  ```
+  ",
         ),
-        "# Hello, World
-
-Hello! This is an example page, you'll find me at `content/index.md`.
-
-I'm written in Markdown, and I'm rendered to HTML by Cynthia Mini!
-
-Here's a list of things you can do with me:
-
-- Lists!
-- [Links](https://github.com/strawmelonjuice/CynthiaWebSiteEngine-Mini) and even [relative links](/example-post)
-- **Bold** and *italic* text
-
-1. Numbered lists
-2. Images: ![Gleam's Lucy mascot](https://gleam.run/images/lucy/lucy.svg)
-
-## The world is big
-
-### The world is a little smaller
-
-#### The world is tiny
-
-##### The world is tinier
-
-###### The world is the tiniest
-
-> Also quote blocks!
->
-> -StrawmelonJuice
-
-```bash
-echo \"Code blocks!\"
-// - StrawmelonJuice
-```
-",
       )
       |> create_post(
         to: "example-post.md",
-        with: configtype.Post(
+        with: contenttypes.Content(
           filename: "",
           title: "An example post!",
           description: "This is an example post",
           layout: "theme",
           permalink: "/example-post",
-          post: configtype.PostMetaData(
+          data: contenttypes.PostData(
             category: "example",
-            date_posted: "2021-01-01",
+            date_published: "2021-01-01",
             date_updated: "2021-01-01",
             tags: ["example"],
+            comments: [],
           ),
+          inner_plain: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.md`.",
         ),
-        containing: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.md`.",
       )
       |> create_page(
         to: "posts",
-        with: configtype.Page(
+        with: contenttypes.Content(
           filename: "posts",
           title: "Posts",
           description: "this page is not actually shown, due to the ! prefix in the permalink",
           layout: "default",
           permalink: "!/",
-          page: configtype.ContentsPagePageData(menus: [1]),
+          data: contenttypes.PageData(in_menus: [1]),
+          inner_plain: "",
         ),
-        containing: "",
       )
     }
   }
@@ -436,8 +429,7 @@ echo \"Code blocks!\"
 fn create_post(
   after others: List(#(String, String)),
   to path: String,
-  with meta: configtype.Post,
-  containing inner: String,
+  with meta: contenttypes.Content,
 ) -> List(#(String, String)) {
   let path = files.path_join([process.cwd(), "/content/", path])
   let meta_json =
@@ -466,25 +458,26 @@ fn create_post(
 fn create_page(
   after others: List(#(String, String)),
   to path: String,
-  with meta: configtype.Page,
-  containing inner: String,
+  with content: contenttypes.Content,
 ) -> List(#(String, String)) {
+  let assert contenttypes.PageData(in_menus:) = content.data
+  let page_data = contenttypes.PageData(in_menus:)
   let path = files.path_join([process.cwd(), "/content/", path])
   let meta_json =
     json.object([
-      #("title", json.string(meta.title)),
-      #("description", json.string(meta.description)),
+      #("title", json.string(content.title)),
+      #("description", json.string(content.description)),
       #("kind", json.string("page")),
-      #("layout", json.string(meta.layout)),
-      #("permalink", json.string(meta.permalink)),
+      #("layout", json.string(content.layout)),
+      #("permalink", json.string(content.permalink)),
       #(
         "page",
-        json.object([#("menus", json.array(meta.page.menus, json.int))]),
+        json.object([#("menus", json.array(page_data.in_menus, json.int))]),
       ),
     ])
     |> json.to_string()
   let meta_path = path <> ".meta.json"
-  [#(meta_path, meta_json), #(path, inner)]
+  [#(meta_path, meta_json), #(path, content.inner_plain)]
   |> list.append(others)
 }
 

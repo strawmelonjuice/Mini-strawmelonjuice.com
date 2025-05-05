@@ -20,6 +20,7 @@ import plinth/node/process
 import simplifile
 
 pub fn main() {
+	// Check if we are running in Bun
   case bungibindies.runs_in_bun() {
     Ok(_) -> Nil
     Error(_) -> {
@@ -30,12 +31,12 @@ pub fn main() {
     }
   }
   console.log(
-    premixed.text_green("Hello from cynthia_websites_mini_server! ")
+    premixed.text_green("Hello from Cynthia Mini! ")
     <> "Running in "
     <> premixed.text_bright_orange(process.cwd())
     <> "!",
   )
-  let #(db, conf) = config.load()
+
   {
     let wasmfile = process.cwd() <> "/assets/cynthia-mini/sql-wasm.wasm"
     case files.file_exist(wasmfile) {
@@ -109,35 +110,35 @@ pub fn main() {
     }
   }
   console.log("Starting server...")
-  let assert Ok(_) =
-    bun.serve(ServeOptions(
-      development: Some(True),
-      hostname: conf.server_host,
-      port: conf.server_port,
-      static_served: static_routes.static_routes(db),
-      handler: web.handle_request(_, db),
-      id: None,
-      reuse_port: None,
-    ))
-  console.log("Server started!")
-  global.set_interval(60_000, fn() {
-    // This function is called every minute
-    let co =
-      configtype.SharedCynthiaConfigGlobalOnly(
-        global_theme: conf.global_theme,
-        global_theme_dark: conf.global_theme_dark,
-        global_colour: conf.global_colour,
-        global_site_name: conf.global_site_name,
-        global_site_description: conf.global_site_description,
-        server_port: conf.server_port,
-        server_host: conf.server_host,
-        posts_comments: conf.posts_comments,
-      )
-    config.update_content_in_db(db, co)
-    Nil
-  })
-  global.set_interval(40_000, fn() {
-    comments.periodic_write_to_file(db)
-    Nil
-  })
+  // let assert Ok(_) =
+  //   bun.serve(ServeOptions(
+  //     development: Some(True),
+  //     hostname: conf.server_host,
+  //     port: conf.server_port,
+  //     static_served: static_routes.static_routes(db),
+  //     handler: web.handle_request(_, db),
+  //     id: None,
+  //     reuse_port: None,
+  //   ))
+  // console.log("Server started!")
+  // global.set_interval(60_000, fn() {
+  //   // This function is called every minute
+  //   let co =
+  //     configtype.SharedCynthiaConfigGlobalOnly(
+  //       global_theme: conf.global_theme,
+  //       global_theme_dark: conf.global_theme_dark,
+  //       global_colour: conf.global_colour,
+  //       global_site_name: conf.global_site_name,
+  //       global_site_description: conf.global_site_description,
+  //       server_port: conf.server_port,
+  //       server_host: conf.server_host,
+  //       posts_comments: conf.posts_comments,
+  //     )
+  //   config.update_content_in_db(db, co)
+  //   Nil
+  // })
+  // global.set_interval(40_000, fn() {
+  //   comments.periodic_write_to_file(db)
+  //   Nil
+  // })
 }
