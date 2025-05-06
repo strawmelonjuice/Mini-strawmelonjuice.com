@@ -1,17 +1,14 @@
-import bungibindies/bun
-import bungibindies/bun/sqlite
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/contenttypes
 import gleam/dict
-import gleam/dynamic/decode
 import gleam/fetch
 import gleam/http/request
 import gleam/javascript/promise
 import gleam/json
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option
 import gleam/result
 import gleam/string
 import gleamy_lights/premixed
@@ -26,7 +23,22 @@ import tom
 /// Then saves the configuration to the database.
 /// If an override environment variable or call param is provided, it will use that database file instead, and load from
 /// there. It will not need any files to exist in the filesystem (except for the SQLite file) in that case.
-pub fn load() {
+pub fn load() -> configtype.CompleteData {
+  let global_config = capture_config()
+  let content = case content_getter() {
+    Ok(lis) -> lis
+    Error(msg) -> {
+      console.error("Error: There was an error getting content:\n" <> msg)
+      process.exit(1)
+      panic as "We should not reach here"
+    }
+  }
+
+  let complete_data = configtype.merge(global_config, content)
+  complete_data
+}
+
+pub fn capture_config() {
   let global_conf_filepath =
     files.path_join([process.cwd(), "/cynthia-mini.toml"])
   let global_conf_filepath_exists = files.file_exist(global_conf_filepath)
@@ -37,12 +49,7 @@ pub fn load() {
       Nil
     }
   }
-  let global_config = case
-    i_load(
-      global_conf_filepath,
-      configtype.default_shared_cynthia_config_global_only,
-    )
-  {
+  let global_config = case parse_configtoml() {
     Ok(config) -> config
     Error(why) -> {
       premixed.text_error_red(
@@ -53,44 +60,7 @@ pub fn load() {
       panic as "We should not reach here"
     }
   }
-  let content = case content_getter() {
-    Ok(lis) -> lis
-    Error(msg) -> {
-      console.error("Error: There was an error getting content:\n" <> msg)
-      process.exit(1)
-      panic as "We should not reach here"
-    }
-  }
-
-  let conf =
-    configtype.shared_merge_shared_cynthia_config(global_config, content)
-  let db_path_env = case bun.env("CYNTHIA_MINI_DB") {
-    Error(_) -> None
-
-    Ok(path) -> Some(path)
-  }
-  let db = database.create_database(db_path_env)
-  store_db(db, conf)
-  #(db, conf)
-}
-
-pub type ContentKindOnly {
-  ContentKind(kind: String)
-}
-
-pub fn content_kind_only_decoder() -> decode.Decoder(ContentKindOnly) {
-  use kind <- decode.field("kind", decode.string)
-  decode.success(ContentKind(kind:))
-}
-
-/// The old definition of parse_configtoml, used FFI. Now its just a redirect.
-// @external(javascript, "./config_ffi.ts", "parse_configtoml")
-
-fn i_load(
-  _: String,
-  _,
-) -> Result(configtype.SharedCynthiaConfigGlobalOnly, String) {
-  parse_configtoml()
+  global_config
 }
 
 fn parse_configtoml() {
@@ -214,68 +184,25 @@ fn content_getter() {
       |> string.replace(".meta.json", "")
       |> files.path_normalize()
     })
-    |> list.try_map(fn(file) -> Result(configtype.Contents, String) {
-      use content <- result.try({
-        fs.read_file_sync(files.path_normalize(file <> ".meta.json"))
+    |> list.try_map(fn(file: String) -> Result(contenttypes.Content, String) {
+      // Now, we have all file names coming into this function.
+      // Time to decode them all, and have
+      use inner_plain <- result.try(
+        simplifile.read(file)
+        |> result.replace_error("FS error while reading ´" <> file <> "´."),
+      )
+      let decoder = contenttypes.content_decoder_and_merger(inner_plain, file)
+      use meta_json <- result.try(
+        simplifile.read(file <> ".meta.json")
         |> result.replace_error(
-          "Error: Could not read file " <> file <> ".meta.json",
-        )
+          "FS error while reading ´" <> file <> ".meta.json´.",
+        ),
+      )
+      json.parse(meta_json, decoder)
+      |> result.map_error(fn(e) {
+        "Some error decoding metadata for ´"<> file |>premixed.text_magenta() <> "´: " <> string.inspect(e)
       })
-      use kind <- result.try({
-        json.parse(content, content_kind_only_decoder())
-        |> result.replace_error(
-          "Error: Could not decode kind in " <> file <> ".meta.json",
-        )
-      })
-      case kind.kind {
-        "page" -> {
-          use page <- result.try({
-            json.parse(content, configtype.page_decoder(file))
-            |> result.replace_error(
-              "Error: Could not decode the page metadata in "
-              <> files.path_normalize(premixed.text_magenta(
-                file <> ".meta.json",
-              )),
-            )
-          })
-          Ok(configtype.ContentsPage(page))
-        }
-        "post" -> {
-          use post <- result.try({
-            json.parse(content, configtype.post_decoder(file))
-            |> result.replace_error(
-              "Error: Could not decode the post metadata in "
-              <> files.path_normalize(premixed.text_magenta(
-                file <> ".meta.json",
-              )),
-            )
-          })
-          Ok(configtype.ContentsPost(post))
-        }
-        _ ->
-          Error(
-            "Error: Could not decode "
-            <> files.path_normalize(premixed.text_magenta(file <> ".meta.json")),
-          )
-      }
     })
-  }
-}
-
-pub fn update_content_in_db(
-  db: sqlite.Database,
-  config: configtype.SharedCynthiaConfigGlobalOnly,
-) -> Nil {
-  case content_getter() {
-    Ok(content) -> {
-      let conf = configtype.shared_merge_shared_cynthia_config(config, content)
-      store_db(db, conf)
-    }
-    Error(msg) -> {
-      console.error("Error: There was an error getting content:\n" <> msg)
-      process.exit(1)
-      panic as "We should not reach here"
-    }
   }
 }
 
@@ -345,10 +272,10 @@ comments = false
   }
   {
     {
-      create_page(
-        after: [],
-        to: "index.md",
-        with: contenttypes.Content(
+      add_item(
+        [],
+        "index.md",
+        contenttypes.Content(
           filename: "",
           title: "Example index",
           description: "This is an example index page",
@@ -357,15 +284,6 @@ comments = false
           data: contenttypes.PageData(in_menus: [1]),
           inner_plain: "# Hello, World
 
-  Hello! This is an example page, you'll find me at `content/index.md`.
-
-  I'm written in Markdown, and I'm rendered to HTML by Cynthia Mini!
-
-  Here's a list of things you can do with me:
-
-  - Lists!
-  - [Links](https://github.com/strawmelonjuice/CynthiaWebSiteEngine-Mini) and even [relative links](/example-post)
-  - **Bold** and *italic* text
 
   1. Numbered lists
   2. Images: ![Gleam's Lucy mascot](https://gleam.run/images/lucy/lucy.svg)
@@ -391,7 +309,7 @@ comments = false
   ",
         ),
       )
-      |> create_post(
+      |> add_item(
         to: "example-post.md",
         with: contenttypes.Content(
           filename: "",
@@ -409,7 +327,7 @@ comments = false
           inner_plain: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.md`.",
         ),
       )
-      |> create_page(
+      |> add_item(
         to: "posts",
         with: contenttypes.Content(
           filename: "posts",
@@ -422,59 +340,19 @@ comments = false
         ),
       )
     }
+    |> write_posts_and_pages_to_fs
   }
-  |> write_posts_and_pages_to_fs
 }
 
-fn create_post(
-  after others: List(#(String, String)),
-  to path: String,
-  with meta: contenttypes.Content,
-) -> List(#(String, String)) {
-  let path = files.path_join([process.cwd(), "/content/", path])
-  let meta_json =
-    json.object([
-      #("title", json.string(meta.title)),
-      #("description", json.string(meta.description)),
-      #("kind", json.string("post")),
-      #("layout", json.string(meta.layout)),
-      #("permalink", json.string(meta.permalink)),
-      #(
-        "post",
-        json.object([
-          #("category", json.string(meta.post.category)),
-          #("date-posted", json.string(meta.post.date_posted)),
-          #("date-updated", json.string(meta.post.date_updated)),
-          #("tags", json.array(meta.post.tags, json.string)),
-        ]),
-      ),
-    ])
-    |> json.to_string()
-  let meta_path = path <> ".meta.json"
-  [#(meta_path, meta_json), #(path, inner)]
-  |> list.append(others)
-}
-
-fn create_page(
+fn add_item(
   after others: List(#(String, String)),
   to path: String,
   with content: contenttypes.Content,
 ) -> List(#(String, String)) {
-  let assert contenttypes.PageData(in_menus:) = content.data
-  let page_data = contenttypes.PageData(in_menus:)
   let path = files.path_join([process.cwd(), "/content/", path])
   let meta_json =
-    json.object([
-      #("title", json.string(content.title)),
-      #("description", json.string(content.description)),
-      #("kind", json.string("page")),
-      #("layout", json.string(content.layout)),
-      #("permalink", json.string(content.permalink)),
-      #(
-        "page",
-        json.object([#("menus", json.array(page_data.in_menus, json.int))]),
-      ),
-    ])
+    content
+    |> contenttypes.encode_content_for_fs
     |> json.to_string()
   let meta_path = path <> ".meta.json"
   [#(meta_path, meta_json), #(path, content.inner_plain)]

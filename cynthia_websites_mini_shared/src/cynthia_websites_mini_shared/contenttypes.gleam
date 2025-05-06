@@ -34,6 +34,26 @@ pub fn content_decoder() -> decode.Decoder(Content) {
   ))
 }
 
+pub fn content_decoder_and_merger(
+  inner_plain: String,
+  filename: String,
+) -> decode.Decoder(Content) {
+  use title <- decode.field("title", decode.string)
+  use description <- decode.field("description", decode.string)
+  use layout <- decode.field("layout", decode.string)
+  use permalink <- decode.field("permalink", decode.string)
+  use data <- decode.field("data", content_data_decoder())
+  decode.success(Content(
+    filename:,
+    title:,
+    description:,
+    layout:,
+    permalink:,
+    inner_plain:,
+    data:,
+  ))
+}
+
 pub fn encode_content(content: Content) -> json.Json {
   let Content(
     filename:,
@@ -51,6 +71,24 @@ pub fn encode_content(content: Content) -> json.Json {
     #("layout", json.string(layout)),
     #("permalink", json.string(permalink)),
     #("inner_plain", json.string(inner_plain)),
+    #("data", encode_content_data(data)),
+  ])
+}
+pub fn encode_content_for_fs(content: Content) -> json.Json {
+  let Content(
+    filename:,
+    title:,
+    description:,
+    layout:,
+    permalink:,
+    inner_plain:,
+    data:,
+  ) = content
+  json.object([
+    #("title", json.string(title)),
+    #("description", json.string(description)),
+    #("layout", json.string(layout)),
+    #("permalink", json.string(permalink)),
     #("data", encode_content_data(data)),
   ])
 }
@@ -82,7 +120,7 @@ pub type ContentData {
   )
 }
 
-fn content_data_decoder() -> decode.Decoder(ContentData) {
+pub fn content_data_decoder() -> decode.Decoder(ContentData) {
   use variant <- decode.field("type", decode.string)
   case variant {
     "post_data" -> {
@@ -117,7 +155,7 @@ fn content_data_decoder() -> decode.Decoder(ContentData) {
   }
 }
 
-fn encode_content_data(content_data: ContentData) -> json.Json {
+pub fn encode_content_data(content_data: ContentData) -> json.Json {
   case content_data {
     PostData(comments:, date_published:, date_updated:, category:, tags:) ->
       json.object([

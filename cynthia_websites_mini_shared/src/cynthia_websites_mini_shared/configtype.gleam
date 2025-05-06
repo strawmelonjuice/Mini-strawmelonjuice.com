@@ -101,7 +101,7 @@ pub const default_shared_cynthia_config_global_only: SharedCynthiaConfigGlobalOn
   posts_comments: False,
 )
 
-pub fn shared_merge_shared_cynthia_config(
+pub fn merge(
   orig: SharedCynthiaConfigGlobalOnly,
   content: List(Content),
 ) -> CompleteData {
