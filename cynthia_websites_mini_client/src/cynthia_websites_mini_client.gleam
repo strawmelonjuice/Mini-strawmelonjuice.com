@@ -26,7 +26,7 @@ import rsvp
 
 pub fn main() {
   let app = lustre.application(init, update, view.main)
-  let assert Ok(_) = lustre.start(app, "#app", Nil)
+  let assert Ok(_) = lustre.start(app, "#viewable", Nil)
 
   Nil
 }
@@ -51,7 +51,7 @@ fn fetch_all(
   on_response handle_response: fn(Result(configtype.CompleteData, rsvp.Error)) ->
     msg,
 ) -> Effect(msg) {
-  let url = utils.phone_home_url() <> "/fetch"
+  let url = utils.phone_home_url() <> "/site.json"
   let decoder = configtype.complete_data_decoder()
   let handler = rsvp.expect_json(decoder, handle_response)
 
