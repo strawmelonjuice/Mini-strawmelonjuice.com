@@ -13,9 +13,7 @@
 //// This module is written to test the docs, it seems to be a
 //// good fit for the oceanic theme.
 
-import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/model_type
-import cynthia_websites_mini_shared/configtype
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode.{type Dynamic}
@@ -26,10 +24,6 @@ import gleam/string
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
-import plinth/browser/document as plinth_document
-import plinth/browser/element as plinth_element
-import plinth/browser/window
-import plinth/javascript/console
 
 /// Page layout handler for the Oceanic theme
 ///
@@ -51,10 +45,10 @@ pub fn page_layout(
   store model: model_type.Model,
 ) -> Element(a) {
   // Load the primary navigation menu if not in priority mode
-  let menu = menu_1(model.computed_menus)
+  let menu = menu_1(model)
 
   // Load the secondary navigation menu if not in priority mode
-  let secondary_menu = menu_2(model.computed_menus)
+  let secondary_menu = menu_2(model)
 
   // Extract required metadata with assertions to ensure it exists
   let assert Ok(title) =
@@ -98,10 +92,7 @@ pub fn page_layout(
         ],
       ),
       // Description area - uses dangerous-unescaped-html to allow formatted content
-      html.aside(
-        [attribute.attribute("dangerous-unescaped-html", description)],
-        [],
-      ),
+      element.unsafe_raw_html("aside", "aside", [], description),
     ])
 
   // Assemble the complete layout using the common layout function
@@ -139,10 +130,10 @@ pub fn post_layout(
   store model: model_type.Model,
 ) -> Element(a) {
   // Load the primary navigation menu if not in priority mode
-  let menu = menu_1(model.computed_menus)
+  let menu = menu_1(model)
 
   // Load the secondary navigation menu if not in priority mode
-  let secondary_menu = menu_2(model.computed_menus)
+  let secondary_menu = menu_2(model)
 
   // Extract required metadata with assertions
   let assert Ok(title) =
@@ -179,10 +170,7 @@ pub fn post_layout(
           ],
         ),
         // Post description/excerpt
-        html.aside(
-          [attribute.attribute("dangerous-unescaped-html", description)],
-          [],
-        ),
+        element.unsafe_raw_html("aside", "aside", [], description),
       ]),
       // Post metadata grid - publication details in a styled card
       html.div(
@@ -455,11 +443,10 @@ fn oceanic_common(
 ///
 /// @param content Dictionary mapping menu levels to lists of menu items
 /// @return List of HTML elements representing menu items
-pub fn menu_1(
-  from content: Dict(Int, List(#(String, String))),
-) -> List(Element(a)) {
+pub fn menu_1(from model: model_type.Model) -> List(Element(a)) {
   // Get the current URL hash to identify the active page
-  let assert Ok(hash) = window.get_hash()
+  let hash = model.path
+  let content = model.computed_menus
 
   // Extract level 1 menu items (main navigation)
   case dict.get(content, 1) {
@@ -499,12 +486,10 @@ pub fn menu_1(
 ///
 /// @param content Dictionary mapping menu levels to lists of menu items
 /// @return List of HTML elements representing secondary menu items
-pub fn menu_2(
-  from content: Dict(Int, List(#(String, String))),
-) -> List(Element(a)) {
+pub fn menu_2(from model: model_type.Model) -> List(Element(a)) {
   // Get the current URL hash to identify the active page
-  let assert Ok(hash) = window.get_hash()
-
+  let hash = model.path
+  let content = model.computed_menus
   // Extract level 2 menu items (secondary navigation)
   case dict.get(content, 2) {
     Error(_) -> []

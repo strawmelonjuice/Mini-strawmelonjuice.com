@@ -7,6 +7,7 @@ import gleam/option
 import gleam/result
 import plinth/javascript/console
 
+/// Fetches the corresponding theme and layout to the user's preferred colorscheme
 pub fn get_sytheme(model: Model) {
   let theme = case dom.get_color_scheme() {
     "light" -> {

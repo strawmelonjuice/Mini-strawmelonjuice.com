@@ -2,6 +2,7 @@
 
 // IMPORTS ---------------------------------------------------------------------
 
+import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/messages.{
   type Msg, ApiReturnedData, UserComment, UserNavigateTo,
 }
@@ -12,12 +13,14 @@ import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/contenttypes
 import gleam/dict
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/string
 import gleam/uri.{type Uri}
 import lustre
 import lustre/effect.{type Effect}
+import plinth/browser/window
 
 import modem
 import rsvp
@@ -34,8 +37,14 @@ pub fn main() {
 fn init(_) -> #(Model, Effect(Msg)) {
   let effects =
     effect.batch([fetch_all(ApiReturnedData), modem.init(on_url_change)])
-
-  let model = Model("", None, dict.new(), Ok(Nil))
+  let initial_path = case window.get_hash() {
+    Ok("") | Error(..) -> {
+      dom.set_hash("/")
+      "/"
+    }
+    Ok(f) -> f
+  }
+  let model = Model(initial_path, None, dict.new(), Ok(Nil))
 
   #(model, effects)
 }
@@ -43,7 +52,12 @@ fn init(_) -> #(Model, Effect(Msg)) {
 // Effect handlers --------------------------------------------------------------
 /// On url change: (Obviously) is triggered on url change, this is useful for intercepting the url hash change on in-site-navigation, that Cynthia uses.
 fn on_url_change(uri: Uri) -> Msg {
-  todo as "Handle url changes."
+  let assert Ok(#(_, d)) =
+    uri
+    |> uri.to_string
+    |> string.split_once("#")
+
+  messages.UserNavigateTo(d)
 }
 
 /// Fetches data from server side

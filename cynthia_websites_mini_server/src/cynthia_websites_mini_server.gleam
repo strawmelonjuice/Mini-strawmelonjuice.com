@@ -90,6 +90,7 @@ fn dynamic_site_server(mutmodel: mutable_model_type.MutableModel) {
       case model.cached_response {
         None -> model
         Some(..) ->
+          // Drops the cached response to keep it updated
           mutable_model_type.MutableModelContent(..model, cached_response: None)
       }
     })

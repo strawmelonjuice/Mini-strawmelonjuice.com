@@ -25,12 +25,13 @@ pub fn page_layout(
   with variables: Dict(String, Dynamic),
   store model: model_type.Model,
 ) -> Element(a) {
-  let menu = menu_1(model.computed_menus)
+  let menu = menu_1(model)
   let assert Ok(title) =
     decode.run(
       result.unwrap(dict.get(variables, "title"), dynamic.from(option.None)),
       decode.string,
     )
+    as "Could not determine title"
   let assert Ok(description) =
     decode.run(
       result.unwrap(
@@ -44,10 +45,7 @@ pub fn page_layout(
       [attribute.class("font-bold text-2xl text-center text-base-content")],
       [html.text(title)],
     ),
-    html.aside(
-      [attribute.attribute("dangerous-unescaped-html", description)],
-      [],
-    ),
+    element.unsafe_raw_html("aside", "aside", [], description),
   ])
   |> cindy_common(content, menu, _, variables)
 }
@@ -57,7 +55,7 @@ pub fn post_layout(
   with variables: Dict(String, Dynamic),
   store model: model_type.Model,
 ) -> Element(a) {
-  let menu = menu_1(model.computed_menus)
+  let menu = menu_1(model)
   let assert Ok(title) =
     decode.run(
       result.unwrap(dict.get(variables, "title"), dynamic.from(option.None)),
@@ -77,10 +75,7 @@ pub fn post_layout(
         [attribute.class("font-bold text-2xl text-center text-base-content")],
         [html.text(title)],
       ),
-      html.aside(
-        [attribute.attribute("dangerous-unescaped-html", description)],
-        [],
-      ),
+      element.unsafe_raw_html("aside", "aside", [], description),
     ]),
     html.div([attribute.class("grid grid-cols-2 grid-rows-4 gap-2")], [
       // ----------------------
@@ -243,10 +238,9 @@ fn cindy_common(
 }
 
 /// Cindy Simple only has one menu, shown on the top of the page. But we still count it as menu 1.
-pub fn menu_1(
-  from content: Dict(Int, List(#(String, String))),
-) -> List(Element(a)) {
-  let assert Ok(hash) = window.get_hash()
+pub fn menu_1(from model: model_type.Model) -> List(Element(a)) {
+  let hash = model.path
+  let content = model.computed_menus
   case dict.get(content, 1) {
     Error(_) -> []
     Ok(dookie) -> {

@@ -15,23 +15,21 @@ import lustre/attribute.{attribute}
 import lustre/element.{type Element}
 import lustre/element/html
 
-pub fn render_content(
-  model: Model,
-  content: contenttypes.Content,
-  inner: String,
-) -> Element(a) {
+pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a) {
   let is_a_postlist = case content.data {
     contenttypes.PageData(..) -> string.starts_with(content.permalink, "!")
     contenttypes.PostData(..) -> False
   }
-  use <- bool.lazy_guard(is_a_postlist, fn() { html.data([], []) })
+  // use <- bool.lazy_guard(is_a_postlist, fn() { html.data([], []) })
   let assert Ok(def) = paints.get_sytheme(model)
+
   let #(into, content, variables) = case content.data {
     contenttypes.PageData(_) -> {
       let mold = case content.layout {
         "default" | "theme" | "" -> molds.into(def.layout, "page", model)
         layout -> molds.into(layout, "page", model)
       }
+
       let description =
         content.description
         |> parse_html("descr.md")
@@ -41,7 +39,7 @@ pub fn render_content(
         |> dict.insert("title", content.title |> dynamic.from)
         |> dict.insert("description_html", description |> dynamic.from)
         |> dict.insert("description", content.description |> dynamic.from)
-      #(mold, parse_html(inner, content.filename), variables)
+      #(mold, parse_html(content.inner_plain, content.filename), variables)
     }
     contenttypes.PostData(
       category:,
@@ -68,7 +66,7 @@ pub fn render_content(
         |> dict.insert("comments", comments |> dynamic.from)
         |> dict.insert("category", category |> dynamic.from)
         |> dict.insert("tags", tags |> string.join(", ") |> dynamic.from)
-      #(mold, parse_html(inner, content.filename), variables)
+      #(mold, parse_html(content.inner_plain, content.filename), variables)
     }
   }
   // Other stuff should be added to vars here, like site metadata, ~menu links~, etc. EDIT: Menu links go in their own thing.
@@ -77,24 +75,24 @@ pub fn render_content(
     |> option.map(fn(a) { a.global_site_name })
     |> option.to_result(Nil)
     |> result.unwrap("My Site Name")
-  into(
-    content,
-    variables |> dict.insert("global_site_name", dynamic.from(site_name)),
-  )
+  html.div([attribute("data-theme", def.daisy_ui_theme_name)], [
+    into(
+      content,
+      variables |> dict.insert("global_site_name", dynamic.from(site_name)),
+    ),
+  ])
 }
 
 pub fn parse_html(inner: String, filename: String) -> Element(a) {
   case filename |> string.split(".") |> list.last {
     // Markdown is rendered with a custom renderer. After that, it can be pasted into the template.
     Ok("md") | Ok("markdown") | Ok("mdown") ->
-      html.div(
-        [attribute("dangerous-unescaped-html", custom_md_render(inner))],
-        [],
-      )
+      element.unsafe_raw_html("div", "div", [], custom_md_render(inner))
     // HTML/SVG is directly pastable into the template.
     Ok("html") | Ok("htm") | Ok("svg") ->
-      html.div([attribute("dangerous-unescaped-html", inner)], [])
+      element.unsafe_raw_html("div", "div", [], inner)
     // Text is wrapped in a <pre> tag. Then it can be pasted into the template.
+    //
     Ok("txt") -> html.pre([], [html.text(inner)])
     // Anything else is wrapped in a <pre> tag with a red color. Then it can be pasted into the template. This shows that the file type is not supported.
     _ ->
