@@ -4,7 +4,7 @@
 
 import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/messages.{
-  type Msg, ApiReturnedData, UserComment, UserNavigateTo,
+  type Msg, ApiReturnedData, UserNavigateTo,
 }
 import cynthia_websites_mini_client/model_type.{type Model, Model}
 import cynthia_websites_mini_client/utils
@@ -80,9 +80,6 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
     UserNavigateTo(path) -> {
       #(Model(..model, path:), effect.none())
-    }
-    UserComment(_) -> {
-      todo
     }
     ApiReturnedData(data) -> {
       case data {

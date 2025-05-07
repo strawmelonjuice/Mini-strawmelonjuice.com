@@ -1,7 +1,5 @@
 import cynthia_websites_mini_client/dom
-import cynthia_websites_mini_client/messages.{
-  type Msg, UserComment, UserNavigateTo,
-}
+import cynthia_websites_mini_client/messages.{type Msg, UserNavigateTo}
 import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pageloader/postlistloader
 import cynthia_websites_mini_client/pottery
@@ -86,6 +84,7 @@ pub fn main(model: Model) -> Element(Msg) {
         }
         _ -> content
       }
+      let assert Ok(_) = dom.push_title(content.title)
       pottery.render_content(model, content)
     }
   }

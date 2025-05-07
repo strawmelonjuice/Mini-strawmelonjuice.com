@@ -317,9 +317,7 @@ fn oceanic_common(
   html.div(
     [
       attribute.id("content"),
-      attribute.attribute("data-layout", "oceanic"),
-      // Layout identifier for JavaScript
-      attribute.class("w-full h-full overflow-y-auto"),
+      attribute.class("w-full h-full overflow-y-auto bg-base-300"),
     ],
     [
       // Top navigation bar with site name and primary menu

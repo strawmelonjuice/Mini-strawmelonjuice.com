@@ -4,5 +4,4 @@ import rsvp
 pub type Msg {
   ApiReturnedData(Result(configtype.CompleteData, rsvp.Error))
   UserNavigateTo(String)
-  UserComment(String)
 }

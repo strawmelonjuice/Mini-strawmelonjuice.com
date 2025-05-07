@@ -75,12 +75,18 @@ pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a)
     |> option.map(fn(a) { a.global_site_name })
     |> option.to_result(Nil)
     |> result.unwrap("My Site Name")
-  html.div([attribute("data-theme", def.daisy_ui_theme_name)], [
-    into(
-      content,
-      variables |> dict.insert("global_site_name", dynamic.from(site_name)),
-    ),
-  ])
+  html.div(
+    [
+      attribute("data-theme", def.daisy_ui_theme_name),
+      attribute.class("contents"),
+    ],
+    [
+      into(
+        content,
+        variables |> dict.insert("global_site_name", dynamic.from(site_name)),
+      ),
+    ],
+  )
 }
 
 pub fn parse_html(inner: String, filename: String) -> Element(a) {

@@ -168,73 +168,63 @@ fn cindy_common(
     |> result.unwrap(dynamic.from(option.None))
     |> decode.run(decode.string)
   }
-  html.div(
-    [
-      attribute.id("content"),
-      attribute.attribute("data-layout", "cindy"),
-      attribute.class("w-full mb-2"),
-    ],
-    [
-      html.span([], [
-        html.div(
-          [
-            attribute.class(
-              "grid grid-cols-5 grid-rows-12 gap-0 w-screen h-screen",
-            ),
-          ],
-          [
-            // Menu and site name
-            html.div([attribute.class("col-span-5 p-2 m-0 bg-base-300 flex")], [
-              html.div(
-                [attribute.class("flex-auto w-3/12 flex items-stretch")],
+  html.div([attribute.id("content"), attribute.class("w-full mb-2")], [
+    html.span([], [
+      html.div(
+        [
+          attribute.class(
+            "grid grid-cols-5 grid-rows-12 gap-0 w-screen h-screen",
+          ),
+        ],
+        [
+          // Menu and site name
+          html.div([attribute.class("col-span-5 p-2 m-0 bg-base-300 flex")], [
+            html.div([attribute.class("flex-auto w-3/12 flex items-stretch")], [
+              html.span(
                 [
-                  html.span(
-                    [
-                      attribute.class(
-                        "text-center self-center font-bold btn btn-ghost text-xl",
-                      ),
-                    ],
-                    [html.text(site_name)],
+                  attribute.class(
+                    "text-center self-center font-bold btn btn-ghost text-xl",
                   ),
                 ],
+                [html.text(site_name)],
               ),
-              html.div([attribute.class("flex-auto w-9/12")], [
-                html.menu([attribute.class("text-right")], [
-                  html.ul(
-                    [
-                      attribute.id("menu_1_inside"),
-                      attribute.class(
-                        "menu menu-horizontal bg-base-200 rounded-box",
-                      ),
-                    ],
-                    menu,
-                  ),
-                ]),
+            ]),
+            html.div([attribute.class("flex-auto w-9/12")], [
+              html.menu([attribute.class("text-right")], [
+                html.ul(
+                  [
+                    attribute.id("menu_1_inside"),
+                    attribute.class(
+                      "menu menu-horizontal bg-base-200 rounded-box",
+                    ),
+                  ],
+                  menu,
+                ),
               ]),
             ]),
-            // Content
-            html.div(
-              [
-                attribute.class(
-                  "col-span-5 row-span-7 row-start-2 md:col-span-4 md:row-span-11 md:col-start-2 md:row-start-2 overflow-auto min-h-full p-4",
-                ),
-              ],
-              [content, html.br([])],
-            ),
-            // Post meta
-            html.div(
-              [
-                attribute.class(
-                  "col-span-5 row-span-4 row-start-9 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:max-w-[20VW] md:p-2 break-words",
-                ),
-              ],
-              [post_meta],
-            ),
-          ],
-        ),
-      ]),
-    ],
-  )
+          ]),
+          // Content
+          html.div(
+            [
+              attribute.class(
+                "col-span-5 row-span-7 row-start-2 md:col-span-4 md:row-span-11 md:col-start-2 md:row-start-2 overflow-auto min-h-full p-4",
+              ),
+            ],
+            [content, html.br([])],
+          ),
+          // Post meta
+          html.div(
+            [
+              attribute.class(
+                "col-span-5 row-span-4 row-start-9 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:max-w-[20VW] md:p-2 break-words",
+              ),
+            ],
+            [post_meta],
+          ),
+        ],
+      ),
+    ]),
+  ])
 }
 
 /// Cindy Simple only has one menu, shown on the top of the page. But we still count it as menu 1.
