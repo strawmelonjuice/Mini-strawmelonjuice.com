@@ -16,6 +16,7 @@ pub fn static_routes(mutable_model: mutable_model_type.MutableModel) {
   |> dict.insert("/404", notfound())
   |> Some
 }
+
 pub fn index_html(gc: configtype.SharedCynthiaConfigGlobalOnly) {
   "<!DOCTYPE html>
 <html lang='en'>
