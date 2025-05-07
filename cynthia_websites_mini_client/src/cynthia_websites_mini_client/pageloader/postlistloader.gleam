@@ -1,7 +1,6 @@
 import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_shared/contenttypes.{PostData}
-import gleam/javascript/array
 import gleam/list
 import gleam/option
 import gleam/result

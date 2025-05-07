@@ -17,11 +17,6 @@ import lustre/element/html
 import qs
 
 pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a) {
-  let is_a_postlist = case content.data {
-    contenttypes.PageData(..) -> string.starts_with(content.permalink, "!")
-    contenttypes.PostData(..) -> False
-  }
-  // use <- bool.lazy_guard(is_a_postlist, fn() { html.data([], []) })
   let assert Ok(def) = paints.get_sytheme(model)
 
   let #(into, output, variables) = case content.data {

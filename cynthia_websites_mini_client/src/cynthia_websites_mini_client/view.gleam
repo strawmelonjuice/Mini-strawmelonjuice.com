@@ -1,12 +1,11 @@
 import cynthia_websites_mini_client/dom
-import cynthia_websites_mini_client/messages.{type Msg, UserNavigateTo}
+import cynthia_websites_mini_client/messages.{type Msg}
 import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pageloader/postlistloader
 import cynthia_websites_mini_client/pottery
-import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/contenttypes
 import gleam/list
-import gleam/option.{type Option, None, Some}
+import gleam/option.{None, Some}
 import gleam/result
 import lustre/attribute
 import lustre/element.{type Element}
