@@ -1,91 +1,161 @@
 import gleam/dynamic/decode
-import gleam/int
-import gleam/string
+import gleam/json
 
-pub type Minimal {
-  Minimal(
-    meta_title: String,
-    meta_description: String,
-    meta_kind: Int,
-    meta_permalink: String,
-    last_inserted_at: String,
-    original_filename: String,
+// Content main type ----------------------------------------------------------------------------
+/// Type storing all info it parses from files and json metadatas
+pub type Content {
+  Content(
+    filename: String,
+    title: String,
+    description: String,
+    layout: String,
+    permalink: String,
+    inner_plain: String,
+    data: ContentData,
   )
 }
 
-pub fn minimal_aliased_decoder() -> decode.Decoder(Minimal) {
-  use meta_title <- decode.field("meta_title", decode.string)
-  use meta_description <- decode.field("meta_description", decode.string)
-  use meta_kind_string <- decode.field("meta_kind", decode.string)
-  let kind_transformer = fn(cont: fn(Int) -> decode.Decoder(Minimal)) -> decode.Decoder(
-    Minimal,
-  ) {
-    let vid: Result(Int, decode.DecodeError) = case meta_kind_string {
-      "page" -> Ok(0)
-      "post" -> Ok(1)
-      "custom " <> a -> {
-        case int.parse(a) {
-          Ok(f) -> Ok(f)
-          Error(_) ->
-            Error(
-              decode.DecodeError(
-                "Expected a valid custom kind",
-                string.inspect(a),
-                ["meta_kind"],
-              ),
-            )
-        }
-      }
-      a ->
-        Error(
-          decode.DecodeError("Expected a valid kind", string.inspect(a), [
-            "meta_kind",
-          ]),
-        )
-    }
-    case vid {
-      Ok(meta_kind) -> cont(meta_kind)
-      Error(_) ->
-        decode.failure(
-          Minimal(
-            meta_title: "",
-            meta_description: "",
-            meta_kind: -1,
-            meta_permalink: "",
-            last_inserted_at: "",
-            original_filename: "",
-          ),
-          "meta_kind",
-        )
-    }
-  }
-  use meta_kind <- kind_transformer
-  use meta_permalink <- decode.field("meta_permalink", decode.string)
-  use last_inserted_at <- decode.field("last_inserted_at", decode.string)
-  use original_filename <- decode.field("original_filename", decode.string)
-  decode.success(Minimal(
-    meta_title:,
-    meta_description:,
-    meta_kind:,
-    meta_permalink:,
-    last_inserted_at:,
-    original_filename:,
+pub fn content_decoder() -> decode.Decoder(Content) {
+  use filename <- decode.field("filename", decode.string)
+  use title <- decode.field("title", decode.string)
+  use description <- decode.field("description", decode.string)
+  use layout <- decode.field("layout", decode.string)
+  use permalink <- decode.field("permalink", decode.string)
+  use inner_plain <- decode.field("inner_plain", decode.string)
+  use data <- decode.field("data", content_data_decoder())
+  decode.success(Content(
+    filename:,
+    title:,
+    description:,
+    layout:,
+    permalink:,
+    inner_plain:,
+    data:,
   ))
 }
 
-pub fn minimal_decoder() -> decode.Decoder(Minimal) {
-  use meta_title <- decode.field("meta_title", decode.string)
-  use meta_description <- decode.field("meta_description", decode.string)
-  use meta_kind <- decode.field("meta_kind", decode.int)
-  use meta_permalink <- decode.field("meta_permalink", decode.string)
-  use last_inserted_at <- decode.field("last_inserted_at", decode.string)
-  use original_filename <- decode.field("filename", decode.string)
-  decode.success(Minimal(
-    meta_title:,
-    meta_description:,
-    meta_kind:,
-    meta_permalink:,
-    last_inserted_at:,
-    original_filename:,
+pub fn content_decoder_and_merger(
+  inner_plain: String,
+  filename: String,
+) -> decode.Decoder(Content) {
+  use title <- decode.field("title", decode.string)
+  use description <- decode.field("description", decode.string)
+  use layout <- decode.field("layout", decode.string)
+  use permalink <- decode.field("permalink", decode.string)
+  use data <- decode.field("data", content_data_decoder())
+  decode.success(Content(
+    filename:,
+    title:,
+    description:,
+    layout:,
+    permalink:,
+    inner_plain:,
+    data:,
   ))
 }
+
+pub fn encode_content(content: Content) -> json.Json {
+  let Content(
+    filename:,
+    title:,
+    description:,
+    layout:,
+    permalink:,
+    inner_plain:,
+    data:,
+  ) = content
+  json.object([
+    #("filename", json.string(filename)),
+    #("title", json.string(title)),
+    #("description", json.string(description)),
+    #("layout", json.string(layout)),
+    #("permalink", json.string(permalink)),
+    #("inner_plain", json.string(inner_plain)),
+    #("data", encode_content_data(data)),
+  ])
+}
+
+pub fn encode_content_for_fs(content: Content) -> json.Json {
+  let Content(
+    filename: _,
+    title:,
+    description:,
+    layout:,
+    permalink:,
+    inner_plain: _,
+    data:,
+  ) = content
+  json.object([
+    #("title", json.string(title)),
+    #("description", json.string(description)),
+    #("layout", json.string(layout)),
+    #("permalink", json.string(permalink)),
+    #("data", encode_content_data(data)),
+  ])
+}
+
+// Content data type ----------------------------------------------------------------------------
+
+pub type ContentData {
+  /// Post metadata
+  PostData(
+    /// Date string: This is decoded as a string, then recoded and decoded again to make sure it complies with ISO 8601.
+    /// # Date published
+    /// Stores the date on which the post was published.
+    date_published: String,
+    /// Date string: This is decoded as a string, then recoded and decoded again to make sure it complies with ISO 8601.
+    /// # Date updated
+    /// Stores the date on which the post was last updated.
+    date_updated: String,
+    /// Category this post belongs to
+    category: String,
+    /// Tags that belong to this post
+    tags: List(String),
+  )
+  /// Page metadata
+  PageData(
+    /// In which menus this page should appear
+    in_menus: List(Int),
+  )
+}
+
+pub fn content_data_decoder() -> decode.Decoder(ContentData) {
+  use variant <- decode.field("type", decode.string)
+  case variant {
+    "post_data" -> {
+      use date_published <- decode.field("date_published", decode.string)
+      use date_updated <- decode.field("date_updated", decode.string)
+      use category <- decode.field("category", decode.string)
+      use tags <- decode.field("tags", decode.list(decode.string))
+      decode.success(PostData(date_published:, date_updated:, category:, tags:))
+    }
+    "page_data" -> {
+      use in_menus <- decode.field("in_menus", decode.list(decode.int))
+      decode.success(PageData(in_menus:))
+    }
+    _ ->
+      decode.failure(
+        PostData(date_published: "", date_updated: "", category: "", tags: []),
+        "ContentData",
+      )
+  }
+}
+
+pub fn encode_content_data(content_data: ContentData) -> json.Json {
+  case content_data {
+    PostData(date_published:, date_updated:, category:, tags:) ->
+      json.object([
+        #("type", json.string("post_data")),
+        #("date_published", json.string(date_published)),
+        #("date_updated", json.string(date_updated)),
+        #("category", json.string(category)),
+        #("tags", json.array(tags, json.string)),
+      ])
+    PageData(in_menus:) ->
+      json.object([
+        #("type", json.string("page_data")),
+        #("in_menus", json.array(in_menus, json.int)),
+      ])
+  }
+}
+// End of module.

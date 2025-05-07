@@ -6,6 +6,7 @@ import plinth/browser/document
 import plinth/browser/element
 import plinth/javascript/console
 
+@deprecated("Switching over to Lustre's own engine")
 pub fn push(title: String, body: le_element.Element(a)) {
   let isnotfound =
     document.body()
@@ -42,6 +43,26 @@ pub fn push(title: String, body: le_element.Element(a)) {
 
   body_element
   |> element.set_inner_html(new_body)
+  Ok(Nil)
+}
+
+pub fn push_title(title: String) -> Result(Nil, String) {
+  use title_element <- result.then(
+    document.query_selector("title")
+    |> result.replace_error("No title element found"),
+  )
+
+  let sitetitle =
+    {
+      use a <- result.try(document.query_selector(
+        "head>meta[property='og:site_name']",
+      ))
+      let b = a |> element.get_attribute("content")
+      b
+    }
+    |> result.map(fn(x) { x <> " — " })
+    |> result.unwrap("")
+  title_element |> element.set_inner_text(sitetitle <> title)
   Ok(Nil)
 }
 

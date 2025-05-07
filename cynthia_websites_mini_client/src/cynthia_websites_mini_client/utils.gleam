@@ -15,5 +15,15 @@ pub fn phone_home() -> Request(String) {
   |> request.set_host(get_window_host())
 }
 
+pub fn phone_home_url() -> String {
+  let origin = window.origin()
+  let host = get_window_host()
+  case origin {
+    "http://" <> _ -> "http://" <> host
+    "https://" <> _ -> "https://" <> host
+    _ -> "https://" <> host
+  }
+}
+
 @external(javascript, "./utils_ffi.ts", "getWindowHost")
 pub fn get_window_host() -> String

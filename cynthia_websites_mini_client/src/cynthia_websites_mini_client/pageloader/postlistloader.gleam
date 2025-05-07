@@ -1,58 +1,92 @@
-import cynthia_websites_mini_client/datamanagement
+import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pottery
-import gleam/javascript/array
+import cynthia_websites_mini_shared/contenttypes.{PostData}
 import gleam/list
+import gleam/option
+import gleam/result
 import lustre/attribute
 import lustre/element
 import lustre/element/html
 
-pub fn postlist_all(store: datamanagement.ClientStore) {
-  datamanagement.fetch_post_list(store)
-  |> array.to_list
+fn fetch_post_list(model: Model) {
+  model.complete_data
+  |> option.to_result(Nil)
+  |> result.map(fn(complete) {
+    complete.content
+    |> list.filter(fn(item) {
+      case item.data {
+        PostData(..) -> True
+        _ -> False
+      }
+    })
+  })
+  |> result.unwrap([])
+}
+
+pub fn postlist_all(model: Model) {
+  fetch_post_list(model)
   |> postlist_to_html
 }
 
-pub fn postlist_by_tag(store: datamanagement.ClientStore, tag: String) {
-  datamanagement.fetch_post_list(store)
-  |> array.to_list
+pub fn postlist_by_tag(model: Model, card: String) {
+  fetch_post_list(model)
   |> list.filter(fn(post) {
-    list.contains(post.meta_tags |> array.to_list(), tag)
+    let assert PostData(
+      date_published: _date_published,
+      date_updated: _date_updated,
+      category: _category,
+      tags:,
+    ): contenttypes.ContentData = post.data
+    tags |> list.contains(card)
   })
   |> postlist_to_html
 }
 
-pub fn postlist_by_category(store: datamanagement.ClientStore, category: String) {
-  datamanagement.fetch_post_list(store)
-  |> array.to_list
-  |> list.filter(fn(post) { post.meta_category == category })
+pub fn postlist_by_category(model: Model, cat: String) {
+  fetch_post_list(model)
+  |> list.filter(fn(post) {
+    let assert PostData(
+      date_published: _date_published,
+      date_updated: _date_updated,
+      category:,
+      tags: _tags,
+    ) = post.data
+    category == cat
+  })
   |> postlist_to_html
 }
 
-fn postlist_to_html(posts: List(datamanagement.PostListItem)) {
+fn postlist_to_html(posts: List(contenttypes.Content)) -> element.Element(a) {
   let postlist =
     posts
     |> list.map(fn(post) {
+      let assert PostData(
+        date_published:,
+        date_updated:,
+        category: _category,
+        tags: _tags,
+      ) = post.data
       html.li([attribute.class("list-row p-10")], [
         html.a(
           [
-            attribute.href("/#" <> post.meta_permalink),
+            attribute.href("/#" <> post.permalink),
             attribute.class("post__link"),
           ],
           [
             html.div(
               [attribute.class("text-xs uppercase font-semibold opacity-60")],
-              case post.meta_date_posted == post.meta_date_updated {
-                True -> [html.text(post.meta_date_posted)]
+              case date_published == date_updated {
+                True -> [html.text(date_published)]
                 False -> [
-                  html.text(post.meta_date_posted),
+                  html.text(date_published),
                   html.text(" (updated "),
-                  html.text(post.meta_date_updated),
+                  html.text(date_updated),
                   html.text(")"),
                 ]
               },
             ),
             html.div([attribute.class("text-center text-xl")], [
-              html.text(post.meta_title),
+              html.text(post.title),
             ]),
             html.blockquote(
               [
@@ -60,7 +94,7 @@ fn postlist_to_html(posts: List(datamanagement.PostListItem)) {
                   "list-col-wrap text-sm border-l-2 border-accent border-dotted pl-4 bg-secondary bg-opacity-10",
                 ),
               ],
-              [pottery.parse_html(post.meta_description, "descr.md")],
+              [pottery.parse_html(post.description, "descr.md")],
             ),
           ],
         ),
@@ -70,5 +104,5 @@ fn postlist_to_html(posts: List(datamanagement.PostListItem)) {
     [attribute.class("postlist list bg-base-200 rounded-box shadow-md")],
     postlist,
   )
-  |> element.to_string()
 }
+/// Comments are stored as a list of `Comment`s.
