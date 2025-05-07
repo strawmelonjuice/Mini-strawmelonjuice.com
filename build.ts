@@ -19,7 +19,6 @@ function help() {
 		"To run gleam commands on one or both ends, run: bun `./build.ts [client-|server-]gleam <subcommand>`",
 	);
 }
-
 let executed = true;
 import themeconf from "./themes.json";
 import path from "path";
