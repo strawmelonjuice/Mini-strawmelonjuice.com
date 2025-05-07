@@ -154,13 +154,13 @@ fn cynthia_config_global_only_exploiter(o: dict.Dict(String, tom.Toml)) {
       tom.as_string(field)
       |> result.map_error(TomlGetStringError)
     })
-  let posts_comments = case
-    tom.get(o, ["posts", "comments"]) |> result.map(tom.as_bool)
+  let comment_repo = case
+    tom.get(o, ["posts", "comment_repo"]) |> result.map(tom.as_string)
   {
     Ok(Ok(field)) -> {
-      field
+      option.Some(field)
     }
-    _ -> True
+    _ -> option.None
   }
   Ok(configtype.SharedCynthiaConfigGlobalOnly(
     global_theme:,
@@ -170,7 +170,7 @@ fn cynthia_config_global_only_exploiter(o: dict.Dict(String, tom.Toml)) {
     global_site_description:,
     server_port:,
     server_host:,
-    posts_comments:,
+    comment_repo:,
   ))
 }
 
@@ -200,7 +200,10 @@ fn content_getter() {
       )
       json.parse(meta_json, decoder)
       |> result.map_error(fn(e) {
-        "Some error decoding metadata for ´"<> file |>premixed.text_magenta() <> "´: " <> string.inspect(e)
+        "Some error decoding metadata for ´"
+        <> file |> premixed.text_magenta()
+        <> "´: "
+        <> string.inspect(e)
       })
     })
   }
@@ -242,7 +245,9 @@ site_description = \"A big site on a mini Cynthia!\"
 port = 8080
 host = \"localhost\"
 [posts]
-comments = false
+# Set this to a repo to allow utteranc.es to enable comments on your posts. You'll to have the utterance bot added to that repo. Add it like ´username/repositoryname´.
+# See https://github.com/apps/utterances to add the bot!
+comment_repo = \"\"
 ",
     )
     |> result.map_error(fn(e) {
@@ -322,7 +327,6 @@ comments = false
             date_published: "2021-01-01",
             date_updated: "2021-01-01",
             tags: ["example"],
-            comments: [],
           ),
           inner_plain: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.md`.",
         ),

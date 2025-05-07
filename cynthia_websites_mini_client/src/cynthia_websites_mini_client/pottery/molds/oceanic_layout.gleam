@@ -24,6 +24,7 @@ import gleam/string
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
+import plinth/browser/window
 
 /// Page layout handler for the Oceanic theme
 ///
@@ -420,8 +421,7 @@ fn oceanic_common(
           ])
         }
       },
-      // Simple footer - kept minimal by design
-      html.footer(
+      html.div(
         [
           attribute.class(
             "mt-8 text-center text-sm text-base-content opacity-75 py-4",

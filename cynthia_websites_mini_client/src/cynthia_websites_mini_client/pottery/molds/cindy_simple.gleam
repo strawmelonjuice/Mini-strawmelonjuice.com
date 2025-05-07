@@ -14,7 +14,6 @@ import gleam/string
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
-import plinth/browser/window
 
 /// cindy layout for pages.
 ///

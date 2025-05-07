@@ -33,7 +33,6 @@ pub fn postlist_by_tag(model: Model, card: String) {
   fetch_post_list(model)
   |> list.filter(fn(post) {
     let assert PostData(
-      comments: _comments,
       date_published: _date_published,
       date_updated: _date_updated,
       category: _category,
@@ -48,7 +47,6 @@ pub fn postlist_by_category(model: Model, cat: String) {
   fetch_post_list(model)
   |> list.filter(fn(post) {
     let assert PostData(
-      comments: _comments,
       date_published: _date_published,
       date_updated: _date_updated,
       category:,
@@ -64,7 +62,6 @@ fn postlist_to_html(posts: List(contenttypes.Content)) -> element.Element(a) {
     posts
     |> list.map(fn(post) {
       let assert PostData(
-        comments: _comments,
         date_published:,
         date_updated:,
         category: _category,

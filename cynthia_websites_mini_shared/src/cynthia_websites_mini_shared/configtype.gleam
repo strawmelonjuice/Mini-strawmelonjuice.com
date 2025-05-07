@@ -12,7 +12,7 @@ pub type CompleteData {
     global_site_description: String,
     server_port: Option(Int),
     server_host: Option(String),
-    posts_comments: Bool,
+    comment_repo: Option(String),
     content: List(Content),
   )
 }
@@ -26,7 +26,7 @@ pub fn encode_complete_data(complete_data: CompleteData) -> json.Json {
     global_site_description:,
     server_port:,
     server_host:,
-    posts_comments:,
+    comment_repo:,
     content:,
   ) = complete_data
   json.object([
@@ -43,7 +43,10 @@ pub fn encode_complete_data(complete_data: CompleteData) -> json.Json {
       None -> json.null()
       Some(value) -> json.string(value)
     }),
-    #("posts_comments", json.bool(posts_comments)),
+    #("comment_repo", case comment_repo {
+      None -> json.null()
+      Some(value) -> json.string(value)
+    }),
     #("content", json.array(content, contenttypes.encode_content)),
   ])
 }
@@ -59,7 +62,10 @@ pub fn complete_data_decoder() -> decode.Decoder(CompleteData) {
   )
   use server_port <- decode.field("server_port", decode.optional(decode.int))
   use server_host <- decode.field("server_host", decode.optional(decode.string))
-  use posts_comments <- decode.field("posts_comments", decode.bool)
+  use comment_repo <- decode.field(
+    "comment_repo",
+    decode.optional(decode.string),
+  )
   use content <- decode.field(
     "content",
     decode.list(contenttypes.content_decoder()),
@@ -72,7 +78,7 @@ pub fn complete_data_decoder() -> decode.Decoder(CompleteData) {
     global_site_description:,
     server_port:,
     server_host:,
-    posts_comments:,
+    comment_repo:,
     content:,
   ))
 }
@@ -86,7 +92,7 @@ pub type SharedCynthiaConfigGlobalOnly {
     global_site_description: String,
     server_port: Option(Int),
     server_host: Option(String),
-    posts_comments: Bool,
+    comment_repo: Option(String),
   )
 }
 
@@ -98,7 +104,7 @@ pub const default_shared_cynthia_config_global_only: SharedCynthiaConfigGlobalOn
   global_site_description: "A big site on a mini Cynthia!",
   server_port: None,
   server_host: None,
-  posts_comments: False,
+  comment_repo: None,
 )
 
 pub fn merge(
@@ -113,7 +119,7 @@ pub fn merge(
     global_site_description: orig.global_site_description,
     server_port: orig.server_port,
     server_host: orig.server_host,
-    posts_comments: orig.posts_comments,
+    comment_repo: orig.comment_repo,
     content:,
   )
 }

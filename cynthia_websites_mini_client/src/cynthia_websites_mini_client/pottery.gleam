@@ -1,12 +1,12 @@
+import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pottery/molds
 import cynthia_websites_mini_client/pottery/paints
+import cynthia_websites_mini_client/utils
 import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/contenttypes
-import gleam/bool
 import gleam/dict
 import gleam/dynamic
-import gleam/dynamic/decode
 import gleam/list
 import gleam/option
 import gleam/result
@@ -14,6 +14,7 @@ import gleam/string
 import lustre/attribute.{attribute}
 import lustre/element.{type Element}
 import lustre/element/html
+import qs
 
 pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a) {
   let is_a_postlist = case content.data {
@@ -23,7 +24,7 @@ pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a)
   // use <- bool.lazy_guard(is_a_postlist, fn() { html.data([], []) })
   let assert Ok(def) = paints.get_sytheme(model)
 
-  let #(into, content, variables) = case content.data {
+  let #(into, output, variables) = case content.data {
     contenttypes.PageData(_) -> {
       let mold = case content.layout {
         "default" | "theme" | "" -> molds.into(def.layout, "page", model)
@@ -41,13 +42,7 @@ pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a)
         |> dict.insert("description", content.description |> dynamic.from)
       #(mold, parse_html(content.inner_plain, content.filename), variables)
     }
-    contenttypes.PostData(
-      category:,
-      date_published:,
-      date_updated:,
-      comments:,
-      tags:,
-    ) -> {
+    contenttypes.PostData(category:, date_published:, date_updated:, tags:) -> {
       let mold = case content.layout {
         "default" | "theme" | "" -> molds.into(def.layout, "post", model)
         layout -> molds.into(layout, "post", model)
@@ -63,7 +58,6 @@ pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a)
         |> dict.insert("description", content.description |> dynamic.from)
         |> dict.insert("date_published", date_published |> dynamic.from)
         |> dict.insert("date_modified", date_updated |> dynamic.from)
-        |> dict.insert("comments", comments |> dynamic.from)
         |> dict.insert("category", category |> dynamic.from)
         |> dict.insert("tags", tags |> string.join(", ") |> dynamic.from)
       #(mold, parse_html(content.inner_plain, content.filename), variables)
@@ -75,17 +69,73 @@ pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a)
     |> option.map(fn(a) { a.global_site_name })
     |> option.to_result(Nil)
     |> result.unwrap("My Site Name")
+  let considered_output =
+    {
+      let default = [output]
+      case content.data, model {
+        contenttypes.PostData(..),
+          model_type.Model(
+            complete_data: option.Some(configtype.CompleteData(
+              comment_repo: option.Some(repo),
+              ..,
+            )),
+            ..,
+          )
+          if repo != ""
+        -> {
+          let comment_color_scheme = case dom.get_color_scheme() {
+            "dark" -> "github-dark"
+            _ -> "github-light"
+          }
+          let query =
+            [
+              #("async", []),
+              #("crossorigin", ["anonymous"]),
+              #("issue-term", [content.permalink]),
+              #("repo", [repo]),
+              #("src", ["https://utteranc.es/client.js"]),
+              #("theme", [comment_color_scheme]),
+              #("url", [utils.phone_home_url() <> "/#" <> model.path]),
+              #("origin", [utils.phone_home_url()]),
+              #("pathname", [model.path]),
+              #("title", [content.title]),
+              #("description", [content.description]),
+              #("og:title", []),
+              #("session", []),
+            ]
+            |> dict.from_list
+            |> qs.default_serialize()
+
+          let src = "https://utteranc.es/utterances.html" <> query
+          list.append(default, [
+            html.iframe([
+              attribute("loading", "lazy"),
+              attribute.src(src),
+              // attribute("scrolling", "yes"),
+              attribute("title", "Comments"),
+              attribute.class(
+                "utterances-frame w-full min-h-[30vh] h-full outline-none focus:outline-none o",
+              ),
+            ]),
+          ])
+        }
+        _, _ -> default
+      }
+    }
+    |> html.div([attribute.class("contents")], _)
   html.div(
     [
       attribute("data-theme", def.daisy_ui_theme_name),
       attribute.class("contents"),
     ],
-    [
-      into(
-        content,
-        variables |> dict.insert("global_site_name", dynamic.from(site_name)),
-      ),
-    ],
+    {
+      [
+        into(
+          considered_output,
+          variables |> dict.insert("global_site_name", dynamic.from(site_name)),
+        ),
+      ]
+    },
   )
 }
 
