@@ -78,3 +78,31 @@ Oceanic was created as a test, to check how accurate [add theme](https://github.
 | Monospace Size   | 14px                                                                |
 | Special Features | Custom color palette, supports two menus, enhanced for code display |
 
+### GitHub Light
+
+A clean, professional theme based on GitHub's light mode interface. Perfect for documentation and technical content with excellent readability and familiar GitHub styling.
+
+| Feature        | Details                                   |
+| -------------- | ----------------------------------------- |
+| Layout         | github                                    |
+| Mode           | Light                                     |
+| Font Family    | -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial |
+| Font Size      | 16px                                      |
+| Monospace Font | SFMono-Regular, Consolas, Liberation Mono |
+| Monospace Size | 14px                                      |
+| Special Features | GitHub-style code blocks, table formatting |
+
+### GitHub Dark
+
+The dark mode counterpart to GitHub Light, offering the same professional experience with reduced eye strain for low-light environments. Features GitHub's dark palette with carefully chosen contrast ratios.
+
+| Feature        | Details                                   |
+| -------------- | ----------------------------------------- |
+| Layout         | github                                    |
+| Mode           | Dark                                      |
+| Font Family    | -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial |
+| Font Size      | 16px                                      |
+| Monospace Font | SFMono-Regular, Consolas, Liberation Mono |
+| Monospace Size | 14px                                      |
+| Special Features | GitHub-style code blocks, syntax highlighting optimized for dark mode |
+

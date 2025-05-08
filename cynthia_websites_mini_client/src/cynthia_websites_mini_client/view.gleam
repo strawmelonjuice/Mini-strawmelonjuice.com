@@ -21,8 +21,8 @@ pub fn main(model: Model) -> Element(Msg) {
         |> result.lazy_unwrap(fn() {
           contenttypes.Content(
             filename: "notfound.md",
-            title: "404 page not found",
-            description: "The page you are looking for does not exist.",
+            title: "Page not found",
+            description: model.path,
             layout: "theme",
             permalink: "404",
             inner_plain: "# 404!\n\nThe page you are looking for does not exist.",
@@ -62,6 +62,23 @@ pub fn main(model: Model) -> Element(Msg) {
                 filename: "postlist.html",
                 data: contenttypes.PageData([]),
                 inner_plain: postlistloader.postlist_by_tag(model, tag)
+                  |> element.to_string,
+              )
+            }
+            "/search/" <> search_term -> {
+              let title = "Search results for: " <> search_term
+              let description = ""
+              contenttypes.Content(
+                title:,
+                description:,
+                layout: "default",
+                permalink: model.path,
+                filename: "postlist.html",
+                data: contenttypes.PageData([]),
+                inner_plain: postlistloader.postlist_by_search_term(
+                  model,
+                  search_term,
+                )
                   |> element.to_string,
               )
             }

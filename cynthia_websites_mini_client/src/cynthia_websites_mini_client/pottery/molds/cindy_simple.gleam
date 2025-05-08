@@ -1,8 +1,9 @@
 //// Cindy Simple Layout module
 ////
-//// Default OOTD layout for Cynthia Mini.
+//// Default OOTB layout for Cynthia Mini.
 
 // Common imports for layouts
+import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type
 import gleam/dict.{type Dict}
 import gleam/dynamic
@@ -20,10 +21,10 @@ import lustre/element/html
 /// Dict keys:
 /// - `content`
 pub fn page_layout(
-  from content: Element(a),
+  from content: Element(messages.Msg),
   with variables: Dict(String, Dynamic),
   store model: model_type.Model,
-) -> Element(a) {
+) -> Element(messages.Msg) {
   let menu = menu_1(model)
   let assert Ok(title) =
     decode.run(
@@ -50,10 +51,10 @@ pub fn page_layout(
 }
 
 pub fn post_layout(
-  from content: Element(a),
+  from content: Element(messages.Msg),
   with variables: Dict(String, Dynamic),
   store model: model_type.Model,
-) -> Element(a) {
+) -> Element(messages.Msg) {
   let menu = menu_1(model)
   let assert Ok(title) =
     decode.run(
@@ -157,9 +158,9 @@ pub fn post_layout(
 }
 
 fn cindy_common(
-  content: Element(a),
-  menu: List(Element(a)),
-  post_meta: Element(a),
+  content: Element(messages.Msg),
+  menu: List(Element(messages.Msg)),
+  post_meta: Element(messages.Msg),
   variables: Dict(String, Dynamic),
 ) {
   let assert Ok(site_name) = {
@@ -227,7 +228,7 @@ fn cindy_common(
 }
 
 /// Cindy Simple only has one menu, shown on the top of the page. But we still count it as menu 1.
-pub fn menu_1(from model: model_type.Model) -> List(Element(a)) {
+pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
   let hash = model.path
   let content = model.computed_menus
   case dict.get(content, 1) {

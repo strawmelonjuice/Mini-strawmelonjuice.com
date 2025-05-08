@@ -1,9 +1,10 @@
 import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_client/messages
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
 
-pub fn error(msg: String) -> Element(a) {
+pub fn error(msg: String) -> Element(messages.Msg) {
   let assert Ok(_) = dom.push_title("Cynthia Mini: Error!")
   html.div(
     [

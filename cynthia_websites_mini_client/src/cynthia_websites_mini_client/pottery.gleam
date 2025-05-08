@@ -1,4 +1,5 @@
 import cynthia_websites_mini_client/dom
+import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pottery/molds
 import cynthia_websites_mini_client/pottery/paints
@@ -16,7 +17,10 @@ import lustre/element.{type Element}
 import lustre/element/html
 import qs
 
-pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a) {
+pub fn render_content(
+  model: Model,
+  content: contenttypes.Content,
+) -> Element(messages.Msg) {
   let assert Ok(def) = paints.get_sytheme(model)
 
   let #(into, output, variables) = case content.data {
@@ -134,7 +138,7 @@ pub fn render_content(model: Model, content: contenttypes.Content) -> Element(a)
   )
 }
 
-pub fn parse_html(inner: String, filename: String) -> Element(a) {
+pub fn parse_html(inner: String, filename: String) -> Element(messages.Msg) {
   case filename |> string.split(".") |> list.last {
     // Markdown is rendered with a custom renderer. After that, it can be pasted into the template.
     Ok("md") | Ok("markdown") | Ok("mdown") ->

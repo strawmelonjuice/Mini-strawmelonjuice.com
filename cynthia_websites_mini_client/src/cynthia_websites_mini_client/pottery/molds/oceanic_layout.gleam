@@ -13,6 +13,7 @@
 //// This module is written to test the docs, it seems to be a
 //// good fit for the oceanic theme.
 
+import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type
 import gleam/dict.{type Dict}
 import gleam/dynamic
@@ -40,10 +41,10 @@ import lustre/element/html
 /// @param priority If true, skips loading menus (for initial fast rendering)
 /// @return A fully constructed page layout
 pub fn page_layout(
-  from content: Element(a),
+  from content: Element(messages.Msg),
   with variables: Dict(String, Dynamic),
   store model: model_type.Model,
-) -> Element(a) {
+) -> Element(messages.Msg) {
   // Load the primary navigation menu if not in priority mode
   let menu = menu_1(model)
 
@@ -125,10 +126,10 @@ pub fn page_layout(
 /// @param priority If true, skips loading menus (for initial fast rendering)
 /// @return A fully constructed post layout
 pub fn post_layout(
-  from content: Element(a),
+  from content: Element(messages.Msg),
   with variables: Dict(String, Dynamic),
   store model: model_type.Model,
-) -> Element(a) {
+) -> Element(messages.Msg) {
   // Load the primary navigation menu if not in priority mode
   let menu = menu_1(model)
 
@@ -295,12 +296,12 @@ pub fn post_layout(
 /// @param variables Dictionary containing metadata for the page/post
 /// @return A complete HTML layout structure
 fn oceanic_common(
-  content: Element(a),
-  menu: List(Element(a)),
-  post_meta: Element(a),
-  secondary_menu: List(Element(a)),
+  content: Element(messages.Msg),
+  menu: List(Element(messages.Msg)),
+  post_meta: Element(messages.Msg),
+  secondary_menu: List(Element(messages.Msg)),
   variables: Dict(String, Dynamic),
-) -> Element(a) {
+) -> Element(messages.Msg) {
   // Extract site name and determine if this is a post
   let assert Ok(site_name) =
     dict.get(variables, "global_site_name")
@@ -440,7 +441,7 @@ fn oceanic_common(
 ///
 /// @param content Dictionary mapping menu levels to lists of menu items
 /// @return List of HTML elements representing menu items
-pub fn menu_1(from model: model_type.Model) -> List(Element(a)) {
+pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
   // Get the current URL hash to identify the active page
   let hash = model.path
   let content = model.computed_menus
@@ -483,7 +484,7 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(a)) {
 ///
 /// @param content Dictionary mapping menu levels to lists of menu items
 /// @return List of HTML elements representing secondary menu items
-pub fn menu_2(from model: model_type.Model) -> List(Element(a)) {
+pub fn menu_2(from model: model_type.Model) -> List(Element(messages.Msg)) {
   // Get the current URL hash to identify the active page
   let hash = model.path
   let content = model.computed_menus
@@ -530,7 +531,7 @@ pub fn menu_2(from model: model_type.Model) -> List(Element(a)) {
 /// @return Flat list of HTML elements representing all menu items
 pub fn render_nav_menu(
   items: Dict(Int, List(#(String, String))),
-) -> List(Element(a)) {
+) -> List(Element(messages.Msg)) {
   // Convert the dictionary to a list of entries and flatten
   dict.to_list(items)
   |> list.flat_map(fn(entry) {

@@ -352,6 +352,7 @@ console.log("Building and bundling client code...");
 
 	const sourceCSS = `
 /* Until I figure out a way to download these to the server reliably, I'm just going to import them from the web. */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
 @import url('https://fontlay.com/css2?family=Quicksand:wght@300..700&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
 @tailwind base;
 @tailwind components;

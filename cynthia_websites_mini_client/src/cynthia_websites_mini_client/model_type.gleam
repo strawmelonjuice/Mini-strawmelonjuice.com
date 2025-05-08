@@ -18,5 +18,8 @@ pub type Model {
     /// Normally this is `Ok(Nil)`
     /// On error this is `Error(error_message: String)`
     status: Result(Nil, String),
+    /// Other variables
+    /// This stores for example the current search term
+    other: Dict(String, String),
   )
 }

@@ -43,7 +43,7 @@ fn init(_) -> #(Model, Effect(Msg)) {
     }
     Ok(f) -> f
   }
-  let model = Model(initial_path, None, dict.new(), Ok(Nil))
+  let model = Model(initial_path, None, dict.new(), Ok(Nil), dict.new())
 
   #(model, effects)
 }
@@ -78,7 +78,25 @@ fn fetch_all(
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
     UserNavigateTo(path) -> {
-      #(Model(..model, path:), effect.none())
+      dom.set_hash(path)
+      let other =
+        model.other
+        |> dict.delete("search_term")
+      #(Model(..model, path:, other:), effect.none())
+    }
+    messages.UserSearchTerm(search_term) -> {
+      let path = "!/search/" <> search_term
+      let computed_menus = model.computed_menus
+      let complete_data = model.complete_data
+      let status = model.status
+      let other =
+        model.other
+        |> dict.insert("search_term", search_term)
+      dom.set_hash(path)
+      #(
+        Model(path:, complete_data:, computed_menus:, status:, other:),
+        effect.none(),
+      )
     }
     ApiReturnedData(data) -> {
       case data {
@@ -99,13 +117,27 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
           let computed_menus = compute_menus(new.content, model)
           let complete_data = Some(new)
           let status = Ok(Nil)
-          let path = model.path
+
           #(
-            Model(path:, complete_data:, computed_menus:, status:),
+            Model(..model, complete_data:, computed_menus:, status:),
             effect.none(),
           )
         }
       }
+    }
+    // This also shows pretty well how to store booleans in the model.other dict: Use results.
+    messages.UserOnGitHubLayoutToggleMenu -> {
+      let other = case dict.get(model.other, "github-layout menu open") {
+        Ok(..) -> {
+          // is open, so close it
+          dict.delete(model.other, "github-layout menu open")
+        }
+        Error(..) -> {
+          // is closed, so open it
+          dict.insert(model.other, "github-layout menu open", "")
+        }
+      }
+      #(Model(..model, other:), effect.none())
     }
   }
 }
