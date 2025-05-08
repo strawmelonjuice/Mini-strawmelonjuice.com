@@ -72,6 +72,8 @@ them referencing how to add in proper references to your layout.
 Now, of course, freely edit your layout module! Thanks to guidance of the robust Gleam type system and the ease of Lustre,
 you should have no problem in either using it completely as templating language or as a proper programming language.
 
+Also nice to know, CynthiaMini uses [DaisyUI v4](https://v4.daisyui.com/components/) for all of it's styling, this extends to the layout stylings.
+
 #### #4 Create a PR
 
 > If you don't know how to create a pull request,
