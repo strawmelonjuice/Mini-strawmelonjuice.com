@@ -152,9 +152,10 @@ fn postlist_to_html(
               [
                 html.div(
                   [attribute.class("text-center text-xl")],
-                  {
-                    case postlist {
-                      True -> [
+                  [
+                    {
+                      bool.guard(
+                        postlist,
                         html.div(
                           [
                             attribute.class(
@@ -163,15 +164,16 @@ fn postlist_to_html(
                           ],
                           [html.text("post list")],
                         ),
-                      ]
-                      False -> [
-                        html.div([attribute.class("badge badge-neutral m-2")], [
-                          html.text("page"),
-                        ]),
-                      ]
-                    }
-                  }
-                    |> list.append([html.text(page.title)])
+                        fn() {
+                          html.div(
+                            [attribute.class("badge badge-neutral m-2")],
+                            [html.text("page")],
+                          )
+                        },
+                      )
+                    },
+                    html.text(page.title),
+                  ]
                     |> list.reverse(),
                 ),
               ],

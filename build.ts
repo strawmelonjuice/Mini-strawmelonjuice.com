@@ -523,7 +523,7 @@ switch (process.argv[2].toLowerCase()) {
 		break;
 	case "run-cd":
 		{
-			if (process.argv[4].toLowerCase() == "static") {
+			if (process.argv[4]!= undefined&&process.argv[4].toLowerCase() == "static") {
 				console.info(
 					"Static generation, then starting local bun server.",
 				);

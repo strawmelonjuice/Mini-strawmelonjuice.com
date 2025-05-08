@@ -7,10 +7,12 @@ import cynthia_websites_mini_server/static_routes
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/web
 import cynthia_websites_mini_shared/configtype
+import gleam/int
 import gleam/javascript/array
 import gleam/json
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/result
 import gleam/string
 import gleamy_lights/console
 import gleamy_lights/premixed
@@ -61,20 +63,49 @@ fn dynamic_site_server(mutmodel: mutable_model_type.MutableModel) {
   let model = mutmodel |> mutable_reference.get
   let conf = model.config
   {
+    let folder = process.cwd() <> "/assets/cynthia-mini"
+    case simplifile.create_directory_all(folder) {
+      Ok(..) -> Nil
+      Error(e) -> {
+        console.error(
+          "A problem occurred while creating the ´"
+          <> folder
+          <> "´ directory: "
+          <> premixed.text_error_red(string.inspect(e)),
+        )
+        process.exit(1)
+        panic as "We should not reach here"
+      }
+    }
+
     case files.file_exist(process.cwd() <> "/assets/cynthia-mini/README.md") {
       True -> Nil
       False -> {
-        let assert Ok(_) =
+        case
           simplifile.write(
             process.cwd() <> "/assets/cynthia-mini/README.md",
             "# What does this folder do?\n\r\n\rThis folder holds a few files Cynthia Mini serves to the browser to make sure everything works alright.\n\r\n\rThese are usually checked and downloaded if necessary only during start of the server,\n\rso try not to touch them! If you believe one of the files in here might be faulty, delete it, and restart the server.\n\r\n\rHave a nice day! :)",
           )
+        {
+          Ok(..) -> Nil
+          Error(e) -> {
+            console.error(
+              "A problem occurred while creating the ´"
+              <> process.cwd()
+              <> "/assets/cynthia-mini/README.md"
+              <> "´ file: "
+              <> premixed.text_error_red(string.inspect(e)),
+            )
+            process.exit(1)
+            panic as "We should not reach here"
+          }
+        }
         Nil
       }
     }
   }
   console.log("Starting server...")
-  let assert Ok(_) =
+  case
     bun.serve(ServeOptions(
       development: Some(True),
       hostname: conf.server_host,
@@ -84,17 +115,42 @@ fn dynamic_site_server(mutmodel: mutable_model_type.MutableModel) {
       id: None,
       reuse_port: None,
     ))
-  console.log("Server started!")
-  global.set_interval(60_000, fn() {
-    mutable_reference.update(mutmodel, fn(model) {
-      case model.cached_response {
-        None -> model
-        Some(..) ->
-          // Drops the cached response to keep it updated
-          mutable_model_type.MutableModelContent(..model, cached_response: None)
-      }
-    })
-  })
+  {
+    Ok(..) -> {
+      console.log(
+        "Server started! Running on: "
+        <> premixed.text_cyan(
+          "http://"
+          <> option.unwrap(conf.server_host, "localhost")
+          <> ":"
+          <> int.to_string(option.unwrap(conf.server_port, 8080))
+          <> "/",
+        ),
+      )
+      global.set_interval(60_000, fn() {
+        mutable_reference.update(mutmodel, fn(model) {
+          case model.cached_response {
+            None -> model
+            Some(..) ->
+              // Drops the cached response to keep it updated
+              mutable_model_type.MutableModelContent(
+                ..model,
+                cached_response: None,
+              )
+          }
+        })
+      })
+    }
+    Error(e) -> {
+      console.error(
+        "A problem occurred while starting the server: "
+        <> premixed.text_error_red(string.inspect(e)),
+      )
+      process.exit(1)
+      panic as "We should not reach here"
+    }
+  }
+
   Nil
 }
 
