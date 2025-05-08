@@ -52,7 +52,7 @@ Please note that color scheme names need to be unique, and that when you've defi
 
 #### #3 Add your layout
 
-Firstly, create a new layout module by copying + renaming the `cindy_simple.gleam` file in
+Firstly, create a new layout module, easiest done by copying + renaming the `cindy_simple.gleam` file in
 
 ```
 cynthia_websites_mini_client/src/cynthia_websites_mini_client/pottery/molds/
@@ -66,8 +66,7 @@ You'll also have to set some references to your newly created layout. For this, 
 cynthia_websites_mini_client/src/cynthia_websites_mini_client/pottery/molds.gleam
 ```
 
-and update the functions `into()` and `retroactive_menu_update()`, these should have some comments on
-them referencing how to add in proper references to your layout.
+and bind the function `into()` to your layout, it should have some comments further explaining how to add in proper references to your layout.
 
 Now, of course, freely edit your layout module! Thanks to guidance of the robust Gleam type system and the ease of Lustre,
 you should have no problem in either using it completely as templating language or as a proper programming language.
