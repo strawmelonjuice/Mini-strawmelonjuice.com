@@ -45,6 +45,15 @@ pub fn handle_request(
       |> promise.resolve()
     }
     "/site.json" -> {
+      console.log(
+        premixed.text_ok_green("[ 200 ]\t")
+        <> "(GET)\t"
+        <> premixed.text_lightblue("/site.json")
+        <> " "
+        <> premixed.text_cyan(
+          "\t(this means client-side will now start loading content!)",
+        ),
+      )
       let model = mutable_reference.get(mutable_model)
       case model.cached_response {
         Some(res_string) -> {
@@ -71,7 +80,7 @@ pub fn handle_request(
       }
       |> response.set_body(response.new(), _)
       |> response.set_headers(
-        [#("Content-Type", "text/json; charset=utf-8")]
+        [#("Content-Type", "application/json; charset=utf-8")]
         |> array.from_list(),
       )
       |> response.set_status(200)
