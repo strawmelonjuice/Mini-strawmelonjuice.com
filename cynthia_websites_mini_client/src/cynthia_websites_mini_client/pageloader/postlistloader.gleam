@@ -2,6 +2,7 @@ import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_shared/contenttypes.{PostData}
+import gleam/bool
 import gleam/list
 import gleam/option
 import gleam/result
@@ -141,6 +142,7 @@ fn postlist_to_html(
         }
         contenttypes.PageData(..) -> {
           let page = item
+          let postlist = string.starts_with(page.permalink, "!")
           html.li([attribute.class("list-row p-10")], [
             html.a(
               [
@@ -148,22 +150,42 @@ fn postlist_to_html(
                 attribute.class("post__link"),
               ],
               [
-                html.div([attribute.class("text-center text-xl")], [
-                  html.div([attribute.class("badge badge-neutral m-2")], [
-                    html.text("page"),
-                  ]),
-                  html.text(page.title),
-                ]),
-                html.blockquote(
-                  [
-                    attribute.class(
-                      "list-col-wrap text-sm border-l-2 border-accent border-dotted pl-4 bg-secondary bg-opacity-10",
-                    ),
-                  ],
-                  [pottery.parse_html(page.description, "descr.md")],
+                html.div(
+                  [attribute.class("text-center text-xl")],
+                  {
+                    case postlist {
+                      True -> [
+                        html.div(
+                          [
+                            attribute.class(
+                              "badge badge-secondary badge-outline m-2",
+                            ),
+                          ],
+                          [html.text("post list")],
+                        ),
+                      ]
+                      False -> [
+                        html.div([attribute.class("badge badge-neutral m-2")], [
+                          html.text("page"),
+                        ]),
+                      ]
+                    }
+                  }
+                    |> list.append([html.text(page.title)])
+                    |> list.reverse(),
                 ),
               ],
             ),
+            bool.guard(postlist, html.br([]), fn() {
+              html.blockquote(
+                [
+                  attribute.class(
+                    "list-col-wrap text-sm border-l-2 border-accent border-dotted pl-4 bg-secondary bg-opacity-10",
+                  ),
+                ],
+                [pottery.parse_html(page.description, "descr.md")],
+              )
+            }),
           ])
         }
       }
@@ -173,4 +195,3 @@ fn postlist_to_html(
     postlist,
   )
 }
-/// Comments are stored as a list of `Comment`s.
