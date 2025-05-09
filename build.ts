@@ -24,8 +24,7 @@ let executed = true;
 import themeconf from "./themes.json";
 import path from "path";
 import CleanCSS from "clean-css";
-import { readdirSync, readFileSync, writeFileSync } from "fs";
-import { static_routes } from "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server/static_routes.d.mts";
+import { readFileSync, writeFileSync } from "fs";
 switch (process.argv[2].toLowerCase()) {
   case "clean":
     {
