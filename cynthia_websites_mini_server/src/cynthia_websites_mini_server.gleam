@@ -199,6 +199,22 @@ fn static_site_server() {
       panic as "We should not reach here"
     }
   }
+  case
+    simplifile.copy_directory(
+      at: process.cwd() <> "/assets/",
+      to: outdir <> "/assets/",
+    )
+  {
+    Ok(..) -> Nil
+    Error(e) -> {
+      console.error(
+        "A problem occurred while copying the assets directory: "
+        <> premixed.text_error_red(string.inspect(e)),
+      )
+      process.exit(1)
+      panic as "We should not reach here"
+    }
+  }
   console.info(
     premixed.text_ok_green("Site pregeneration complete!")
     <> " Serve files in "
