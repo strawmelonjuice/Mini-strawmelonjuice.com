@@ -505,7 +505,7 @@ switch (process.argv[2].toLowerCase()) {
           sourcemap: "linked",
         });
         const shebang = `#!/usr/bin/env bun`;
-        let bundle = readFileSync("./dist/cynthia_websites_mini_server.js");
+        let bundle = readFileSync("./dist/cynthia_websites_mini_server.js").toString();
         bundle = shebang + "\n\n" + bundle;
         writeFileSync("./dist/cynthia_websites_mini_server.js", bundle);
         if (s.success) console.log("Bundling completed.");
