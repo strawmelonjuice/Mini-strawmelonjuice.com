@@ -276,7 +276,7 @@ themes_gleam_content += `]
 `;
 const fo = Bun.file(
   __dirname +
-    "/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui/themes_generated.gleam",
+  "/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui/themes_generated.gleam",
 );
 fo.write(themes_gleam_content);
 const tailwindconfig: import("tailwindcss").Config = {
@@ -523,7 +523,7 @@ switch (process.argv[2].toLowerCase()) {
         process.argv[4].toLowerCase() == "static"
       ) {
         console.info("Static generation, then starting local bun server.");
-        Bun.spawnSync({
+        if (Bun.spawnSync({
           cmd: [
             "bun",
             path.join(
@@ -536,14 +536,15 @@ switch (process.argv[2].toLowerCase()) {
           stderr: "inherit",
           stdin: "inherit",
           cwd: process.argv[3],
-        });
-        Bun.spawnSync({
-          cwd: path.join(process.argv[3], "/out"),
-          cmd: ["bunx", "serve"],
-          stdout: "inherit",
-          stderr: "inherit",
-          stdin: "inherit",
-        });
+        }).success) {
+          Bun.spawnSync({
+            cwd: path.join(process.argv[3], "/out"),
+            cmd: ["bunx", "serve"],
+            stdout: "inherit",
+            stderr: "inherit",
+            stdin: "inherit",
+          });
+        }
       } else {
         console.info("Starting Cynthia Mini as server.");
         Bun.spawnSync({
