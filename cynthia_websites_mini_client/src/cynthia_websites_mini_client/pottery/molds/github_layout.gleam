@@ -98,10 +98,6 @@ pub fn post_layout(
   let menu = menu_1(model)
 
   // Extract required metadata
-  let assert Ok(title) =
-    dict.get(variables, "title")
-    |> result.unwrap(dynamic.from(None))
-    |> decode.run(decode.string)
   let assert Ok(description) =
     dict.get(variables, "description_html")
     |> result.unwrap(dynamic.from(None))

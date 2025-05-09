@@ -12,7 +12,6 @@ import gleam/javascript/array
 import gleam/json
 import gleam/list
 import gleam/option.{None, Some}
-import gleam/result
 import gleam/string
 import gleamy_lights/console
 import gleamy_lights/premixed
