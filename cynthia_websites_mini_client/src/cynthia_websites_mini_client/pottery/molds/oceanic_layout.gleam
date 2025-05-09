@@ -25,6 +25,7 @@ import gleam/string
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
+import lustre/event
 
 /// Page layout handler for the Oceanic theme
 ///
@@ -332,6 +333,31 @@ fn oceanic_common(
               [html.text(site_name)],
             ),
           ]),
+          // Center - Add search input with oceanic styling
+          html.div([attribute.class("navbar-center hidden sm:flex")], [
+            html.div([attribute.class("relative w-64")], [
+              html.div(
+                [
+                  attribute.class(
+                    "flex items-center h-9 bg-base-300/80 border-b-2 border-primary/30 hover:border-primary/60 focus-within:border-primary w-full rounded-t-md px-2",
+                  ),
+                ],
+                [
+                  html.span([attribute.class("text-base-content/60 mr-2")], [
+                    html.span([attribute.class("i-tabler-search w-4 h-4")], []),
+                  ]),
+                  html.input([
+                    attribute.class(
+                      "w-full py-1 px-1 bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/50",
+                    ),
+                    attribute.placeholder("Search content..."),
+                    attribute.type_("text"),
+                    event.on_input(messages.UserSearchTerm),
+                  ]),
+                ],
+              ),
+            ]),
+          ]),
           // Right side - primary menu
           html.div([attribute.class("navbar-end")], [
             html.ul(
@@ -345,6 +371,29 @@ fn oceanic_common(
           ]),
         ],
       ),
+      // Mobile search bar (shown only on small screens)
+      html.div([attribute.class("px-4 mb-4 sm:hidden")], [
+        html.div(
+          [
+            attribute.class(
+              "flex items-center h-9 bg-base-300/80 border-b-2 border-primary/30 hover:border-primary/60 focus-within:border-primary w-full rounded-t-md px-2",
+            ),
+          ],
+          [
+            html.span([attribute.class("text-base-content/60 mr-2")], [
+              html.span([attribute.class("i-tabler-search w-4 h-4")], []),
+            ]),
+            html.input([
+              attribute.class(
+                "w-full py-1 px-1 bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/50",
+              ),
+              attribute.placeholder("Search content..."),
+              attribute.type_("text"),
+              event.on_input(messages.UserSearchTerm),
+            ]),
+          ],
+        ),
+      ]),
       // Secondary menu container - can be hidden when empty
       // This allows for context-dependent navigation options
       html.div(

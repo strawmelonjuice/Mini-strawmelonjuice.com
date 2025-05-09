@@ -15,6 +15,7 @@ import gleam/string
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
+import lustre/event
 
 /// cindy layout for pages.
 ///
@@ -173,7 +174,7 @@ fn cindy_common(
       html.div(
         [
           attribute.class(
-            "grid grid-cols-5 grid-rows-12 gap-0 w-screen h-screen",
+            "grid grid-cols-5 grid-rows-12 gap-0 w-screen h-screen bg-base-100",
           ),
         ],
         [
@@ -189,7 +190,42 @@ fn cindy_common(
                 [html.text(site_name)],
               ),
             ]),
-            html.div([attribute.class("flex-auto w-9/12")], [
+            // Add search input field between site name and menu
+            html.div(
+              [
+                attribute.class(
+                  "flex-auto w-4/12 flex items-center justify-center",
+                ),
+              ],
+              [
+                html.div([attribute.class("relative w-full max-w-xs")], [
+                  html.div(
+                    [
+                      attribute.class(
+                        "flex items-center h-8 bg-base-200/80 border border-base-300 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary w-full",
+                      ),
+                    ],
+                    [
+                      html.span([attribute.class("pl-3 text-base-content/60")], [
+                        html.span(
+                          [attribute.class("i-tabler-search w-4 h-4")],
+                          [],
+                        ),
+                      ]),
+                      html.input([
+                        attribute.class(
+                          "w-full py-1.5 px-2 text-sm bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/50",
+                        ),
+                        attribute.placeholder("Search..."),
+                        attribute.type_("text"),
+                        event.on_input(messages.UserSearchTerm),
+                      ]),
+                    ],
+                  ),
+                ]),
+              ],
+            ),
+            html.div([attribute.class("flex-auto w-5/12")], [
               html.menu([attribute.class("text-right")], [
                 html.ul(
                   [
