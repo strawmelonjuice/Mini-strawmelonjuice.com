@@ -18,6 +18,24 @@
     "layout": "cindy"
   },
   {
+    "name": "autumn-dual",
+    "prevalence": "light",
+    "fonts": [
+      "Fira Sans",
+      "Ubuntu",
+      "Noto Sans"
+    ],
+    "font-size": 15,
+    "fonts-mono": [
+      "Fira Mono",
+      "Ubuntu Mono",
+      "Noto Mono"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": "autumn",
+    "layout": "cindy-dual"
+  },
+  {
     "name": "night",
     "prevalence": "dark",
     "fonts": [
@@ -36,6 +54,24 @@
     "layout": "cindy"
   },
   {
+    "name": "night-dual",
+    "prevalence": "dark",
+    "fonts": [
+      "Fira Sans",
+      "Ubuntu",
+      "Noto Sans"
+    ],
+    "font-size": 15,
+    "fonts-mono": [
+      "Fira Mono",
+      "Ubuntu Mono",
+      "Noto Mono"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": "night",
+    "layout": "cindy-dual"
+  },
+  {
     "name": "coffee",
     "prevalence": "dark",
     "fonts": [
@@ -52,6 +88,24 @@
     "font-size-mono": 14,
     "daisyUI": "coffee",
     "layout": "cindy"
+  },
+  {
+    "name": "coffee-dual",
+    "prevalence": "dark",
+    "fonts": [
+      "Fira Sans",
+      "Ubuntu",
+      "Noto Sans"
+    ],
+    "font-size": 15,
+    "fonts-mono": [
+      "Fira Mono",
+      "Ubuntu Mono",
+      "Noto Mono"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": "coffee",
+    "layout": "cindy-dual"
   },
   {
     "name": "oceanic",

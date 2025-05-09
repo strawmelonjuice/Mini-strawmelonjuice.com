@@ -34,6 +34,20 @@ Embrace the warm, inviting ambiance of fall with the Autumn theme. Features eart
 | Monospace Font | Fira Mono, Ubuntu Mono, Noto Mono |
 | Monospace Size | 14px                              |
 
+### Autumn Dual
+
+The Autumn color scheme with the dual layout variation. Preserves the warm earthy tones while adding support for a secondary menu, making it ideal for sites needing contextual navigation options.
+
+| Feature        | Details                           |
+| -------------- | --------------------------------- |
+| Layout         | cindy-dual                        |
+| Mode           | Light                             |
+| Font Family    | Fira Sans, Ubuntu, Noto Sans      |
+| Font Size      | 15px                              |
+| Monospace Font | Fira Mono, Ubuntu Mono, Noto Mono |
+| Monospace Size | 14px                              |
+| Special Features | Secondary menu support          |
+
 ### Night
 
 A sophisticated dark mode experience that reduces eye strain while maintaining perfect contrast and readability.
@@ -49,6 +63,20 @@ A sophisticated dark mode experience that reduces eye strain while maintaining p
 | Monospace Font | Fira Mono, Ubuntu Mono, Noto Mono |
 | Monospace Size | 14px                              |
 
+### Night Dual
+
+The Night theme with an enhanced layout that includes a secondary menu system. Perfect for dark-mode enthusiasts who need additional navigation options in their website structure.
+
+| Feature        | Details                           |
+| -------------- | --------------------------------- |
+| Layout         | cindy-dual                        |
+| Mode           | Dark                              |
+| Font Family    | Fira Sans, Ubuntu, Noto Sans      |
+| Font Size      | 15px                              |
+| Monospace Font | Fira Mono, Ubuntu Mono, Noto Mono |
+| Monospace Size | 14px                              |
+| Special Features | Secondary menu support          |
+
 ### Coffee
 
 Rich and robust like your favorite brew, the Coffee theme delivers a dark aesthetic with deep, warm undertones inspired by coffee hues.
@@ -61,6 +89,20 @@ Rich and robust like your favorite brew, the Coffee theme delivers a dark aesthe
 | Font Size      | 15px                              |
 | Monospace Font | Fira Mono, Ubuntu Mono, Noto Mono |
 | Monospace Size | 14px                              |
+
+### Coffee Dual
+
+The Coffee color scheme paired with our dual-menu layout. Combines rich, warm dark tones with enhanced navigation capabilities that allow for both primary and contextual menu systems.
+
+| Feature        | Details                           |
+| -------------- | --------------------------------- |
+| Layout         | cindy-dual                        |
+| Mode           | Dark                              |
+| Font Family    | Fira Sans, Ubuntu, Noto Sans      |
+| Font Size      | 15px                              |
+| Monospace Font | Fira Mono, Ubuntu Mono, Noto Mono |
+| Monospace Size | 14px                              |
+| Special Features | Secondary menu support          |
 
 ### Oceanic
 
@@ -105,4 +147,26 @@ The dark mode counterpart to GitHub Light, offering the same professional experi
 | Monospace Font | SFMono-Regular, Consolas, Liberation Mono |
 | Monospace Size | 14px                                      |
 | Special Features | GitHub-style code blocks, syntax highlighting optimized for dark mode |
+
+## Layout Comparison
+
+### Cindy Layouts
+
+| Feature               | cindy           | cindy-dual       |
+| --------------------- | --------------- | ---------------- |
+| Primary Menu          | ✅              | ✅               |
+| Secondary Menu        | ❌              | ✅               |
+| Responsive Design     | ✅              | ✅               |
+| Post Metadata Display | Right sidebar   | Right sidebar    |
+| Focus                 | Simplicity      | Navigation       |
+
+### Other Layouts
+
+| Feature               | oceanic         | github           |
+| --------------------- | --------------- | ---------------- |
+| Primary Menu          | ✅              | ✅               |
+| Secondary Menu        | ✅              | ❌               |
+| Responsive Design     | ✅              | ✅               |
+| Post Metadata Display | Left sidebar    | Left sidebar     |
+| Focus                 | Visual appeal   | Technical content|
 

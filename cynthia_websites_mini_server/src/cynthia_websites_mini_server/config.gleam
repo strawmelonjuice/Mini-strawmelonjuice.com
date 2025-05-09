@@ -276,9 +276,23 @@ comment_repo = \"\"
     promise.resolve(Ok(Nil))
   }
   {
-    {
-      add_item(
-        [],
+    console.log("Creating example content...")
+    [
+      item(
+        to: "hangers.md",
+        with: contenttypes.Content(
+          filename: "hangers",
+          title: "Hangers",
+          description: "An example page about hangers",
+          layout: "theme",
+          permalink: "/hangers",
+          data: contenttypes.PageData(in_menus: [2]),
+          inner_plain: "I have no clue. What are hangers again?
+
+This page will only show up if you have a layout with two or more menus available! :)",
+        ),
+      ),
+      item(
         "index.md",
         contenttypes.Content(
           filename: "",
@@ -313,8 +327,8 @@ comment_repo = \"\"
   ```
   ",
         ),
-      )
-      |> add_item(
+      ),
+      item(
         to: "example-post.md",
         with: contenttypes.Content(
           filename: "",
@@ -330,8 +344,8 @@ comment_repo = \"\"
           ),
           inner_plain: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.md`.",
         ),
-      )
-      |> add_item(
+      ),
+      item(
         to: "posts",
         with: contenttypes.Content(
           filename: "posts",
@@ -342,14 +356,14 @@ comment_repo = \"\"
           data: contenttypes.PageData(in_menus: [1]),
           inner_plain: "",
         ),
-      )
-    }
+      ),
+    ]
+    |> list.flatten
     |> write_posts_and_pages_to_fs
   }
 }
 
-fn add_item(
-  after others: List(#(String, String)),
+fn item(
   to path: String,
   with content: contenttypes.Content,
 ) -> List(#(String, String)) {
@@ -360,7 +374,6 @@ fn add_item(
     |> json.to_string()
   let meta_path = path <> ".meta.json"
   [#(meta_path, meta_json), #(path, content.inner_plain)]
-  |> list.append(others)
 }
 
 // What? The function name is descriptive!
