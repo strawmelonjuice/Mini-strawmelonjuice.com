@@ -216,8 +216,8 @@ fn static_site_server() {
   }
   console.info(
     premixed.text_ok_green("Site pregeneration complete!")
-    <> " Serve files in "
+    <> " Serve files from "
     <> premixed.text_orange(outdir <> "/")
-    <> "and you should have a site running!",
+    <> " and you should have a site running!",
   )
 }
