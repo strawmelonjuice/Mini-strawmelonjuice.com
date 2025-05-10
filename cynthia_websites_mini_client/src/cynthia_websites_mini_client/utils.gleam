@@ -23,6 +23,7 @@ pub fn phone_home_url() -> String {
     "https://" <> _ -> "https://" <> host
     _ -> "https://" <> host
   }
+  <> window.pathname()
 }
 
 @external(javascript, "./utils_ffi.ts", "getWindowHost")
