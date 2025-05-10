@@ -21,7 +21,7 @@ Create a [fork](https://github.com/CynthiaWebsiteEngine/Mini/fork) of this repos
 }
 ```
 
-For generating your own colorscheme instead of a daisyUI premixed colorscheme name, consider using <https://v4.daisyui.com/theme-generator/>. You can just replace the theme name with the colors object:
+For generating your own colour scheme instead of a daisyUI premixed colour scheme name, consider using <https://v4.daisyui.com/theme-generator/>. You can just replace the theme name with the colours object:
 
 ```json
 {
@@ -48,7 +48,7 @@ For generating your own colorscheme instead of a daisyUI premixed colorscheme na
 }
 ```
 
-Please note that color scheme names need to be unique, and that when you've defined a colorscheme like above, it can be reffered to by name with other layouts.
+Please note that colour scheme names need to be unique, and that when you've defined a colour scheme like above, it can be referred to by name with other layouts.
 
 #### #3 Add your layout
 

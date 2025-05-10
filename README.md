@@ -4,13 +4,13 @@ Simplified version of CynthiaWeb. Not supporting most of the features.
 Simply put, goal is to run a really
 simple server here, serving static stuff and having the client do the rest.
 
-This leaves a lot of customization options in the bin,
+This leaves a lot of customisation options in the bin,
 as for example custom formats are out of the optional.
 
 In return, Cynthia Mini comes with pre-made themes with each some customisable options!
 
 ## Themes
-A Cynthia Mini theme consists of the combination of a predefined colorscheme and layout. You can [add your own](https://github.com/CynthiaWebsiteEngine/Mini/blob/main/docs/contributing/add-theme.md) if you'd like!
+A Cynthia Mini theme consists of the combination of a predefined colourscheme and layout. You can [add your own](https://github.com/CynthiaWebsiteEngine/Mini/blob/main/docs/contributing/add-theme.md) if you'd like!
 
 [Some themes are coming in!](https://github.com/CynthiaWebsiteEngine/Mini/issues/1)
 
@@ -37,23 +37,10 @@ Global configuration is done in the `cynthia-mini.toml` file.
 Cynthia Mini diverges from Cynthia "Full" in that on Cynthia "Full", the server processes all the config into simple
 HTML, whereas on Cynthia Mini, all the server does is serve up the data. The frontend parses everything.
 
-Another difference, having to do with this, is that both the frontend and the backend carry a SQLite database for
-caching purposes. This because the client syncs and only then filters data from the server, and that load can be greatly
-decreased by keeping data in a database.
 
-On the client side [`SQL.js`](https://sql.js.org/) is used, on the server, the more native
-[`BunSQLite`](https://bun.sh/docs/api/sqlite) is used (using [`bungibindies`](https://hex.pm/packages/bungibindies), to
-bind to Bun API's)
-
-> #### Note:
 >
-> ~~After encountering some issues with `sql.js`, the client side for now uses in-browser object storage for caching.
-> This is a temporary solution, and will be replaced with a more robust solution in the future.~~
 
-#### Database-only
-
-Because Cynthia Mini first loads config to a SQLite database and then uses it, it can also run in database-only mode,
-where there is no config directory, and only an SQLite database to run off directly.
+#### Static mode
 
 ### Example config directory structure
 
