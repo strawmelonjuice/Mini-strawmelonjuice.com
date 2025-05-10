@@ -65,7 +65,7 @@ pub fn handle_request(
           // and encode it as JSON
           let complete_data = config.load()
           let complete_data_json =
-            complete_data |> configtype.encode_complete_data
+            complete_data |> configtype.encode_complete_data_for_client
           let res_string = complete_data_json |> json.to_string
           // And add it to the model as cache for future requests
           mutable_reference.update(mutable_model, fn(model) {

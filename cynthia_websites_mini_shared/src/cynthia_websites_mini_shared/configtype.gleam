@@ -17,15 +17,15 @@ pub type CompleteData {
   )
 }
 
-pub fn encode_complete_data(complete_data: CompleteData) -> json.Json {
+pub fn encode_complete_data_for_client(complete_data: CompleteData) -> json.Json {
   let CompleteData(
     global_theme:,
     global_theme_dark:,
     global_colour:,
     global_site_name:,
     global_site_description:,
-    server_port:,
-    server_host:,
+    server_port: _,
+    server_host: _,
     comment_repo:,
     content:,
   ) = complete_data
@@ -35,14 +35,6 @@ pub fn encode_complete_data(complete_data: CompleteData) -> json.Json {
     #("global_colour", json.string(global_colour)),
     #("global_site_name", json.string(global_site_name)),
     #("global_site_description", json.string(global_site_description)),
-    #("server_port", case server_port {
-      None -> json.null()
-      Some(value) -> json.int(value)
-    }),
-    #("server_host", case server_host {
-      None -> json.null()
-      Some(value) -> json.string(value)
-    }),
     #("comment_repo", case comment_repo {
       None -> json.null()
       Some(value) -> json.string(value)
@@ -60,8 +52,16 @@ pub fn complete_data_decoder() -> decode.Decoder(CompleteData) {
     "global_site_description",
     decode.string,
   )
-  use server_port <- decode.field("server_port", decode.optional(decode.int))
-  use server_host <- decode.field("server_host", decode.optional(decode.string))
+  use server_port <- decode.optional_field(
+    "server_port",
+    None,
+    decode.optional(decode.int),
+  )
+  use server_host <- decode.optional_field(
+    "server_host",
+    None,
+    decode.optional(decode.string),
+  )
   use comment_repo <- decode.field(
     "comment_repo",
     decode.optional(decode.string),

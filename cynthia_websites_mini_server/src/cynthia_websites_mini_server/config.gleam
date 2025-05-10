@@ -1,10 +1,15 @@
+import bungibindies/bun
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/contenttypes
+import gleam/bit_array
 import gleam/dict
+import gleam/dynamic/decode
 import gleam/fetch
+import gleam/float
 import gleam/http/request
+import gleam/int
 import gleam/javascript/promise
 import gleam/json
 import gleam/list
@@ -187,17 +192,43 @@ fn content_getter() {
     |> list.try_map(fn(file: String) -> Result(contenttypes.Content, String) {
       // Now, we have all file names coming into this function.
       // Time to decode them all, and have
-      use inner_plain <- result.try(
-        simplifile.read(file)
-        |> result.replace_error("FS error while reading ´" <> file <> "´."),
-      )
-      let decoder = contenttypes.content_decoder_and_merger(inner_plain, file)
       use meta_json <- result.try(
         simplifile.read(file <> ".meta.json")
         |> result.replace_error(
           "FS error while reading ´" <> file <> ".meta.json´.",
         ),
       )
+      // Sometimes stuff is saved somewhere else, like in a different file path or maybe somewhere on the web, of course Cynthia Mini can still find those files!
+      // ...However, we first need to know there is an "external" file somewhere, we do that by checking the 'path' field.
+      // The extension before .meta.json is still used to parse the content.
+      let possibly_extern =
+        json.parse(meta_json, {
+          use path <- decode.optional_field("path", "", decode.string)
+          decode.success(path)
+        })
+        |> result.unwrap("")
+        |> string.to_option
+      let permalink =
+        json.parse(meta_json, {
+          use path <- decode.optional_field("permalink", "", decode.string)
+          decode.success(path)
+        })
+        |> result.unwrap("")
+      use inner_plain <- result.try(
+        // This case also check if the permalink starts with "!", in which case it is a content list.
+        // Content lists will be generated on the client side, and their pre-given content 
+        // will be discarded, so loading it in from anywhere would be a waste of resources.
+        case string.starts_with(permalink, "!"), possibly_extern {
+          True, _ -> Ok("")
+          False, option.None -> {
+            simplifile.read(file)
+            |> result.replace_error("FS error while reading ´" <> file <> "´.")
+          }
+          False, option.Some(p) -> get_ext(p)
+        },
+      )
+
+      let decoder = contenttypes.content_decoder_and_merger(inner_plain, file)
       json.parse(meta_json, decoder)
       |> result.map_error(fn(e) {
         "Some error decoding metadata for ´"
@@ -206,6 +237,45 @@ fn content_getter() {
         <> string.inspect(e)
       })
     })
+  }
+}
+
+// especially to not have promise colouring 💔
+@external(javascript, "./request_ffi.ts", "actual_call_to_curl")
+fn actual_call_to_curl(url: String) -> Result(String, String)
+
+/// Gets external content, beit by file path or by http(s) url.
+fn get_ext(path: String) -> Result(String, String) {
+  case string.starts_with(string.lowercase(path), "http") {
+    True -> {
+      let start = bun.nanoseconds()
+      console.log(
+        "Downloading external content ´" <> premixed.text_blue(path) <> "´...",
+      )
+
+      use res <- result.try(
+        actual_call_to_curl(path)
+        |> result.map_error(fn(b) { "Could not fetch external content: " <> b }),
+      )
+      let end = bun.nanoseconds()
+      let duration_ms = { end -. start } /. 1_000_000.0
+
+      console.log(
+        "Downloaded external content ´"
+        <> premixed.text_blue(path)
+        <> "´ in "
+        <> int.to_string(duration_ms |> float.truncate)
+        <> "ms!",
+      )
+      Ok(res)
+    }
+    False -> {
+      // Is a file path
+      simplifile.read(path)
+      |> result.replace_error(
+        "FS error while reading external content file ´" <> path <> "´.",
+      )
+    }
   }
 }
 
@@ -236,19 +306,31 @@ fn dialog_initcfg() {
     { process.cwd() <> "/cynthia-mini.toml" }
     |> fs.write_file_sync(
       "[global]
-theme = \"autumn\"
-theme_dark = \"night\"
-colour = \"#FFFFFF\"
-site_name = \"My Site\"
-site_description = \"A big site on a mini Cynthia!\"
-[server]
-port = 8080
-host = \"localhost\"
-[posts]
-# Set this to a repo to allow utteranc.es to enable comments on your posts. You'll to have the utterance bot added to that repo. Add it like ´username/repositoryname´.
-# See https://github.com/apps/utterances to add the bot!
-comment_repo = \"\"
-",
+  # Theme to use for light mode - default themes: autumn, default
+  theme = \"autumn\"
+  # Theme to use for dark mode - default themes: night, default-dark
+  theme_dark = \"night\"
+  # Primary color for accents and highlights
+  colour = \"#FFFFFF\"
+  # Your website's name, displayed in various places
+  site_name = \"My Site\"
+  # A brief description of your website
+  site_description = \"A big site on a mini Cynthia!\"
+
+  [server]
+  # Port number for the web server
+  port = 8080
+  # Host address for the web server
+  host = \"localhost\"
+
+  [posts]
+  # Enable comments on posts using utteranc.es
+  # Format: \"username/repositoryname\"
+  #
+  # You will need to give the utterances bot access to your repo.
+  # See https://github.com/apps/utterances to add the utterances bot to your repo
+  comment_repo = \"\"
+  ",
     )
     |> result.map_error(fn(e) {
       premixed.text_error_red("Error: Could not write cynthia-mini.toml: " <> e)
@@ -281,7 +363,7 @@ comment_repo = \"\"
       item(
         to: "hangers.md",
         with: contenttypes.Content(
-          filename: "hangers",
+          filename: "hangers.md",
           title: "Hangers",
           description: "An example page about hangers",
           layout: "theme",
@@ -290,6 +372,19 @@ comment_repo = \"\"
           inner_plain: "I have no clue. What are hangers again?
 
 This page will only show up if you have a layout with two or more menus available! :)",
+        ),
+      ),
+      ext_item(
+        to: "themes.md",
+        from: "https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini/refs/heads/main/docs/themes.md",
+        with: contenttypes.Content(
+          filename: "themes.md",
+          title: "Themes",
+          description: "External page example, using the theme list.",
+          layout: "theme",
+          permalink: "/themes",
+          data: contenttypes.PageData(in_menus: [1]),
+          inner_plain: "",
         ),
       ),
       item(
@@ -373,7 +468,37 @@ fn item(
     |> contenttypes.encode_content_for_fs
     |> json.to_string()
   let meta_path = path <> ".meta.json"
-  [#(meta_path, meta_json), #(path, content.inner_plain)]
+  case string.starts_with(content.permalink, "!") {
+    True -> {
+      // No content file for post lists.
+      [#(meta_path, meta_json)]
+    }
+    False -> [#(meta_path, meta_json), #(path, content.inner_plain)]
+  }
+}
+
+fn ext_item(
+  to fpath: String,
+  from path: String,
+  with content: contenttypes.Content,
+) -> List(#(String, String)) {
+  let meta_json =
+    json.object([
+      #("path", json.string(path)),
+      #("title", json.string(content.title)),
+      #("description", json.string(content.description)),
+      #("layout", json.string(content.layout)),
+      #("permalink", json.string(content.permalink)),
+      #("data", contenttypes.encode_content_data(content.data)),
+    ])
+    |> json.to_string()
+
+  [
+    #(
+      files.path_join([process.cwd(), "/content/", fpath]) <> ".meta.json",
+      meta_json,
+    ),
+  ]
 }
 
 // What? The function name is descriptive!

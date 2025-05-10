@@ -157,7 +157,8 @@ fn static_site_server() {
   console.info("Cynthia Mini is in pregeneration mode!")
 
   let complete_data = config.load()
-  let complete_data_json = complete_data |> configtype.encode_complete_data
+  let complete_data_json =
+    complete_data |> configtype.encode_complete_data_for_client
   let res_string = complete_data_json |> json.to_string
   let outdir = process.cwd() <> "/out"
   case simplifile.create_directory_all(outdir) {
