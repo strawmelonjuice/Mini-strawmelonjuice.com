@@ -19,7 +19,7 @@ If no theme is specified, the system will default to "autumn" for light mode and
 
 ## Available Themes
 
-### Autumn
+### Autumn (`"autumn"`)
 
 Embrace the warm, inviting ambience of fall with the Autumn theme. Features earthy tones and gentle contrasts that create a cosy reading environment.
 
@@ -32,7 +32,7 @@ Embrace the warm, inviting ambience of fall with the Autumn theme. Features eart
 > - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
 > - Monospace Size: 14px
 
-### Autumn Dual
+### Autumn Dual (`"autumn-dual"`)
 
 The Autumn colour scheme with the dual layout variation. Preserves the warm earthy tones while adding support for a secondary menu, making it ideal for sites needing contextual navigation options.
 
@@ -44,7 +44,19 @@ The Autumn colour scheme with the dual layout variation. Preserves the warm eart
 > - Monospace Size: 14px
 > - Special Features: Secondary menu support
 
-### Night
+### Autumn Landing (`"autumn-landing"`)
+
+The Autumn colour scheme optimized for landing pages. Features the same warm earthy tones with a layout designed specifically for home pages and landing sites, with enhanced visual elements and a more prominent hero section.
+
+> - Layout: `cindy-landing`
+> - Mode: Light
+> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Size: 16px
+> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Size: 14px
+> - Special Features: Optimized for landing pages
+
+### Night (`"night"`)
 
 A sophisticated dark mode experience that reduces eye strain while maintaining perfect contrast and readability.
 
@@ -57,7 +69,7 @@ A sophisticated dark mode experience that reduces eye strain while maintaining p
 > - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
 > - Monospace Size: 14px
 
-### Night Dual
+### Night Dual (`"night-dual"`)
 
 The Night theme with an enhanced layout that includes a secondary menu system. Perfect for dark-mode enthusiasts who need additional navigation options in their website structure.
 
@@ -69,7 +81,19 @@ The Night theme with an enhanced layout that includes a secondary menu system. P
 > - Monospace Size: 14px
 > - Special Features: Secondary menu support
 
-### Coffee
+### Night Landing (`"night-landing"`)
+
+The Night theme with a specialized layout for creating impactful landing pages. Maintains the elegant dark mode experience while providing a structure optimized for welcome pages and site entrances.
+
+> - Layout: `cindy-landing`
+> - Mode: Dark
+> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Size: 16px
+> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Size: 14px
+> - Special Features: Optimized for landing pages
+
+### Coffee (`"coffee"`)
 
 Rich and robust like your favourite brew, the Coffee theme delivers a dark aesthetic with deep, warm undertones inspired by coffee hues.
 
@@ -80,7 +104,7 @@ Rich and robust like your favourite brew, the Coffee theme delivers a dark aesth
 > - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
 > - Monospace Size: 14px
 
-### Coffee Dual
+### Coffee Dual (`"coffee-dual"`)
 
 The Coffee colour scheme paired with our dual-menu layout. Combines rich, warm dark tones with enhanced navigation capabilities that allow for both primary and contextual menu systems.
 
@@ -92,7 +116,7 @@ The Coffee colour scheme paired with our dual-menu layout. Combines rich, warm d
 > - Monospace Size: 14px
 > - Special Features: Secondary menu support
 
-### Oceanic
+### Oceanic (`"oceanic"`)
 
 Cool blues and calming teals create an immersive dark experience. Unlike other themes, Oceanic features its own custom layout and distinctive font pairing, making it perfect for technical content and code snippets.
 
@@ -106,7 +130,7 @@ Oceanic was created as a test, to check how accurate [add theme](https://github.
 > - Monospace Size: 14px
 > - Special Features: Custom colour palette, supports two menus, enhanced for code display
 
-### GitHub Light
+### GitHub Light (`"github-light"`)
 
 A clean, professional theme based on GitHub's light mode interface. Perfect for documentation and technical content with excellent readability and familiar GitHub styling.
 
@@ -118,7 +142,7 @@ A clean, professional theme based on GitHub's light mode interface. Perfect for 
 > - Monospace Size: 14px
 > - Special Features: GitHub-style code blocks, table formatting
 
-### GitHub Dark
+### GitHub Dark (`"github-dark"`)
 
 The dark mode counterpart to GitHub Light, offering the same professional experience with reduced eye strain for low-light environments. Features GitHub's dark palette with carefully chosen contrast ratios.
 
@@ -134,7 +158,7 @@ The dark mode counterpart to GitHub Light, offering the same professional experi
 
 ### Cindy Layouts
 
-> - **cindy**
+> - **cindy-simple**
 >   - Primary Menu: ✅
 >   - Secondary Menu: ❌
 >   - Responsive Design: ✅
@@ -147,6 +171,15 @@ The dark mode counterpart to GitHub Light, offering the same professional experi
 >   - Responsive Design: ✅
 >   - Post Metadata Display: Right sidebar
 >   - Focus: Navigation
+>
+> - **cindy-landing**
+> _Note: this layout only exists for pages, on posts, it'll fall back to cindy-simple.
+>   - Primary Menu: ✅
+>   - Secondary Menu: ❌
+>   - Responsive Design: ✅
+>   - Post Metadata Display: Hidden
+>   - Focus: Conversion & visual impact
+>   - Special Features: Optimized for landing pages
 
 ### Other Layouts
 
