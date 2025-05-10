@@ -7,6 +7,7 @@ import lustre/element.{type Element}
 
 // Imports from layout modules
 import cynthia_websites_mini_client/pottery/molds/cindy_dual
+import cynthia_websites_mini_client/pottery/molds/cindy_landing
 import cynthia_websites_mini_client/pottery/molds/cindy_simple
 import cynthia_websites_mini_client/pottery/molds/github_layout
 import cynthia_websites_mini_client/pottery/molds/oceanic_layout
@@ -59,6 +60,24 @@ pub fn into(
           metadata: Dict(String, Dynamic),
         ) -> Element(messages.Msg) {
           cindy_dual.post_layout(content, metadata, model)
+        }
+      }
+    }
+    "cindy-landing" -> {
+      // Cindy-landing shows an optimized layout for landing pages
+      // Post layout remains identical to cindy-simple
+      case is_post {
+        False -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) -> Element(messages.Msg) {
+          cindy_landing.page_layout(content, metadata, model)
+        }
+        True -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) -> Element(messages.Msg) {
+          cindy_simple.post_layout(content, metadata, model)
         }
       }
     }

@@ -390,9 +390,9 @@ This page will only show up if you have a layout with two or more menus availabl
         "index.md",
         contenttypes.Content(
           filename: "",
-          title: "Example index",
+          title: "Example landing",
           description: "This is an example index page",
-          layout: "theme",
+          layout: "cindy-landing",
           permalink: "/",
           data: contenttypes.PageData(in_menus: [1]),
           inner_plain: "# Hello, World
