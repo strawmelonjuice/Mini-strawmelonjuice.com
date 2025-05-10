@@ -30,9 +30,17 @@ pub fn phone_home_url() -> String {
 }
 
 fn phone_home_lessener(in: String) -> String {
-  case in |> string.ends_with("//") {
+  case string.ends_with(in, "//") {
     True -> phone_home_lessener(in |> string.drop_end(1))
-    False -> in
+    False ->
+      case string.ends_with(in, "index.html") {
+        True -> phone_home_lessener(in |> string.replace("index.html", ""))
+        False ->
+          case string.ends_with(in, "index.html/") {
+            True -> phone_home_lessener(in |> string.replace("index.html", ""))
+            False -> in
+          }
+      }
   }
 }
 
