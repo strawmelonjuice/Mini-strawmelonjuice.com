@@ -37,10 +37,23 @@ Global configuration is done in the `cynthia-mini.toml` file.
 Cynthia Mini diverges from Cynthia "Full" in that on Cynthia "Full", the server processes all the config into simple
 HTML, whereas on Cynthia Mini, all the server does is serve up the data. The frontend parses everything.
 
-
->
-
 #### Static mode
+
+Static mode allows you to pre-generate your website content into static files that can be deployed to any web server. When running Cynthia Mini with the `static` or `pregenerate` command, it will:
+
+1. Load your content and configuration from the `content` directory and `cynthia-mini.toml`
+2. Generate a complete `site.json` file containing all your site data
+3. Create an `index.html` file with the Cynthia Mini client embedded in it to render your site
+4. Output everything to an `out` directory that can be deployed anywhere
+
+This approach provides the benefits of a static site generator (hosting on any web server, improved security, faster load times) while retaining the dynamic features of Cynthia Mini through client-side rendering.
+
+To use static mode:
+```
+cynthiaweb-mini static
+```
+
+After generation, you can serve the output directory with any static file server.
 
 ### Example config directory structure
 
@@ -61,7 +74,6 @@ HTML, whereas on Cynthia Mini, all the server does is serve up the data. The fro
         article2.md
         article2.md.meta.json
 ./cynthia-mini.toml
-./cache.db
 ```
 
 Something like this.
