@@ -40,6 +40,19 @@ pub fn main() {
   case process.argv() |> array.to_list() |> list.drop(2) {
     ["dynamic", ..] -> dynamic_site_server(mutable_model_type.new())
     ["pregenerate", ..] | ["static"] -> static_site_server()
+    ["help", ..] | ["--help", ..] | ["-h", ..] -> {
+      console.log(
+        "\nCynthia Mini - A lightweight server for building websites\n\n"
+        <> "Usage:\n"
+        <> "  cynthia-mini [command]\n\n"
+        <> "Commands:\n"
+        <> "  dynamic      Start a dynamic website server\n"
+        <> "  static       Generate a static website\n"
+        <> "  pregenerate  Alias for static\n"
+        <> "  help        Show this help message\n\n"
+        <> "For more information, visit: https://github.com/CynthiaWebsiteEngine/Mini",
+      )
+    }
     [a, ..] | [a] ->
       console.error(
         "Unknown subcommand: ´"
