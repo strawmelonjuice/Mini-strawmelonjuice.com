@@ -56,6 +56,18 @@ The Autumn colour scheme optimized for landing pages. Features the same warm ear
 > - Monospace Size: 14px
 > - Special Features: Optimized for landing pages
 
+### Minimalist Light (`"minimalist-light"`)
+
+A clean, distraction-free light theme that emphasizes content readability. Features subtle neutral colors, simple typography, and a streamlined interface that puts focus on what matters most - your content.
+
+> - Layout: `minimalist`
+> - Mode: Light
+> - Font Family: Inter, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: JetBrains Mono, Fira Code, monospace
+> - Monospace Size: 14px
+> - Special Features: Simplified UI, enhanced readability, clean typography
+
 ### Night (`"night"`)
 
 A sophisticated dark mode experience that reduces eye strain while maintaining perfect contrast and readability.
@@ -92,6 +104,18 @@ The Night theme with a specialized layout for creating impactful landing pages. 
 > - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
 > - Monospace Size: 14px
 > - Special Features: Optimized for landing pages
+
+### Minimalist Dark (`"minimalist-dark"`)
+
+A modern dark theme that reduces visual clutter and eye strain. With its clean, understated design and intuitive layout, it's perfect for long reading sessions and distraction-free writing environments.
+
+> - Layout: `minimalist`
+> - Mode: Dark
+> - Font Family: Inter, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: JetBrains Mono, Fira Code, monospace
+> - Monospace Size: 14px
+> - Special Features: Simplified UI, enhanced readability, clean typography
 
 ### Coffee (`"coffee"`)
 
@@ -164,15 +188,17 @@ The dark mode counterpart to GitHub Light, offering the same professional experi
 >   - Responsive Design: ✅
 >   - Post Metadata Display: Right sidebar
 >   - Focus: Simplicity
->
-> - **cindy-dual**
+
+
+>  **cindy-dual**
 >   - Primary Menu: ✅
 >   - Secondary Menu: ✅
 >   - Responsive Design: ✅
 >   - Post Metadata Display: Right sidebar
 >   - Focus: Navigation
->
-> - **cindy-landing**
+
+
+> **cindy-landing**
 > _Note: this layout only exists for pages, on posts, it'll fall back to cindy-simple.
 >   - Primary Menu: ✅
 >   - Secondary Menu: ❌
@@ -183,14 +209,24 @@ The dark mode counterpart to GitHub Light, offering the same professional experi
 
 ### Other Layouts
 
-> - **oceanic**
+> **minimalist**
+>   - Primary Menu: ✅
+>   - Secondary Menu: ❌
+>   - Responsive Design: ✅
+>   - Post Metadata Display: Inline (above content)
+>   - Focus: Content readability & simplicity
+>   - Special Features: Distraction-free reading experience, clean typography
+
+
+> **oceanic**
 >   - Primary Menu: ✅
 >   - Secondary Menu: ✅
 >   - Responsive Design: ✅
 >   - Post Metadata Display: Left sidebar
 >   - Focus: Visual appeal
->
-> - **github**
+
+
+> **github**
 >   - Primary Menu: ✅
 >   - Secondary Menu: ❌
 >   - Responsive Design: ✅
