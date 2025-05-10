@@ -9,7 +9,7 @@ import gleam/fetch
 import gleam/float
 import gleam/http/request
 import gleam/int
-import gleam/javascript/promise
+import gleam/javascript/promise.{type Promise}
 import gleam/json
 import gleam/list
 import gleam/option
@@ -27,9 +27,10 @@ import tom
 /// Then saves the configuration to the database.
 /// If an override environment variable or call param is provided, it will use that database file instead, and load from
 /// there. It will not need any files to exist in the filesystem (except for the SQLite file) in that case.
-pub fn load() -> configtype.CompleteData {
+pub fn load() -> Promise(configtype.CompleteData) {
   let global_config = capture_config()
-  let content = case content_getter() {
+  use content_list <- promise.await(content_getter())
+  let content = case content_list {
     Ok(lis) -> lis
     Error(msg) -> {
       console.error("Error: There was an error getting content:\n" <> msg)
@@ -40,6 +41,7 @@ pub fn load() -> configtype.CompleteData {
 
   let complete_data = configtype.merge(global_config, content)
   complete_data
+  |> promise.resolve
 }
 
 pub fn capture_config() {
@@ -178,73 +180,93 @@ fn cynthia_config_global_only_exploiter(o: dict.Dict(String, tom.Toml)) {
   ))
 }
 
-fn content_getter() {
-  {
-    simplifile.get_files(files.path_join([process.cwd() <> "/content"]))
-    |> result.unwrap([])
-    |> list.filter(fn(file) { file |> string.ends_with(".meta.json") })
-    |> list.map(fn(file) {
+fn content_getter() -> promise.Promise(
+  Result(List(contenttypes.Content), String),
+) {
+  let promises: List(Promise(Result(contenttypes.Content, String))) = {
+    fn(file) {
       file
       |> string.replace(".meta.json", "")
       |> files.path_normalize()
-    })
-    |> list.try_map(fn(file: String) -> Result(contenttypes.Content, String) {
-      // Now, we have all file names coming into this function.
-      // Time to decode them all, and have
-      use meta_json <- result.try(
-        simplifile.read(file <> ".meta.json")
-        |> result.replace_error(
-          "FS error while reading ´" <> file <> ".meta.json´.",
+    }
+    |> fn(value) {
+      list.map(
+        list.filter(
+          result.unwrap(
+            simplifile.get_files(files.path_join([process.cwd() <> "/content"])),
+            [],
+          ),
+          fn(file) { file |> string.ends_with(".meta.json") },
         ),
+        value,
       )
-      // Sometimes stuff is saved somewhere else, like in a different file path or maybe somewhere on the web, of course Cynthia Mini can still find those files!
-      // ...However, we first need to know there is an "external" file somewhere, we do that by checking the 'path' field.
-      // The extension before .meta.json is still used to parse the content.
-      let possibly_extern =
-        json.parse(meta_json, {
-          use path <- decode.optional_field("path", "", decode.string)
-          decode.success(path)
-        })
-        |> result.unwrap("")
-        |> string.to_option
-      let permalink =
-        json.parse(meta_json, {
-          use path <- decode.optional_field("permalink", "", decode.string)
-          decode.success(path)
-        })
-        |> result.unwrap("")
-      use inner_plain <- result.try(
-        // This case also check if the permalink starts with "!", in which case it is a content list.
-        // Content lists will be generated on the client side, and their pre-given content 
-        // will be discarded, so loading it in from anywhere would be a waste of resources.
-        case string.starts_with(permalink, "!"), possibly_extern {
-          True, _ -> Ok("")
-          False, option.None -> {
-            simplifile.read(file)
-            |> result.replace_error("FS error while reading ´" <> file <> "´.")
-          }
-          False, option.Some(p) -> get_ext(p)
-        },
-      )
-
-      let decoder = contenttypes.content_decoder_and_merger(inner_plain, file)
-      json.parse(meta_json, decoder)
-      |> result.map_error(fn(e) {
-        "Some error decoding metadata for ´"
-        <> file |> premixed.text_magenta()
-        <> "´: "
-        <> string.inspect(e)
-      })
-    })
+    }
+    |> list.map(get_inner_and_meta)
   }
+  let content = promise.map(promise.await_list(promises), result.all)
+  content
 }
 
-// especially to not have promise colouring 💔
-@external(javascript, "./request_ffi.ts", "actual_call_to_curl")
-fn actual_call_to_curl(url: String) -> Result(String, String)
+fn get_inner_and_meta(
+  file: String,
+) -> Promise(Result(contenttypes.Content, String)) {
+  use meta_json <- promise.try_await(
+    simplifile.read(file <> ".meta.json")
+    |> result.replace_error(
+      "FS error while reading ´" <> file <> ".meta.json´.",
+    )
+    |> promise.resolve,
+  )
+  // Sometimes stuff is saved somewhere else, like in a different file path or maybe somewhere on the web, of course Cynthia Mini can still find those files!
+  // ...However, we first need to know there is an "external" file somewhere, we do that by checking the 'path' field.
+  // The extension before .meta.json is still used to parse the content.
+  let possibly_extern =
+    json.parse(meta_json, {
+      use path <- decode.optional_field("path", "", decode.string)
+      decode.success(path)
+    })
+    |> result.unwrap("")
+    |> string.to_option
+  use permalink <- promise.try_await(
+    json.parse(meta_json, {
+      use path <- decode.optional_field("permalink", "", decode.string)
+      decode.success(path)
+    })
+    |> result.replace_error("Could not decode permalink for ´" <> file <> "´")
+    |> promise.resolve,
+  )
+
+  use inner_plain <- promise.try_await({
+    // This case also check if the permalink starts with "!", in which case it is a content list.
+    // Content lists will be generated on the client side, and their pre-given content 
+    // will be discarded, so loading it in from anywhere would be a waste of resources.
+    case string.starts_with(permalink, "!"), possibly_extern {
+      True, _ -> promise.resolve(Ok(""))
+      False, option.None -> {
+        promise.resolve(
+          simplifile.read(file)
+          |> result.replace_error("FS error while reading ´" <> file <> "´."),
+        )
+      }
+      False, option.Some(p) -> get_ext(p)
+    }
+  })
+
+  let decoder = contenttypes.content_decoder_and_merger(inner_plain, file)
+  let metadata =
+    json.parse(meta_json, decoder)
+    |> result.map_error(fn(e) {
+      "Some error decoding metadata for ´"
+      <> file |> premixed.text_magenta()
+      <> "´: "
+      <> string.inspect(e)
+    })
+
+  promise.resolve(metadata)
+}
 
 /// Gets external content, beit by file path or by http(s) url.
-fn get_ext(path: String) -> Result(String, String) {
+fn get_ext(path: String) -> promise.Promise(Result(String, String)) {
   case string.starts_with(string.lowercase(path), "http") {
     True -> {
       let start = bun.nanoseconds()
@@ -252,27 +274,60 @@ fn get_ext(path: String) -> Result(String, String) {
         "Downloading external content ´" <> premixed.text_blue(path) <> "´...",
       )
 
-      use res <- result.try(
-        actual_call_to_curl(path)
-        |> result.map_error(fn(b) { "Could not fetch external content: " <> b }),
+      let assert Ok(req) = request.to(path)
+      use resp <- promise.try_await(
+        promise.map(fetch.send(req), fn(e) {
+          result.replace_error(
+            e,
+            "Error while downloading external content ´"
+              <> path
+              <> "´: "
+              <> string.inspect(e),
+          )
+        }),
+      )
+      use resp <- promise.try_await(
+        promise.map(fetch.read_text_body(resp), fn(e) {
+          result.replace_error(
+            e,
+            "Error while reading external content ´"
+              <> path
+              <> "´: "
+              <> string.inspect(e),
+          )
+        }),
       )
       let end = bun.nanoseconds()
       let duration_ms = { end -. start } /. 1_000_000.0
-
-      console.log(
-        "Downloaded external content ´"
-        <> premixed.text_blue(path)
-        <> "´ in "
-        <> int.to_string(duration_ms |> float.truncate)
-        <> "ms!",
-      )
-      Ok(res)
+      case resp.status {
+        200 -> {
+          console.log(
+            "Downloaded external content ´"
+            <> premixed.text_blue(path)
+            <> "´ in "
+            <> int.to_string(duration_ms |> float.truncate)
+            <> "ms!",
+          )
+          Ok(resp.body)
+        }
+        _ -> {
+          Error(
+            "Error while downloading external content ´"
+            <> path
+            <> "´: "
+            <> string.inspect(resp.status),
+          )
+        }
+      }
+      |> promise.resolve
     }
     False -> {
       // Is a file path
-      simplifile.read(path)
-      |> result.replace_error(
-        "FS error while reading external content file ´" <> path <> "´.",
+      promise.resolve(
+        simplifile.read(path)
+        |> result.replace_error(
+          "FS error while reading external content file ´" <> path <> "´.",
+        ),
       )
     }
   }

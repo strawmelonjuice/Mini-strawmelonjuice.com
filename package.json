@@ -33,5 +33,5 @@
 		"prepack": "bun run bundle",
 		"run-in-test": "bun ./build.ts run-cd './test'",
 		"test": "bun ./build.ts test"
-	},
+	}
 }

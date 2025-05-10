@@ -35,24 +35,3 @@ function concatArrayBuffers(chunks: Uint8Array[]): Uint8Array {
 export async function answer_bunrequest_with_file(file: BunFile) {
   return new Response(await file.bytes());
 }
-
-// especially to not have promise colouring 💔
-
-export function actual_call_to_curl(url: string) {
-  const check = Bun.spawnSync({
-    cmd: ["curl", "--version"],
-    // stderr: "inherit",
-  })
-if (!check.success) {
-    return new GleamError("Curl (cli) is not installed or not accessible on path! You need curl to use web-external content.");
-  }
-  const response = Bun.spawnSync({
-    cmd: ["curl", "-s", url],
-  });
-  if (!response.success) {
-    return new GleamError("Failed to download file from URL: " + url + "\n\n" + response.stderr);
-  } else {
-    return new GleamOk(response.stdout.toString());
-  }
-}
-

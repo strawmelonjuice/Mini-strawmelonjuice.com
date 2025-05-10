@@ -58,12 +58,12 @@ pub fn handle_request(
       case model.cached_response {
         Some(res_string) -> {
           // Cache hit! Return the cached response string so that it can be used in the response body
-          res_string
+          res_string |> promise.resolve
         }
         None -> {
           // If there is no cached response, load the complete data from the config file
           // and encode it as JSON
-          let complete_data = config.load()
+          use complete_data <- promise.await(config.load())
           let complete_data_json =
             complete_data |> configtype.encode_complete_data_for_client
           let res_string = complete_data_json |> json.to_string
@@ -76,6 +76,7 @@ pub fn handle_request(
           })
           // Now return the response string so that it can be used in the response body
           res_string
+          |> promise.resolve
         }
       }
       |> response.set_body(response.new(), _)

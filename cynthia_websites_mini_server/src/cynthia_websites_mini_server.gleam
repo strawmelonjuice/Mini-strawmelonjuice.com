@@ -9,6 +9,7 @@ import cynthia_websites_mini_server/web
 import cynthia_websites_mini_shared/configtype
 import gleam/int
 import gleam/javascript/array
+import gleam/javascript/promise
 import gleam/json
 import gleam/list
 import gleam/option.{None, Some}
@@ -38,7 +39,8 @@ pub fn main() {
     <> "!",
   )
   case process.argv() |> array.to_list() |> list.drop(2) {
-    ["dynamic", ..] -> dynamic_site_server(mutable_model_type.new())
+    ["dynamic", ..] ->
+      dynamic_site_server(mutable_model_type.new()) |> promise.resolve
     ["pregenerate", ..] | ["static"] -> static_site_server()
     ["help", ..] | ["--help", ..] | ["-h", ..] -> {
       console.log(
@@ -52,6 +54,7 @@ pub fn main() {
         <> "  help        Show this help message\n\n"
         <> "For more information, visit: https://github.com/CynthiaWebsiteEngine/Mini",
       )
+      |> promise.resolve
     }
     [a, ..] | [a] ->
       console.error(
@@ -63,10 +66,13 @@ pub fn main() {
         <> premixed.text_green("´static´")
         <> " instead.",
       )
+      |> promise.resolve
+
     [] ->
       console.error(
         "No subcommand given. Please try with ´dynamic´ or ´static´ instead.",
       )
+      |> promise.resolve
   }
 }
 
@@ -169,7 +175,51 @@ fn dynamic_site_server(mutmodel: mutable_model_type.MutableModel) {
 fn static_site_server() {
   console.info("Cynthia Mini is in pregeneration mode!")
 
-  let complete_data = config.load()
+  {
+    let folder = process.cwd() <> "/assets/cynthia-mini"
+    case simplifile.create_directory_all(folder) {
+      Ok(..) -> Nil
+      Error(e) -> {
+        console.error(
+          "A problem occurred while creating the ´"
+          <> folder
+          <> "´ directory: "
+          <> premixed.text_error_red(string.inspect(e)),
+        )
+        process.exit(1)
+        panic as "We should not reach here"
+      }
+    }
+
+    case files.file_exist(process.cwd() <> "/assets/cynthia-mini/README.md") {
+      True -> Nil
+      False -> {
+        case
+          simplifile.write(
+            process.cwd() <> "/assets/cynthia-mini/README.md",
+            "# What does this folder do?\n\r\n\rThis folder holds a few files Cynthia Mini serves to the browser to make sure everything works alright.\n\r\n\rThese are usually checked and downloaded if necessary only during start of the server,\n\rso try not to touch them! If you believe one of the files in here might be faulty, delete it, and restart the server.\n\r\n\rHave a nice day! :)",
+          )
+        {
+          Ok(..) -> Nil
+          Error(e) -> {
+            console.error(
+              "A problem occurred while creating the ´"
+              <> process.cwd()
+              <> "/assets/cynthia-mini/README.md"
+              <> "´ file: "
+              <> premixed.text_error_red(string.inspect(e)),
+            )
+            process.exit(1)
+            panic as "We should not reach here"
+          }
+        }
+        Nil
+      }
+    }
+  }
+
+  use complete_data <- promise.await(config.load())
+
   let complete_data_json =
     complete_data |> configtype.encode_complete_data_for_client
   let res_string = complete_data_json |> json.to_string
@@ -228,10 +278,31 @@ fn static_site_server() {
       panic as "We should not reach here"
     }
   }
+  case simplifile.is_file(outdir <> "/site.json") {
+    Ok(True) -> Nil
+    _ -> {
+      console.error(
+        "An unknown problem occurred while creating the ´site.json´ file.",
+      )
+      process.exit(1)
+      panic as "We should not reach here"
+    }
+  }
+  case simplifile.is_file(outdir <> "/index.html") {
+    Ok(True) -> Nil
+    _ -> {
+      console.error(
+        "An unknown problem occurred while creating the ´index.html´ file.",
+      )
+      process.exit(1)
+      panic as "We should not reach here"
+    }
+  }
   console.info(
     premixed.text_ok_green("Site pregeneration complete!")
     <> " Serve files from "
     <> premixed.text_orange(outdir <> "/")
     <> " and you should have a site running!",
   )
+  promise.resolve(Nil)
 }
