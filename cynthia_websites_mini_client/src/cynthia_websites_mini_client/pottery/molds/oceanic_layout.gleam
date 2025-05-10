@@ -15,6 +15,7 @@
 
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type
+import cynthia_websites_mini_client/utils
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode.{type Dynamic}
@@ -516,7 +517,7 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
                 True -> "active"
                 False -> ""
               }),
-              attribute.href("/#" <> item.1),
+              attribute.href(utils.phone_home_url() <> "#" <> item.1),
             ],
             [html.text(item.0)],
           ),
@@ -560,7 +561,7 @@ pub fn menu_2(from model: model_type.Model) -> List(Element(messages.Msg)) {
                 False -> "btn btn-sm btn-outline btn-primary"
                 // Outline button for inactive
               }),
-              attribute.href("/#" <> item.1),
+              attribute.href(utils.phone_home_url() <> "#" <> item.1),
             ],
             [html.text(item.0)],
           ),

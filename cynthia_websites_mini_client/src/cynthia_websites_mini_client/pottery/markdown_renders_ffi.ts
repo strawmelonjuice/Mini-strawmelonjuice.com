@@ -4,7 +4,7 @@ import Token from "markdown-it/lib/token.mjs";
 // commonmark mode
 const markdown = markdownit("commonmark");
 
-export function custom_render(text: string): string {
+export function custom_render(text: string, phone_home_url: () => string): string {
   let mdast = markdown.parse(text, {});
   mdast.forEach((token: Token) => {
     (function find_link_refs(current_token) {
@@ -17,7 +17,7 @@ export function custom_render(text: string): string {
           if (
             current_token.attrs !== null &&
             current_token.attrs[0][1].startsWith("/") &&
-            !current_token.attrs[0][1].startsWith("/#")
+            !current_token.attrs[0][1].startsWith(phone_home_url() + "#")
           ) {
             const original_href: string = current_token.attrs[0][1];
             const new_href: string = "/#" + original_href;

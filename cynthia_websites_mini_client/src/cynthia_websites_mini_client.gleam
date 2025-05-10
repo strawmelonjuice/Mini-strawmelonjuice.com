@@ -64,7 +64,7 @@ fn fetch_all(
   on_response handle_response: fn(Result(configtype.CompleteData, rsvp.Error)) ->
     msg,
 ) -> Effect(msg) {
-  let url = utils.phone_home_url() <> "/site.json"
+  let url = utils.phone_home_url() <> "site.json"
   let decoder = configtype.complete_data_decoder()
   let handler = rsvp.expect_json(decoder, handle_response)
 

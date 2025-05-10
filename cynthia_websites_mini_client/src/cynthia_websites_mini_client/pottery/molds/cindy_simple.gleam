@@ -5,6 +5,7 @@
 // Common imports for layouts
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type
+import cynthia_websites_mini_client/utils
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode.{type Dynamic}
@@ -285,7 +286,7 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
                 }
               }// <> " bg-secondary link-neutral-200 hover:link-secondary border-solid border-2 border-primary-content",
               ),
-              attribute.href("/#" <> a.1),
+              attribute.href(utils.phone_home_url() <> "#" <> a.1),
             ],
             [html.text(a.0)],
           ),

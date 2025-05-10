@@ -10,6 +10,7 @@
 
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type
+import cynthia_websites_mini_client/utils
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode.{type Dynamic}
@@ -543,7 +544,9 @@ fn github_common(
                                       "hover:bg-base-200 text-base-content/80"
                                   },
                                 ),
-                                attribute.href("/#" <> item.1),
+                                attribute.href(
+                                  utils.phone_home_url() <> "#" <> item.1,
+                                ),
                                 event.on_click(
                                   messages.UserOnGitHubLayoutToggleMenu,
                                 ),
@@ -744,7 +747,7 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
                     "border-transparent text-base-content/70 hover:border-base-300/60"
                 },
               ),
-              attribute.href("/#" <> item.1),
+              attribute.href(utils.phone_home_url() <> "#" <> item.1),
             ],
             [
               html.div([attribute.class("flex items-center gap-1.5")], [

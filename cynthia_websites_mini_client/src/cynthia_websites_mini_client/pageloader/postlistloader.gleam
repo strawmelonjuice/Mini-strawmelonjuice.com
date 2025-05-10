@@ -1,6 +1,7 @@
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pottery
+import cynthia_websites_mini_client/utils
 import cynthia_websites_mini_shared/contenttypes.{PostData}
 import gleam/bool
 import gleam/list
@@ -105,7 +106,7 @@ fn postlist_to_html(
           html.li([attribute.class("list-row p-10")], [
             html.a(
               [
-                attribute.href("/#" <> post.permalink),
+                attribute.href(utils.phone_home_url() <> "#" <> post.permalink),
                 attribute.class("post__link"),
               ],
               [
@@ -146,7 +147,7 @@ fn postlist_to_html(
           html.li([attribute.class("list-row p-10")], [
             html.a(
               [
-                attribute.href("/#" <> page.permalink),
+                attribute.href(utils.phone_home_url() <> "#" <> page.permalink),
                 attribute.class("post__link"),
               ],
               [

@@ -94,7 +94,7 @@ pub fn render_content(
               #("repo", [repo]),
               #("src", ["https://utteranc.es/client.js"]),
               #("theme", [comment_color_scheme]),
-              #("url", [utils.phone_home_url() <> "/#" <> model.path]),
+              #("url", [utils.phone_home_url() <> "#" <> model.path]),
               #("origin", [utils.phone_home_url()]),
               #("pathname", [model.path]),
               #("title", [content.title]),
@@ -161,5 +161,12 @@ pub fn parse_html(inner: String, filename: String) -> Element(messages.Msg) {
   }
 }
 
+pub fn custom_md_render(markdown: String) -> String {
+  custom_md_render_internal(markdown, utils.phone_home_url)
+}
+
 @external(javascript, "./pottery/markdown_renders_ffi.ts", "custom_render")
-pub fn custom_md_render(markdown: String) -> String
+fn custom_md_render_internal(
+  markdown: String,
+  call_home: fn() -> String,
+) -> String
