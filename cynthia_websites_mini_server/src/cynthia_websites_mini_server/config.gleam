@@ -3,7 +3,6 @@ import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
 import cynthia_websites_mini_shared/contenttypes
-import gleam/bit_array
 import gleam/dict
 import gleam/dynamic/decode
 import gleam/fetch
