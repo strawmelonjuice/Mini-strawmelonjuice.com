@@ -185,70 +185,83 @@ fn cindy_common(
         ],
         [
           // Menu and site name
-          html.div([attribute.class("col-span-5 p-2 m-0 bg-base-300 flex")], [
-            html.div([attribute.class("flex-auto w-3/12 flex items-stretch")], [
-              html.span(
-                [
-                  attribute.class(
-                    "text-center self-center font-bold btn btn-ghost text-xl",
-                  ),
-                ],
-                [html.text(site_name)],
-              ),
-            ]),
-            // Add search input field between site name and menu
-            html.div(
-              [
-                attribute.class(
-                  "flex-auto w-4/12 flex items-center justify-center",
-                ),
-              ],
-              [
-                html.div([attribute.class("relative w-full max-w-xs")], [
-                  html.div(
-                    [
-                      attribute.class(
-                        "flex items-center h-8 bg-base-200/80 border border-base-300 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary w-full",
-                      ),
-                    ],
-                    [
-                      html.span([attribute.class("pl-3 text-base-content/60")], [
-                        html.span(
-                          [attribute.class("i-tabler-search w-4 h-4")],
-                          [],
-                        ),
-                      ]),
-                      html.input([
-                        attribute.class(
-                          "w-full py-1.5 px-2 text-sm bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/50",
-                        ),
-                        attribute.placeholder("Search..."),
-                        attribute.type_("text"),
-                        event.on_input(messages.UserSearchTerm),
-                      ]),
-                    ],
-                  ),
-                ]),
-              ],
-            ),
-            html.div([attribute.class("flex-auto w-5/12")], [
-              html.menu([attribute.class("text-right")], [
-                html.ul(
-                  [
-                    attribute.id("menu_1_inside"),
-                    attribute.class(
-                      "menu menu-horizontal bg-base-200 rounded-box",
-                    ),
-                  ],
-                  menu,
-                ),
-              ]),
-            ]),
-          ]),
-          // Secondary menu - NEW COMPONENT NOT IN SIMPLE LAYOUT
           html.div(
             [
-              attribute.class("col-span-5 bg-base-200 p-2"),
+              attribute.class(
+                "col-span-5 p-2 m-0 bg-base-300 flex shadow-sm sticky top-0 z-10",
+              ),
+            ],
+            [
+              html.div(
+                [attribute.class("flex-auto w-3/12 flex items-stretch")],
+                [
+                  html.span(
+                    [
+                      attribute.class(
+                        "text-center self-center font-bold btn btn-ghost text-xl transition-all duration-200 hover:scale-105",
+                      ),
+                    ],
+                    [html.text(site_name)],
+                  ),
+                ],
+              ),
+              // Search bar
+              html.div(
+                [
+                  attribute.class(
+                    "flex-auto w-4/12 flex items-center justify-center",
+                  ),
+                ],
+                [
+                  html.div([attribute.class("relative w-full max-w-xs")], [
+                    html.div(
+                      [
+                        attribute.class(
+                          "flex items-center h-8 bg-base-200/90 border border-base-300/80 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary focus-within:shadow-md transition-all duration-200 w-full ring-1 ring-inset ring-base-content/10",
+                        ),
+                      ],
+                      [
+                        html.span(
+                          [attribute.class("pl-3 text-base-content/80")],
+                          [
+                            html.span(
+                              [attribute.class("i-tabler-search w-4 h-4")],
+                              [],
+                            ),
+                          ],
+                        ),
+                        html.input([
+                          attribute.class(
+                            "w-full py-1.5 px-2 text-sm bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/70",
+                          ),
+                          attribute.placeholder("Search..."),
+                          attribute.type_("text"),
+                          event.on_input(messages.UserSearchTerm),
+                        ]),
+                      ],
+                    ),
+                  ]),
+                ],
+              ),
+              html.div([attribute.class("flex-auto w-5/12")], [
+                html.menu([attribute.class("text-right")], [
+                  html.ul(
+                    [
+                      attribute.id("menu_1_inside"),
+                      attribute.class(
+                        "menu menu-horizontal bg-base-200/90 rounded-box shadow-sm",
+                      ),
+                    ],
+                    menu,
+                  ),
+                ]),
+              ]),
+            ],
+          ),
+          // Secondary menu
+          html.div(
+            [
+              attribute.class("col-span-5 bg-base-200 p-2 shadow-sm"),
               attribute.id("secondary_menu_container"),
             ],
             [
@@ -306,8 +319,8 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
             [
               attribute.class({
                 case hash == a.1 {
-                  True -> "menu-active menu-focused active"
-                  False -> ""
+                  True -> "menu-active menu-focused active font-medium"
+                  False -> "hover:bg-base-300/50 transition-colors duration-200"
                 }
               }),
               attribute.href(utils.phone_home_url() <> "#" <> a.1),

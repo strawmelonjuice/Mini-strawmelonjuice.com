@@ -46,7 +46,7 @@ pub fn page_layout(
       decode.string,
     )
 
-  // Build the landing page header - larger and more prominent
+  // Special header for landing pages
   let landing_header =
     html.div(
       [
@@ -74,7 +74,6 @@ pub fn page_layout(
       ],
     )
 
-  // Create a page layout that puts more emphasis on content
   html.div([attribute.class("break-words")], [landing_header])
   |> landing_common(content, menu, _, variables)
 }
@@ -108,7 +107,7 @@ fn landing_common(
           html.div(
             [
               attribute.class(
-                "col-span-6 p-4 m-0 bg-base-300/50 backdrop-blur-sm flex sticky top-0 z-10",
+                "col-span-6 p-4 m-0 bg-base-300/50 backdrop-blur-sm flex sticky top-0 z-10 shadow-sm",
               ),
             ],
             [
@@ -118,14 +117,14 @@ fn landing_common(
                   html.span(
                     [
                       attribute.class(
-                        "text-center self-center font-bold btn btn-ghost text-2xl",
+                        "text-center self-center font-bold btn btn-ghost text-2xl transition-all duration-200 hover:scale-105",
                       ),
                     ],
                     [html.text(site_name)],
                   ),
                 ],
               ),
-              // Minimalist search input that doesn't draw too much attention
+              // Improved search input visibility for dark mode while maintaining minimalist design
               html.div(
                 [
                   attribute.class(
@@ -136,19 +135,19 @@ fn landing_common(
                   html.div(
                     [
                       attribute.class(
-                        "relative w-full max-w-xs opacity-70 hover:opacity-100 transition-opacity",
+                        "relative w-full max-w-xs opacity-80 hover:opacity-100 transition-opacity",
                       ),
                     ],
                     [
                       html.div(
                         [
                           attribute.class(
-                            "flex items-center h-8 bg-base-200/60 border border-base-300/50 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary w-full",
+                            "flex items-center h-8 bg-base-200/70 border border-base-300/60 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary focus-within:shadow-md transition-all duration-200 w-full ring-1 ring-inset ring-base-content/10",
                           ),
                         ],
                         [
                           html.span(
-                            [attribute.class("pl-3 text-base-content/60")],
+                            [attribute.class("pl-3 text-base-content/80")],
                             [
                               html.span(
                                 [attribute.class("i-tabler-search w-4 h-4")],
@@ -158,7 +157,7 @@ fn landing_common(
                           ),
                           html.input([
                             attribute.class(
-                              "w-full py-1.5 px-2 text-sm bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/50",
+                              "w-full py-1.5 px-2 text-sm bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/70",
                             ),
                             attribute.placeholder("Search..."),
                             attribute.type_("text"),
@@ -170,14 +169,14 @@ fn landing_common(
                   ),
                 ],
               ),
-              // Menu styled to be more subtle
+              // Menu styled to be more subtle but with better visibility
               html.div([attribute.class("flex-auto w-5/12")], [
                 html.menu([attribute.class("text-right")], [
                   html.ul(
                     [
                       attribute.id("menu_1_inside"),
                       attribute.class(
-                        "menu menu-horizontal bg-base-200/60 backdrop-blur-sm rounded-box",
+                        "menu menu-horizontal bg-base-200/70 backdrop-blur-sm rounded-box shadow-sm",
                       ),
                     ],
                     menu,

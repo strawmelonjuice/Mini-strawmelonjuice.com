@@ -1,6 +1,7 @@
 //// Cindy Simple Layout module
 ////
 //// Default OOTB layout for Cynthia Mini.
+//// Focused on simplicity while offering a clean, modern experience.
 
 // Common imports for layouts
 import cynthia_websites_mini_client/messages
@@ -44,10 +45,19 @@ pub fn page_layout(
     )
   html.div([attribute.class("break-words")], [
     html.h3(
-      [attribute.class("font-bold text-2xl text-center text-base-content")],
+      [
+        attribute.class(
+          "font-bold text-2xl md:text-3xl text-center text-base-content my-3 transition-all",
+        ),
+      ],
       [html.text(title)],
     ),
-    element.unsafe_raw_html("aside", "aside", [], description),
+    element.unsafe_raw_html(
+      "aside",
+      "aside",
+      [attribute.class("max-w-prose mx-auto")],
+      description,
+    ),
   ])
   |> cindy_common(content, menu, _, variables)
 }
@@ -74,18 +84,29 @@ pub fn post_layout(
   html.div([], [
     html.div([], [
       html.h3(
-        [attribute.class("font-bold text-2xl text-center text-base-content")],
+        [
+          attribute.class(
+            "font-bold text-2xl md:text-3xl text-center text-base-content my-3 transition-all",
+          ),
+        ],
         [html.text(title)],
       ),
-      element.unsafe_raw_html("aside", "aside", [], description),
+      element.unsafe_raw_html(
+        "aside",
+        "aside",
+        [attribute.class("max-w-prose mx-auto mb-4")],
+        description,
+      ),
     ]),
-    html.div([attribute.class("grid grid-cols-2 grid-rows-4 gap-2")], [
+    html.div([attribute.class("grid grid-cols-2 grid-rows-4 gap-3")], [
       // ----------------------
       html.div([], []),
       html.div([], []),
       // ----------------------
-      html.b([attribute.class("font-bold")], [html.text("Published")]),
-      html.div([], [
+      html.b([attribute.class("font-bold text-base-content/80")], [
+        html.text("Published"),
+      ]),
+      html.div([attribute.class("text-base-content/90")], [
         html.text(
           {
             decode.run(
@@ -100,8 +121,10 @@ pub fn post_layout(
         ),
       ]),
       // ----------------------
-      html.b([attribute.class("font-bold")], [html.text("Modified")]),
-      html.div([], [
+      html.b([attribute.class("font-bold text-base-content/80")], [
+        html.text("Modified"),
+      ]),
+      html.div([attribute.class("text-base-content/90")], [
         html.text(
           {
             decode.run(
@@ -117,9 +140,11 @@ pub fn post_layout(
       ]),
       // ----------------------
       html.div([], [
-        html.b([attribute.class("font-bold")], [html.text("Category")]),
+        html.b([attribute.class("font-bold text-base-content/80")], [
+          html.text("Category"),
+        ]),
       ]),
-      html.div([], [
+      html.div([attribute.class("text-base-content/90")], [
         html.text(
           decode.run(
             result.unwrap(
@@ -132,11 +157,13 @@ pub fn post_layout(
         ),
       ]),
     ]),
-    html.div([attribute.class("grid grid-cols-1 grid-rows-1 gap-2")], [
+    html.div([attribute.class("grid grid-cols-1 grid-rows-1 gap-2 mt-3")], [
       html.div([], [
-        html.b([attribute.class("font-bold")], [html.text("Tags")]),
+        html.b([attribute.class("font-bold text-base-content/80")], [
+          html.text("Tags"),
+        ]),
         html.div(
-          [],
+          [attribute.class("flex flex-wrap gap-2 mt-2")],
           variables
             |> dict.get("tags")
             |> result.unwrap(dynamic.from([]))
@@ -146,7 +173,9 @@ pub fn post_layout(
             |> list.map(fn(tag) {
               html.a(
                 [
-                  attribute.class("btn btn-sm btn-outline btn-primary"),
+                  attribute.class(
+                    "btn btn-sm btn-outline btn-primary transition-colors duration-200",
+                  ),
                   attribute.href("#!/tag/" <> tag),
                 ],
                 [html.text(tag)],
@@ -179,81 +208,97 @@ fn cindy_common(
           ),
         ],
         [
-          // Menu and site name
-          html.div([attribute.class("col-span-5 p-2 m-0 bg-base-300 flex")], [
-            html.div([attribute.class("flex-auto w-3/12 flex items-stretch")], [
-              html.span(
-                [
-                  attribute.class(
-                    "text-center self-center font-bold btn btn-ghost text-xl",
-                  ),
-                ],
-                [html.text(site_name)],
-              ),
-            ]),
-            // Add search input field between site name and menu
-            html.div(
-              [
-                attribute.class(
-                  "flex-auto w-4/12 flex items-center justify-center",
-                ),
-              ],
-              [
-                html.div([attribute.class("relative w-full max-w-xs")], [
-                  html.div(
-                    [
-                      attribute.class(
-                        "flex items-center h-8 bg-base-200/80 border border-base-300 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary w-full",
-                      ),
-                    ],
-                    [
-                      html.span([attribute.class("pl-3 text-base-content/60")], [
-                        html.span(
-                          [attribute.class("i-tabler-search w-4 h-4")],
-                          [],
-                        ),
-                      ]),
-                      html.input([
-                        attribute.class(
-                          "w-full py-1.5 px-2 text-sm bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/50",
-                        ),
-                        attribute.placeholder("Search..."),
-                        attribute.type_("text"),
-                        event.on_input(messages.UserSearchTerm),
-                      ]),
-                    ],
-                  ),
-                ]),
-              ],
-            ),
-            html.div([attribute.class("flex-auto w-5/12")], [
-              html.menu([attribute.class("text-right")], [
-                html.ul(
-                  [
-                    attribute.id("menu_1_inside"),
-                    attribute.class(
-                      "menu menu-horizontal bg-base-200 rounded-box",
-                    ),
-                  ],
-                  menu,
-                ),
-              ]),
-            ]),
-          ]),
-          // Content
+          // Menu and site name - Improved styling
           html.div(
             [
               attribute.class(
-                "col-span-5 row-span-7 row-start-2 md:col-span-4 md:row-span-11 md:col-start-2 md:row-start-2 overflow-auto min-h-full p-4",
+                "col-span-5 p-2 m-0 bg-base-300 backdrop-blur-sm flex shadow-sm sticky top-0 z-10",
               ),
             ],
-            [content, html.br([])],
+            [
+              html.div(
+                [attribute.class("flex-auto w-3/12 flex items-stretch")],
+                [
+                  html.span(
+                    [
+                      attribute.class(
+                        "text-center self-center font-bold btn btn-ghost text-xl transition-all duration-200 hover:scale-105",
+                      ),
+                    ],
+                    [html.text(site_name)],
+                  ),
+                ],
+              ),
+              // Improved search input field with better visibility in dark mode
+              html.div(
+                [
+                  attribute.class(
+                    "flex-auto w-4/12 flex items-center justify-center",
+                  ),
+                ],
+                [
+                  html.div([attribute.class("relative w-full max-w-xs")], [
+                    html.div(
+                      [
+                        attribute.class(
+                          "flex items-center h-8 bg-base-200/90 border border-base-300/80 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary focus-within:shadow-md transition-all duration-200 w-full ring-1 ring-inset ring-base-content/10",
+                        ),
+                      ],
+                      [
+                        html.span(
+                          [attribute.class("pl-3 text-base-content/80")],
+                          [
+                            html.span(
+                              [attribute.class("i-tabler-search w-4 h-4")],
+                              [],
+                            ),
+                          ],
+                        ),
+                        html.input([
+                          attribute.class(
+                            "w-full py-1.5 px-2 text-sm bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/70",
+                          ),
+                          attribute.placeholder("Search..."),
+                          attribute.type_("text"),
+                          event.on_input(messages.UserSearchTerm),
+                        ]),
+                      ],
+                    ),
+                  ]),
+                ],
+              ),
+              html.div([attribute.class("flex-auto w-5/12")], [
+                html.menu([attribute.class("text-right")], [
+                  html.ul(
+                    [
+                      attribute.id("menu_1_inside"),
+                      attribute.class(
+                        "menu menu-horizontal bg-base-200/90 rounded-box shadow-sm",
+                      ),
+                    ],
+                    menu,
+                  ),
+                ]),
+              ]),
+            ],
           ),
-          // Post meta
+          // Content - Improved spacing and responsiveness
           html.div(
             [
               attribute.class(
-                "col-span-5 row-span-4 row-start-9 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:max-w-[20VW] md:p-2 break-words",
+                "col-span-5 row-span-7 row-start-2 md:col-span-4 md:row-span-11 md:col-start-2 md:row-start-2 overflow-auto min-h-full p-4 md:p-6 lg:p-8",
+              ),
+            ],
+            [
+              html.div([attribute.class("max-w-4xl mx-auto")], [content]),
+              html.br([]),
+            ],
+          ),
+          // Post meta - Better styling and readability
+          html.div(
+            [
+              attribute.class(
+                "col-span-5 row-span-4 row-start-9 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:max-w-[20VW] md:p-3 break-words shadow-inner",
               ),
             ],
             [post_meta],
@@ -281,11 +326,10 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
             [
               attribute.class({
                 case hash == a.1 {
-                  True -> "menu-active menu-focused active"
-                  False -> ""
+                  True -> "menu-active menu-focused active font-medium"
+                  False -> "hover:bg-base-300/50 transition-colors duration-200"
                 }
-              }// <> " bg-secondary link-neutral-200 hover:link-secondary border-solid border-2 border-primary-content",
-              ),
+              }),
               attribute.href(utils.phone_home_url() <> "#" <> a.1),
             ],
             [html.text(a.0)],
