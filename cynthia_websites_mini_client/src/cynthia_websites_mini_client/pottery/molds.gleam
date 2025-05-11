@@ -9,6 +9,7 @@ import lustre/element.{type Element}
 import cynthia_websites_mini_client/pottery/molds/cindy_dual
 import cynthia_websites_mini_client/pottery/molds/cindy_landing
 import cynthia_websites_mini_client/pottery/molds/cindy_simple
+import cynthia_websites_mini_client/pottery/molds/documentation
 import cynthia_websites_mini_client/pottery/molds/github_layout
 import cynthia_websites_mini_client/pottery/molds/minimalist
 import cynthia_websites_mini_client/pottery/molds/oceanic_layout
@@ -126,6 +127,23 @@ pub fn into(
         }
         _ -> fn(content: Element(messages.Msg), metadata: Dict(String, Dynamic)) {
           github_layout.page_layout(from: content, with: metadata, store: model)
+        }
+      }
+    }
+    "documentation" -> {
+      // Documentation layout for both pages and posts
+      case is_post {
+        False -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) -> Element(messages.Msg) {
+          documentation.page_layout(content, metadata, model)
+        }
+        True -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) -> Element(messages.Msg) {
+          documentation.post_layout(content, metadata, model)
         }
       }
     }

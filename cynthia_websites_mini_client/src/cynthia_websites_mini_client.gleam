@@ -139,6 +139,19 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       }
       #(Model(..model, other:), effect.none())
     }
+    messages.UserOnDocumentationLayoutToggleSidebar -> {
+      let other = case dict.get(model.other, "documentation-sidebar-open") {
+        Ok(..) -> {
+          // is open, so close it
+          dict.delete(model.other, "documentation-sidebar-open")
+        }
+        Error(..) -> {
+          // is closed, so open it
+          dict.insert(model.other, "documentation-sidebar-open", "")
+        }
+      }
+      #(Model(..model, other:), effect.none())
+    }
   }
 }
 

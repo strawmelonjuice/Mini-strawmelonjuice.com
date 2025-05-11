@@ -178,6 +178,78 @@ The dark mode counterpart to GitHub Light, offering the same professional experi
 > - Monospace Size: 14px
 > - Special Features: GitHub-style code blocks, syntax highlighting optimised for dark mode
 
+### Documentation Light (`"documentation-light"`)
+
+A clean, readable theme inspired by modern documentation sites like the Rust Book. Features a sidebar for easy navigation, clear typography, and comfortable reading experience for technical content.
+
+> - Layout: `documentation`
+> - Mode: Light
+> - Font Family: Inter, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Size: 14px
+> - Special Features: Collapsible sidebar navigation, mobile-responsive
+
+### Documentation Dark (`"documentation-dark"`)
+
+The dark mode version of Documentation Light, providing reduced eye strain for extended reading sessions while maintaining the excellent readability and navigation features of the documentation layout.
+
+> - Layout: `documentation`
+> - Mode: Dark
+> - Font Family: Inter, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Size: 14px
+> - Special Features: Optimized dark color palette for code blocks and long-form content
+
+### Documentation Pastel Purple (`"documentation-pastel-purple"`)
+
+A softer, purple-tinted light theme that provides a gentler reading experience than standard light themes. Perfect for technical documentation that needs a touch of personality.
+
+> - Layout: `documentation`
+> - Mode: Light
+> - Font Family: Inter, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Size: 14px
+> - Special Features: Soothing purple accents, improved contrast for code blocks
+
+### Documentation Sepia (`"documentation-sepia"`)
+
+A warm, paper-like theme with sepia tones that reduces eye strain and provides a book-like reading experience. Features serif fonts reminiscent of traditional printed technical manuals.
+
+> - Layout: `documentation`
+> - Mode: Light
+> - Font Family: Merriweather, Georgia, serif
+> - Font Size: 16px
+> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Size: 14px
+> - Special Features: Serif typography, warm paper-like background, enhanced readability for extended reading sessions
+
+### Documentation Ayu (`"documentation-ayu"`)
+
+A dark theme based on the popular Ayu color scheme used in code editors. Provides excellent contrast for code blocks while maintaining readability of prose content.
+
+> - Layout: `documentation`
+> - Mode: Dark
+> - Font Family: Inter, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Size: 14px
+> - Special Features: Optimized syntax highlighting colors, gold accents for improved scanning
+
+### Documentation Coal (`"documentation-coal"`)
+
+A high-contrast dark theme inspired by the Rust Book's "Coal" theme. Features deep blacks with warm orange accents for a comfortable reading experience in low-light environments.
+
+> - Layout: `documentation`
+> - Mode: Dark
+> - Font Family: Inter, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Size: 14px
+> - Special Features: Maximum contrast for accessibility, warm accent colors
+
 ## Layout Comparison
 
 ### Cindy Layouts
@@ -232,4 +304,13 @@ The dark mode counterpart to GitHub Light, offering the same professional experi
 >   - Responsive Design: ✅
 >   - Post Metadata Display: Left sidebar
 >   - Focus: Technical content
+
+
+> **documentation**
+>   - Primary Menu: ✅
+>   - Secondary Menu: ❌
+>   - Responsive Design: ✅
+>   - Post Metadata Display: Right sidebar (on large screens)
+>   - Focus: Technical documentation and tutorials
+>   - Special Features: Collapsible sidebar navigation, optimized for long-form technical content
 
