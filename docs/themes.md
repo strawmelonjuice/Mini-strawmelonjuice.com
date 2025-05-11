@@ -27,9 +27,9 @@ Embrace the warm, inviting ambience of fall with the Autumn theme. Features eart
 
 > - Layout: `cindy`
 > - Mode: Light
-> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Family: Fira Sans
 > - Font Size: 15px
-> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Font: Fira Mono
 > - Monospace Size: 14px
 
 ### Autumn Dual (`"autumn-dual"`)
@@ -38,9 +38,9 @@ The Autumn colour scheme with the dual layout variation. Preserves the warm eart
 
 > - Layout: `cindy-dual`
 > - Mode: Light
-> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Family: Fira Sans
 > - Font Size: 15px
-> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Font: Fira Mono
 > - Monospace Size: 14px
 > - Special Features: Secondary menu support
 
@@ -50,9 +50,9 @@ The Autumn colour scheme optimized for landing pages. Features the same warm ear
 
 > - Layout: `cindy-landing`
 > - Mode: Light
-> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Family: Fira Sans
 > - Font Size: 16px
-> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Font: Fira Mono
 > - Monospace Size: 14px
 > - Special Features: Optimized for landing pages
 
@@ -62,9 +62,9 @@ A clean, distraction-free light theme that emphasizes content readability. Featu
 
 > - Layout: `minimalist`
 > - Mode: Light
-> - Font Family: Inter, system-ui, sans-serif
+> - Font Family: Inter
 > - Font Size: 16px
-> - Monospace Font: JetBrains Mono, Fira Code, monospace
+> - Monospace Font: JetBrains Mono
 > - Monospace Size: 14px
 > - Special Features: Simplified UI, enhanced readability, clean typography
 
@@ -76,9 +76,9 @@ A sophisticated dark mode experience that reduces eye strain while maintaining p
 
 > - Layout: `cindy`
 > - Mode: Dark
-> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Family: Fira Sans
 > - Font Size: 15px
-> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Font: Fira Mono
 > - Monospace Size: 14px
 
 ### Night Dual (`"night-dual"`)
@@ -87,9 +87,9 @@ The Night theme with an enhanced layout that includes a secondary menu system. P
 
 > - Layout: `cindy-dual`
 > - Mode: Dark
-> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Family: Fira Sans
 > - Font Size: 15px
-> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Font: Fira Mono
 > - Monospace Size: 14px
 > - Special Features: Secondary menu support
 
@@ -99,9 +99,9 @@ The Night theme with a specialized layout for creating impactful landing pages. 
 
 > - Layout: `cindy-landing`
 > - Mode: Dark
-> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Family: Fira Sans
 > - Font Size: 16px
-> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Font: Fira Mono
 > - Monospace Size: 14px
 > - Special Features: Optimized for landing pages
 
@@ -111,9 +111,9 @@ A modern dark theme that reduces visual clutter and eye strain. With its clean, 
 
 > - Layout: `minimalist`
 > - Mode: Dark
-> - Font Family: Inter, system-ui, sans-serif
+> - Font Family: Inter
 > - Font Size: 16px
-> - Monospace Font: JetBrains Mono, Fira Code, monospace
+> - Monospace Font: JetBrains Mono
 > - Monospace Size: 14px
 > - Special Features: Simplified UI, enhanced readability, clean typography
 
@@ -123,9 +123,9 @@ Rich and robust like your favourite brew, the Coffee theme delivers a dark aesth
 
 > - Layout: `cindy`
 > - Mode: Dark
-> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Family: Fira Sans
 > - Font Size: 15px
-> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Font: Fira Mono
 > - Monospace Size: 14px
 
 ### Coffee Dual (`"coffee-dual"`)
@@ -134,9 +134,9 @@ The Coffee colour scheme paired with our dual-menu layout. Combines rich, warm d
 
 > - Layout: `cindy-dual`
 > - Mode: Dark
-> - Font Family: Fira Sans, Ubuntu, Noto Sans
+> - Font Family: Fira Sans
 > - Font Size: 15px
-> - Monospace Font: Fira Mono, Ubuntu Mono, Noto Mono
+> - Monospace Font: Fira Mono
 > - Monospace Size: 14px
 > - Special Features: Secondary menu support
 
@@ -148,9 +148,9 @@ Oceanic was created as a test, to check how accurate [add theme](https://github.
 
 > - Layout: `oceanic` (custom)
 > - Mode: Dark
-> - Font Family: Poppins, Open Sans, Roboto
+> - Font Family: Poppins
 > - Font Size: 16px
-> - Monospace Font: Fira Code, JetBrains Mono, Consolas
+> - Monospace Font: Fira Code
 > - Monospace Size: 14px
 > - Special Features: Custom colour palette, supports two menus, enhanced for code display
 
@@ -160,10 +160,10 @@ A clean, professional theme based on GitHub's light mode interface. Perfect for 
 
 > - Layout: `github`
 > - Mode: Light
-> - Font Family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial
-> - Font Size: 16px
-> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
-> - Monospace Size: 14px
+> - Font Family: Open Sans
+> - Font Size: 14px
+> - Monospace Font: IBM Plex Mono
+> - Monospace Size: 12px
 > - Special Features: GitHub-style code blocks, table formatting
 
 ### GitHub Dark (`"github-dark"`)
@@ -172,10 +172,10 @@ The dark mode counterpart to GitHub Light, offering the same professional experi
 
 > - Layout: `github`
 > - Mode: Dark
-> - Font Family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial
-> - Font Size: 16px
-> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
-> - Monospace Size: 14px
+> - Font Family: Open Sans
+> - Font Size: 14px
+> - Monospace Font: IBM Plex Mono
+> - Monospace Size: 12px
 > - Special Features: GitHub-style code blocks, syntax highlighting optimised for dark mode
 
 ### Documentation Light (`"documentation-light"`)
@@ -184,9 +184,9 @@ A clean, readable theme inspired by modern documentation sites like the Rust Boo
 
 > - Layout: `documentation`
 > - Mode: Light
-> - Font Family: Inter, system-ui, sans-serif
+> - Font Family: Inter
 > - Font Size: 16px
-> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Font: IBM Plex Mono
 > - Monospace Size: 14px
 > - Special Features: Collapsible sidebar navigation, mobile-responsive
 
@@ -196,9 +196,9 @@ The dark mode version of Documentation Light, providing reduced eye strain for e
 
 > - Layout: `documentation`
 > - Mode: Dark
-> - Font Family: Inter, system-ui, sans-serif
+> - Font Family: Inter
 > - Font Size: 16px
-> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Font: IBM Plex Mono
 > - Monospace Size: 14px
 > - Special Features: Optimized dark color palette for code blocks and long-form content
 
@@ -208,9 +208,9 @@ A softer, purple-tinted light theme that provides a gentler reading experience t
 
 > - Layout: `documentation`
 > - Mode: Light
-> - Font Family: Inter, system-ui, sans-serif
+> - Font Family: Inter
 > - Font Size: 16px
-> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Font: IBM Plex Mono
 > - Monospace Size: 14px
 > - Special Features: Soothing purple accents, improved contrast for code blocks
 
@@ -220,9 +220,9 @@ A warm, paper-like theme with sepia tones that reduces eye strain and provides a
 
 > - Layout: `documentation`
 > - Mode: Light
-> - Font Family: Merriweather, Georgia, serif
+> - Font Family: Merriweather
 > - Font Size: 16px
-> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Font: IBM Plex Mono
 > - Monospace Size: 14px
 > - Special Features: Serif typography, warm paper-like background, enhanced readability for extended reading sessions
 
@@ -232,9 +232,9 @@ A dark theme based on the popular Ayu color scheme used in code editors. Provide
 
 > - Layout: `documentation`
 > - Mode: Dark
-> - Font Family: Inter, system-ui, sans-serif
+> - Font Family: Inter
 > - Font Size: 16px
-> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Font: IBM Plex Mono
 > - Monospace Size: 14px
 > - Special Features: Optimized syntax highlighting colors, gold accents for improved scanning
 
@@ -244,9 +244,9 @@ A high-contrast dark theme inspired by the Rust Book's "Coal" theme. Features de
 
 > - Layout: `documentation`
 > - Mode: Dark
-> - Font Family: Inter, system-ui, sans-serif
+> - Font Family: Inter
 > - Font Size: 16px
-> - Monospace Font: SFMono-Regular, Consolas, Liberation Mono
+> - Monospace Font: IBM Plex Mono
 > - Monospace Size: 14px
 > - Special Features: Maximum contrast for accessibility, warm accent colors
 
@@ -256,9 +256,9 @@ Fresh and calming, the Pastel Green theme offers a gentle, nature-inspired color
 
 > - Layout: `pastels`
 > - Mode: Light
-> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Family: Quicksand
 > - Font Size: 16px
-> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Font: JetBrains Mono
 > - Monospace Size: 14px
 > - Special Features: Soft shadows, rounded corners, gentle transitions
 
@@ -268,9 +268,9 @@ A delicate, rosy theme that brings warmth and friendliness to your content. Idea
 
 > - Layout: `pastels`
 > - Mode: Light
-> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Family: Quicksand
 > - Font Size: 16px
-> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Font: JetBrains Mono
 > - Monospace Size: 14px
 > - Special Features: Subtle pink accents, airy spacing
 
@@ -280,9 +280,9 @@ Elegant and dreamy, this theme uses soft purple tones to create a sophisticated 
 
 > - Layout: `pastels`
 > - Mode: Light
-> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Family: Quicksand
 > - Font Size: 16px
-> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Font: JetBrains Mono
 > - Monospace Size: 14px
 > - Special Features: Lavender accents, harmonious color transitions
 
@@ -292,9 +292,9 @@ Bright and cheerful without being overwhelming, this theme brings sunshine to yo
 
 > - Layout: `pastels`
 > - Mode: Light
-> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Family: Quicksand
 > - Font Size: 16px
-> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Font: JetBrains Mono
 > - Monospace Size: 14px
 > - Special Features: Sunny highlights, high readability
 
@@ -304,9 +304,9 @@ Cool and professional, yet soft and approachable. This theme provides a trustwor
 
 > - Layout: `pastels`
 > - Mode: Light
-> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Family: Quicksand
 > - Font Size: 16px
-> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Font: JetBrains Mono
 > - Monospace Size: 14px
 > - Special Features: Sky blue accents, clean layout
 
@@ -316,9 +316,9 @@ A modern, glossy theme inspired by Frutiger Aero design language. Features brigh
 
 > - Layout: `frutiger`
 > - Mode: Light
-> - Font Family: Segoe UI, Arial, system-ui
+> - Font Family: Segoe UI
 > - Font Size: 16px
-> - Monospace Font: Consolas, Monaco, monospace
+> - Monospace Font: Consolas
 > - Monospace Size: 14px
 > - Special Features: Glossy effects, translucent elements, gradient text
 
@@ -328,9 +328,9 @@ A vibrant purple variant of the Frutiger Aero style, featuring rich purples and 
 
 > - Layout: `frutiger`
 > - Mode: Light
-> - Font Family: Segoe UI, Arial, system-ui
+> - Font Family: Segoe UI
 > - Font Size: 16px
-> - Monospace Font: Consolas, Monaco, monospace
+> - Monospace Font: Consolas
 > - Monospace Size: 14px
 > - Special Features: Purple color scheme, glass morphism effects
 
@@ -340,23 +340,23 @@ An energetic green interpretation of the Frutiger Aero aesthetic, combining fres
 
 > - Layout: `frutiger`
 > - Mode: Light
-> - Font Family: Segoe UI, Arial, system-ui
+> - Font Family: Segoe UI
 > - Font Size: 16px
-> - Monospace Font: Consolas, Monaco, monospace
+> - Monospace Font: Consolas
 > - Monospace Size: 14px
 > - Special Features: Nature-inspired green palette, glass effects
 
-### Frutiger Dark (`"frutiger-dark"`)
+### Sepia (`"sepia"`)
 
-A dark mode version of the Frutiger Aero style, maintaining the glossy effects while providing reduced eye strain for low-light environments.
+A classic, book-inspired theme optimized for long-form reading. Features traditional serif typography, paper-like textures, and warm sepia tones. Perfect for literary content, personal blogs, or any site that wants to evoke the feeling of a well-loved book.
 
-> - Layout: `frutiger`
-> - Mode: Dark
-> - Font Family: Segoe UI, Arial, system-ui
+> - Layout: `sepia`
+> - Mode: Light
+> - Font Family: Merriweather
 > - Font Size: 16px
-> - Monospace Font: Consolas, Monaco, monospace
+> - Monospace Font: Fira Code
 > - Monospace Size: 14px
-> - Special Features: Dark glass morphism, neon accents
+> - Special Features: Paper texture background, decorative flourishes, drop caps for titles
 
 ## Layout Comparison
 
@@ -421,4 +421,13 @@ A dark mode version of the Frutiger Aero style, maintaining the glossy effects w
 >   - Post Metadata Display: Right sidebar (on large screens)
 >   - Focus: Technical documentation and tutorials
 >   - Special Features: Collapsible sidebar navigation, optimized for long-form technical content
+
+
+> **sepia**
+>   - Primary Menu: ✅
+>   - Secondary Menu: ❌
+>   - Responsive Design: ✅
+>   - Post Metadata Display: Inline (above content)
+>   - Focus: Long-form reading & literary content
+>   - Special Features: Paper texture background, decorative flourishes, drop caps for titles, classic typography
 
