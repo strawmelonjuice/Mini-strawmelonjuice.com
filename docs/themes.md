@@ -250,6 +250,66 @@ A high-contrast dark theme inspired by the Rust Book's "Coal" theme. Features de
 > - Monospace Size: 14px
 > - Special Features: Maximum contrast for accessibility, warm accent colors
 
+### Pastel Green (`"pastel-green"`)
+
+Fresh and calming, the Pastel Green theme offers a gentle, nature-inspired color palette that creates a soothing reading environment. Perfect for wellness, environmental, or lifestyle content.
+
+> - Layout: `pastels`
+> - Mode: Light
+> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Size: 14px
+> - Special Features: Soft shadows, rounded corners, gentle transitions
+
+### Pastel Pink (`"pastel-pink"`)
+
+A delicate, rosy theme that brings warmth and friendliness to your content. Ideal for blogs, personal websites, or any content that benefits from a soft, inviting atmosphere.
+
+> - Layout: `pastels`
+> - Mode: Light
+> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Size: 14px
+> - Special Features: Subtle pink accents, airy spacing
+
+### Pastel Purple (`"pastel-purple"`)
+
+Elegant and dreamy, this theme uses soft purple tones to create a sophisticated yet approachable design. Great for creative portfolios or storytelling platforms.
+
+> - Layout: `pastels`
+> - Mode: Light
+> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Size: 14px
+> - Special Features: Lavender accents, harmonious color transitions
+
+### Pastel Yellow (`"pastel-yellow"`)
+
+Bright and cheerful without being overwhelming, this theme brings sunshine to your content. Perfect for educational sites, children's content, or any project needing an optimistic touch.
+
+> - Layout: `pastels`
+> - Mode: Light
+> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Size: 14px
+> - Special Features: Sunny highlights, high readability
+
+### Pastel Blue (`"pastel-blue"`)
+
+Cool and professional, yet soft and approachable. This theme provides a trustworthy feel while maintaining the gentle nature of the pastel palette.
+
+> - Layout: `pastels`
+> - Mode: Light
+> - Font Family: Quicksand, system-ui, sans-serif
+> - Font Size: 16px
+> - Monospace Font: JetBrains Mono, monospace
+> - Monospace Size: 14px
+> - Special Features: Sky blue accents, clean layout
+
 ## Layout Comparison
 
 ### Cindy Layouts

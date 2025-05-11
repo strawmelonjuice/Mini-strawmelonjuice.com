@@ -504,5 +504,125 @@
       }
     },
     "layout": "documentation"
+  },
+  {
+    "name": "pastel-green",
+    "prevalence": "light",
+    "fonts": ["Quicksand", "system-ui", "sans-serif"],
+    "font-size": 16,
+    "fonts-mono": ["JetBrains Mono", "monospace"],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "pastel-green": {
+        "primary": "#86efac",
+        "secondary": "#bef264",
+        "accent": "#fde047",
+        "neutral": "#e5e7eb",
+        "base-100": "#ffffff",
+        "base-200": "#f3f4f6",
+        "base-300": "#e5e7eb",
+        "info": "#93c5fd",
+        "success": "#86efac",
+        "warning": "#fde047",
+        "error": "#fca5a5"
+      }
+    },
+    "layout": "pastels"
+  },
+  {
+    "name": "pastel-pink",
+    "prevalence": "light", 
+    "fonts": ["Quicksand", "system-ui", "sans-serif"],
+    "font-size": 16,
+    "fonts-mono": ["JetBrains Mono", "monospace"],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "pastel-pink": {
+        "primary": "#fda4af",
+        "secondary": "#f9a8d4",
+        "accent": "#c4b5fd",
+        "neutral": "#e5e7eb",
+        "base-100": "#ffffff",
+        "base-200": "#f3f4f6",
+        "base-300": "#e5e7eb",
+        "info": "#93c5fd",
+        "success": "#86efac",
+        "warning": "#fde047",
+        "error": "#fca5a5"
+      }
+    },
+    "layout": "pastels"
+  },
+  {
+    "name": "pastel-purple",
+    "prevalence": "light",
+    "fonts": ["Quicksand", "system-ui", "sans-serif"],
+    "font-size": 16,
+    "fonts-mono": ["JetBrains Mono", "monospace"],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "pastel-purple": {
+        "primary": "#c4b5fd",
+        "secondary": "#ddd6fe",
+        "accent": "#f9a8d4",
+        "neutral": "#e5e7eb",
+        "base-100": "#ffffff",
+        "base-200": "#f3f4f6",
+        "base-300": "#e5e7eb",
+        "info": "#93c5fd",
+        "success": "#86efac",
+        "warning": "#fde047",
+        "error": "#fca5a5"
+      }
+    },
+    "layout": "pastels"
+  },
+  {
+    "name": "pastel-yellow",
+    "prevalence": "light",
+    "fonts": ["Quicksand", "system-ui", "sans-serif"],
+    "font-size": 16,
+    "fonts-mono": ["JetBrains Mono", "monospace"],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "pastel-yellow": {
+        "primary": "#fde047",
+        "secondary": "#fef08a",
+        "accent": "#bef264",
+        "neutral": "#e5e7eb",
+        "base-100": "#ffffff",
+        "base-200": "#f3f4f6",
+        "base-300": "#e5e7eb",
+        "info": "#93c5fd",
+        "success": "#86efac",
+        "warning": "#fde047",
+        "error": "#fca5a5"
+      }
+    },
+    "layout": "pastels"
+  },
+  {
+    "name": "pastel-blue",
+    "prevalence": "light",
+    "fonts": ["Quicksand", "system-ui", "sans-serif"],
+    "font-size": 16,
+    "fonts-mono": ["JetBrains Mono", "monospace"],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "pastel-blue": {
+        "primary": "#93c5fd",
+        "secondary": "#bfdbfe",
+        "accent": "#c4b5fd",
+        "neutral": "#e5e7eb",
+        "base-100": "#ffffff",
+        "base-200": "#f3f4f6",
+        "base-300": "#e5e7eb",
+        "info": "#93c5fd",
+        "success": "#86efac",
+        "warning": "#fde047",
+        "error": "#fca5a5"
+      }
+    },
+    "layout": "pastels"
   }
 ]

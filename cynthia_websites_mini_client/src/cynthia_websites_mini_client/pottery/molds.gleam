@@ -13,6 +13,7 @@ import cynthia_websites_mini_client/pottery/molds/documentation
 import cynthia_websites_mini_client/pottery/molds/github_layout
 import cynthia_websites_mini_client/pottery/molds/minimalist
 import cynthia_websites_mini_client/pottery/molds/oceanic_layout
+import cynthia_websites_mini_client/pottery/molds/pastels
 
 /// Molds is the name we use for templating here.
 pub fn into(
@@ -144,6 +145,23 @@ pub fn into(
           metadata: Dict(String, Dynamic),
         ) -> Element(messages.Msg) {
           documentation.post_layout(content, metadata, model)
+        }
+      }
+    }
+    "pastels" -> {
+      // Pastels layout handles both pages and posts with consistent styling
+      case is_post {
+        False -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) {
+          pastels.page_layout(from: content, with: metadata, store: model)
+        }
+        True -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) {
+          pastels.post_layout(from: content, with: metadata, store: model)
         }
       }
     }
