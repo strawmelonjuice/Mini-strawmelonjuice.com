@@ -4,14 +4,14 @@
 	"license": "AGPL-3.0-only",
 	"module": "cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
 	"bin": {
-		"cynthiaweb-mini": "./dist/cynthia_websites_mini_server.js"
+		"cynthiaweb-mini": "dist/cynthia_websites_mini_server.js"
 	},
 	"type": "module",
 	"devDependencies": {
 		"@types/bun": "latest",
 		"@types/sql.js": "^1.4.9",
 		"nodemon": "^3.1.9",
-    "@types/clean-css": "^4.2.11",
+		"@types/clean-css": "^4.2.11",
 		"@types/markdown-it": "^14.1.2",
 		"autoprefixer": "^10.4.20",
 		"clean-css": "^5.3.3",
