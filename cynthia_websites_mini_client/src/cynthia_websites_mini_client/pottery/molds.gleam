@@ -10,6 +10,7 @@ import cynthia_websites_mini_client/pottery/molds/cindy_dual
 import cynthia_websites_mini_client/pottery/molds/cindy_landing
 import cynthia_websites_mini_client/pottery/molds/cindy_simple
 import cynthia_websites_mini_client/pottery/molds/documentation
+import cynthia_websites_mini_client/pottery/molds/frutiger
 import cynthia_websites_mini_client/pottery/molds/github_layout
 import cynthia_websites_mini_client/pottery/molds/minimalist
 import cynthia_websites_mini_client/pottery/molds/oceanic_layout
@@ -162,6 +163,22 @@ pub fn into(
           metadata: Dict(String, Dynamic),
         ) {
           pastels.post_layout(from: content, with: metadata, store: model)
+        }
+      }
+    }
+    "frutiger" -> {
+      case is_post {
+        False -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) -> Element(messages.Msg) {
+          frutiger.page_layout(from: content, with: metadata, store: model)
+        }
+        True -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) -> Element(messages.Msg) {
+          frutiger.post_layout(from: content, with: metadata, store: model)
         }
       }
     }

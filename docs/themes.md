@@ -310,6 +310,54 @@ Cool and professional, yet soft and approachable. This theme provides a trustwor
 > - Monospace Size: 14px
 > - Special Features: Sky blue accents, clean layout
 
+### Frutiger Blue (`"frutiger-blue"`)
+
+A modern, glossy theme inspired by Frutiger Aero design language. Features bright blues, glass-like effects, and bold typography for high visual impact.
+
+> - Layout: `frutiger`
+> - Mode: Light
+> - Font Family: Segoe UI, Arial, system-ui
+> - Font Size: 16px
+> - Monospace Font: Consolas, Monaco, monospace
+> - Monospace Size: 14px
+> - Special Features: Glossy effects, translucent elements, gradient text
+
+### Frutiger Purple (`"frutiger-purple"`)
+
+A vibrant purple variant of the Frutiger Aero style, featuring rich purples and pinks with the same glossy, translucent effects.
+
+> - Layout: `frutiger`
+> - Mode: Light
+> - Font Family: Segoe UI, Arial, system-ui
+> - Font Size: 16px
+> - Monospace Font: Consolas, Monaco, monospace
+> - Monospace Size: 14px
+> - Special Features: Purple color scheme, glass morphism effects
+
+### Frutiger Green (`"frutiger-green"`)
+
+An energetic green interpretation of the Frutiger Aero aesthetic, combining fresh greens with glossy surfaces and bold design elements.
+
+> - Layout: `frutiger`
+> - Mode: Light
+> - Font Family: Segoe UI, Arial, system-ui
+> - Font Size: 16px
+> - Monospace Font: Consolas, Monaco, monospace
+> - Monospace Size: 14px
+> - Special Features: Nature-inspired green palette, glass effects
+
+### Frutiger Dark (`"frutiger-dark"`)
+
+A dark mode version of the Frutiger Aero style, maintaining the glossy effects while providing reduced eye strain for low-light environments.
+
+> - Layout: `frutiger`
+> - Mode: Dark
+> - Font Family: Segoe UI, Arial, system-ui
+> - Font Size: 16px
+> - Monospace Font: Consolas, Monaco, monospace
+> - Monospace Size: 14px
+> - Special Features: Dark glass morphism, neon accents
+
 ## Layout Comparison
 
 ### Cindy Layouts

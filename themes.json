@@ -624,5 +624,133 @@
       }
     },
     "layout": "pastels"
+  },
+  {
+    "name": "frutiger-blue",
+    "prevalence": "light",
+    "fonts": [
+      "Segoe UI",
+      "Arial",
+      "system-ui"
+    ],
+    "font-size": 16,
+    "fonts-mono": [
+      "Consolas",
+      "Monaco",
+      "monospace"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "frutiger-blue": {
+        "primary": "#0078d4",
+        "secondary": "#00b7c3",
+        "accent": "#0099ff",
+        "neutral": "#4c4c4c",
+        "base-100": "#ffffff",
+        "base-200": "#f0f9ff",
+        "base-300": "#e6f3ff",
+        "info": "#00b7ff",
+        "success": "#00cc6a",
+        "warning": "#ffd500",
+        "error": "#ff4040"
+      }
+    },
+    "layout": "frutiger"
+  },
+  {
+    "name": "frutiger-purple",
+    "prevalence": "light",
+    "fonts": [
+      "Segoe UI",
+      "Arial", 
+      "system-ui"
+    ],
+    "font-size": 16,
+    "fonts-mono": [
+      "Consolas",
+      "Monaco",
+      "monospace"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "frutiger-purple": {
+        "primary": "#6b46c1",
+        "secondary": "#9f7aea",
+        "accent": "#d53f8c",
+        "neutral": "#4a5568",
+        "base-100": "#ffffff",
+        "base-200": "#f8f5ff",
+        "base-300": "#f3e8ff",
+        "info": "#63b3ed",
+        "success": "#48bb78",
+        "warning": "#ecc94b",
+        "error": "#f56565"
+      }
+    },
+    "layout": "frutiger"
+  },
+  {
+    "name": "frutiger-green",
+    "prevalence": "light",
+    "fonts": [
+      "Segoe UI",
+      "Arial",
+      "system-ui"
+    ],
+    "font-size": 16,
+    "fonts-mono": [
+      "Consolas",
+      "Monaco",
+      "monospace"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "frutiger-green": {
+        "primary": "#00b894",
+        "secondary": "#00d68f",
+        "accent": "#38d9a9",
+        "neutral": "#4a5568",
+        "base-100": "#ffffff",
+        "base-200": "#f0fff4",
+        "base-300": "#dcfce7",
+        "info": "#0ea5e9",
+        "success": "#22c55e",
+        "warning": "#facc15",
+        "error": "#ef4444"
+      }
+    },
+    "layout": "frutiger"
+  },
+  {
+    "name": "frutiger-dark",
+    "prevalence": "dark",
+    "fonts": [
+      "Segoe UI",
+      "Arial",
+      "system-ui"
+    ],
+    "font-size": 16,
+    "fonts-mono": [
+      "Consolas",
+      "Monaco",
+      "monospace"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "frutiger-dark": {
+        "primary": "#60a5fa",
+        "secondary": "#818cf8",
+        "accent": "#f472b6",
+        "neutral": "#6b7280",
+        "base-100": "#1e1e2e",
+        "base-200": "#181825",
+        "base-300": "#11111b",
+        "info": "#0ea5e9",
+        "success": "#22c55e",
+        "warning": "#facc15",
+        "error": "#ef4444"
+      }
+    },
+    "layout": "frutiger"
   }
 ]
