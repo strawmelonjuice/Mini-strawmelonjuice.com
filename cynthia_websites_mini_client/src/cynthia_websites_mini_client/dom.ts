@@ -45,9 +45,9 @@ export function destroy_comment_box() {
   // Destroy the comment box
   const comment_box = document.querySelector("div.utterances");
   if (comment_box) {
-    const inner_comment_box = comment_box.children[0];
-    if (inner_comment_box) {
-      inner_comment_box.remove();
-    }
+    // Remove the comment box from the DOM, but keep the element itself not to conflict with the next comment box
+    comment_box.innerHTML = "";
+    comment_box.removeAttribute("class");
+    comment_box.removeAttribute("style");
   }
 }
