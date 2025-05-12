@@ -1,6 +1,8 @@
+import gleam/float
 import gleam/http
 import gleam/http/request.{type Request}
 import gleam/string
+import gleam/time/timestamp
 import plinth/browser/window
 
 pub fn phone_home() -> Request(String) {
@@ -46,3 +48,11 @@ fn phone_home_lessener(in: String) -> String {
 
 @external(javascript, "./utils_ffi.ts", "getWindowHost")
 pub fn get_window_host() -> String
+
+pub fn now() -> Int {
+  let now =
+    timestamp.system_time()
+    |> timestamp.to_unix_seconds
+    |> float.truncate
+  now
+}

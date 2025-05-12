@@ -15,7 +15,6 @@ import gleam/string
 import lustre/attribute.{attribute}
 import lustre/element.{type Element}
 import lustre/element/html
-import qs
 
 pub fn render_content(
   model: Model,
@@ -86,36 +85,24 @@ pub fn render_content(
             "dark" -> "github-dark"
             _ -> "github-light"
           }
-          let query =
-            [
-              #("async", []),
-              #("crossorigin", ["anonymous"]),
-              #("issue-term", [content.permalink]),
-              #("repo", [repo]),
-              #("src", ["https://utteranc.es/client.js"]),
-              #("theme", [comment_color_scheme]),
-              #("url", [utils.phone_home_url() <> "#" <> model.path]),
-              #("origin", [utils.phone_home_url()]),
-              #("pathname", [model.path]),
-              #("title", [content.title]),
-              #("description", [content.description]),
-              #("og:title", []),
-              #("session", []),
-            ]
-            |> dict.from_list
-            |> qs.default_serialize()
 
-          let src = "https://utteranc.es/utterances.html" <> query
           list.append(default, [
-            html.iframe([
-              attribute("loading", "lazy"),
-              attribute.src(src),
-              // attribute("scrolling", "yes"),
-              attribute("title", "Comments"),
-              attribute.class(
-                "utterances-frame w-full min-h-[30vh] h-full outline-none focus:outline-none o",
-              ),
-            ]),
+            html.script(
+              [
+                attribute("async", ""),
+                attribute("crossorigin", "anonymous"),
+                attribute("theme", comment_color_scheme),
+                attribute("issue-term", content.permalink),
+                attribute("repo", repo),
+                attribute(
+                  "return-url",
+                  utils.phone_home_url() <> "#" <> model.path,
+                ),
+                attribute.src("https://utteranc.es/client.js"),
+              ],
+              "
+",
+            ),
           ])
         }
         _, _ -> default
@@ -170,3 +157,9 @@ fn custom_md_render_internal(
   markdown: String,
   call_home: fn() -> String,
 ) -> String
+
+@external(javascript, "./dom.ts", "destroy_comment_box")
+pub fn destroy_comment_box() -> Nil
+
+@external(javascript, "./dom.ts", "apply_styles_to_comment_box")
+pub fn comment_box_forced_styles() -> Nil

@@ -27,3 +27,27 @@ export function get_inner_html(el: HTMLElement) {
   // Get the innerHTML of an element
   return el.innerHTML;
 }
+
+export function apply_styles_to_comment_box() {
+      // Apply styles to the comment box
+    const comment_box = document.querySelector("div.utterances");
+    if (comment_box) {
+      comment_box.classList.add("w-full", "h-full");
+      const inner_comment_box = comment_box.children[0];
+      if (inner_comment_box && inner_comment_box.classList.value == "utterances-frame") {
+        inner_comment_box.classList = "utterances-frame w-full min-h-[30vh] h-full outline-none focus:outline-none"
+      }
+    }
+  
+}
+
+export function destroy_comment_box() {
+  // Destroy the comment box
+  const comment_box = document.querySelector("div.utterances");
+  if (comment_box) {
+    const inner_comment_box = comment_box.children[0];
+    if (inner_comment_box) {
+      inner_comment_box.remove();
+    }
+  }
+}

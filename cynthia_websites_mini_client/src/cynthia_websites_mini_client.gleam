@@ -7,6 +7,7 @@ import cynthia_websites_mini_client/messages.{
   type Msg, ApiReturnedData, UserNavigateTo,
 }
 import cynthia_websites_mini_client/model_type.{type Model, Model}
+import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_client/utils
 import cynthia_websites_mini_client/view
 import cynthia_websites_mini_shared/configtype
@@ -15,11 +16,16 @@ import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/order
+import gleam/result
 import gleam/string
 import gleam/uri.{type Uri}
 import lustre
 import lustre/effect.{type Effect}
 import plinth/browser/window
+import plinth/javascript/console
+import plinth/javascript/global
+import plinth/javascript/storage
 
 import modem
 import rsvp
@@ -34,16 +40,58 @@ pub fn main() {
 }
 
 fn init(_) -> #(Model, Effect(Msg)) {
+  console.log("Cynthia Client starting up")
   let effects =
     effect.batch([fetch_all(ApiReturnedData), modem.init(on_url_change)])
-  let initial_path = case window.get_hash() {
-    Ok("") | Error(..) -> {
+  // Using local storage as session storage because session storage doesn't stay long enough
+  let assert Ok(session) = storage.local()
+  // .. if the local storage is older than 15 minutes though, we clear it
+  let val = case storage.get_item(session, "time") {
+    Ok(time) -> {
+      let now = utils.now()
+      let stamp = result.unwrap(int.parse(time), 0)
+      let diff = int.subtract(now, stamp) |> int.absolute_value
+      let order = int.compare(diff, 900)
+      case order {
+        order.Eq | order.Gt -> False
+        order.Lt -> True
+      }
+    }
+    Error(..) -> {
+      False
+    }
+  }
+  case val {
+    False -> {
+      console.log("Clearing local storage")
+      storage.clear(session)
+    }
+    True -> {
+      // Keeping local storage, updating time
+      let now = utils.now() |> int.to_string
+      case storage.set_item(session, "time", now) {
+        Ok(_) -> {
+          console.log("Updated local storage time")
+        }
+        Error(e) -> {
+          console.error(
+            "Error updating local storage time: " <> string.inspect(e),
+          )
+        }
+      }
+    }
+  }
+  let initial_path = case storage.get_item(session, "last"), window.get_hash() {
+    Ok(path), _ -> path
+    Error(..), Ok("") | Error(..), Error(..) -> {
       dom.set_hash("/")
       "/"
     }
-    Ok(f) -> f
+    Error(..), Ok(f) -> f
   }
-  let model = Model(initial_path, None, dict.new(), Ok(Nil), dict.new())
+  console.log("Initial path: " <> initial_path)
+  let model =
+    Model(initial_path, None, dict.new(), Ok(Nil), dict.new(), session)
 
   #(model, effects)
 }
@@ -51,11 +99,11 @@ fn init(_) -> #(Model, Effect(Msg)) {
 // Effect handlers --------------------------------------------------------------
 /// On url change: (Obviously) is triggered on url change, this is useful for intercepting the url hash change on in-site-navigation, that Cynthia uses.
 fn on_url_change(uri: Uri) -> Msg {
+  console.log("URL changed to: " <> uri.to_string(uri))
   let assert Ok(#(_, d)) =
     uri
     |> uri.to_string
     |> string.split_once("#")
-
   messages.UserNavigateTo(d)
 }
 
@@ -76,12 +124,33 @@ fn fetch_all(
 // UPDATE ----------------------------------------------------------------------
 
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
+  // Update session storage with the current time
+  let now = utils.now() |> int.to_string
+  case storage.set_item(model.sessionstore, "time", now) {
+    Ok(_) -> {
+      Nil
+    }
+    Error(e) -> {
+      console.error(
+        "Error updating session storage time: " <> string.inspect(e),
+      )
+    }
+  }
   case msg {
     UserNavigateTo(path) -> {
       dom.set_hash(path)
       let other =
         model.other
         |> dict.delete("search_term")
+      case storage.set_item(model.sessionstore, "last", path) {
+        Ok(_) -> {
+          console.log("Stored last path: " <> path)
+        }
+        Error(e) -> {
+          console.error("Error storing last path: " <> string.inspect(e))
+        }
+      }
+      pottery.destroy_comment_box()
       #(Model(..model, path:, other:), effect.none())
     }
     messages.UserSearchTerm(search_term) -> {
@@ -93,8 +162,16 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
         model.other
         |> dict.insert("search_term", search_term)
       dom.set_hash(path)
+      let sessionstore = model.sessionstore
       #(
-        Model(path:, complete_data:, computed_menus:, status:, other:),
+        Model(
+          path:,
+          complete_data:,
+          computed_menus:,
+          status:,
+          other:,
+          sessionstore:,
+        ),
         effect.none(),
       )
     }
@@ -114,6 +191,11 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
           #(Model(..model, status: Error(error_message)), effect.none())
         }
         Ok(new) -> {
+          case new.comment_repo {
+            Some(..) ->
+              global.set_interval(300, pottery.comment_box_forced_styles)
+            None -> global.set_timeout(30_000, fn() { Nil })
+          }
           let computed_menus = compute_menus(new.content, model)
           let complete_data = Some(new)
           let status = Ok(Nil)

@@ -1,6 +1,7 @@
 import cynthia_websites_mini_shared/configtype
 import gleam/dict.{type Dict}
 import gleam/option.{type Option}
+import plinth/javascript/storage
 
 pub type Model {
   Model(
@@ -21,5 +22,7 @@ pub type Model {
     /// Other variables
     /// This stores for example the current search term
     other: Dict(String, String),
+    /// Session storage
+    sessionstore: storage.Storage,
   )
 }
