@@ -82,12 +82,23 @@ fn init(_) -> #(Model, Effect(Msg)) {
     }
   }
   let initial_path = case storage.get_item(session, "last"), window.get_hash() {
-    Ok(path), _ -> path
+    Ok(path), _ -> {
+      // We have a last path in local storage. Return it. Hash will be set to it later.
+      path
+    }
     Error(..), Ok("") | Error(..), Error(..) -> {
+      // No last path in local storage, so we set the hash to "/"
       dom.set_hash("/")
+      let assert Ok(..) = storage.set_item(session, "last", "/")
+
       "/"
     }
-    Error(..), Ok(f) -> f
+    Error(..), Ok(f) -> {
+      // From the hash, we set the last path in local storage
+      let assert Ok(..) = storage.set_item(session, "last", f)
+      // and return the hash
+      f
+    }
   }
   console.log("Initial path: " <> initial_path)
   let model =
