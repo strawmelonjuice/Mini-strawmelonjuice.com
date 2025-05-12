@@ -232,6 +232,19 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       }
       #(Model(..model, other:), effect.none())
     }
+    messages.CindyToggleMenu1 -> {
+      let other = case dict.get(model.other, "cindy menu  1 open") {
+        Ok(..) -> {
+          // is open, so close it
+          dict.delete(model.other, "cindy menu  1 open")
+        }
+        Error(..) -> {
+          // is closed, so open it
+          dict.insert(model.other, "cindy menu  1 open", "")
+        }
+      }
+      #(Model(..model, other:), effect.none())
+    }
     messages.UserOnDocumentationLayoutToggleSidebar -> {
       let other = case dict.get(model.other, "documentation-sidebar-open") {
         Ok(..) -> {

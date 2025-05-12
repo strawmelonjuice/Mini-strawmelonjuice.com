@@ -9,4 +9,5 @@ pub type Msg {
   UserSearchTerm(String)
   UserOnGitHubLayoutToggleMenu
   UserOnDocumentationLayoutToggleSidebar
+  CindyToggleMenu1
 }
