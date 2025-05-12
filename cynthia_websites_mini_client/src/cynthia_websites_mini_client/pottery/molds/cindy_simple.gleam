@@ -59,7 +59,7 @@ pub fn page_layout(
       description,
     ),
   ])
-  |> cindy_common(content, menu, _, variables)
+  |> cindy_common(content, menu, _, variables, model)
 }
 
 pub fn post_layout(
@@ -185,7 +185,7 @@ pub fn post_layout(
       ]),
     ]),
   ])
-  |> cindy_common(content, menu, _, variables)
+  |> cindy_common(content, menu, _, variables, model)
 }
 
 fn cindy_common(
@@ -193,6 +193,7 @@ fn cindy_common(
   menu: List(Element(messages.Msg)),
   post_meta: Element(messages.Msg),
   variables: Dict(String, Dynamic),
+  model: model_type.Model,
 ) {
   let assert Ok(site_name) = {
     dict.get(variables, "global_site_name")
@@ -208,97 +209,138 @@ fn cindy_common(
           ),
         ],
         [
-          // Menu and site name - Improved styling
+          // Menu and site name - Enhanced mobile layout
           html.div(
             [
               attribute.class(
-                "col-span-5 p-2 m-0 bg-base-300 backdrop-blur-sm flex shadow-sm sticky top-0 z-10",
+                "col-span-5 px-2 py-3 md:p-4 m-0 bg-base-300 backdrop-blur-sm flex flex-col md:flex-row items-center shadow-sm sticky top-0 z-10 gap-2 md:gap-0",
               ),
             ],
             [
               html.div(
-                [attribute.class("flex-auto w-3/12 flex items-stretch")],
+                [
+                  attribute.class(
+                    "w-full md:w-3/12 flex items-center justify-between md:justify-start",
+                  ),
+                ],
                 [
                   html.span(
                     [
                       attribute.class(
-                        "text-center self-center font-bold btn btn-ghost text-xl transition-all duration-200 hover:scale-105",
+                        "text-center font-bold btn btn-ghost text-xl transition-all duration-200 hover:scale-105",
                       ),
                     ],
                     [html.text(site_name)],
                   ),
+                  // Mobile menu toggle
+                  html.button(
+                    [
+                      attribute.class(
+                        "md:hidden btn btn-ghost btn-sm fa fa-bars",
+                      ),
+                      attribute.id("cindy_menu_toggle"),
+                      event.on_click(messages.CindyToggleMenu1),
+                    ],
+                    [html.span([attribute.class("i-tabler-menu h-5 w-5")], [])],
+                  ),
                 ],
               ),
-              // Improved search input field with better visibility in dark mode
+              // Search and menu container for mobile
               html.div(
                 [
                   attribute.class(
-                    "flex-auto w-4/12 flex items-center justify-center",
+                    "w-full md:w-9/12 flex-col md:flex-row items-center gap-3 "
+                    <> case dict.get(model.other, "cindy menu  1 open") {
+                      Ok(_) ->
+                        "flex bg-accent backdrop-blur-md p-4 rounded-lg shadow-lg border border-base-300/30 md:bg-transparent md:p-0 md:shadow-none md:border-none"
+                      Error(_) -> "hidden md:flex"
+                    },
                   ),
                 ],
                 [
-                  html.div([attribute.class("relative w-full max-w-xs")], [
-                    html.div(
-                      [
-                        attribute.class(
-                          "flex items-center h-8 bg-base-200/90 border border-base-300/80 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary focus-within:shadow-md transition-all duration-200 w-full ring-1 ring-inset ring-base-content/10",
-                        ),
-                      ],
-                      [
-                        html.span(
-                          [attribute.class("pl-3 text-base-content/80")],
-                          [
-                            html.span(
-                              [attribute.class("i-tabler-search w-4 h-4")],
-                              [],
-                            ),
-                          ],
-                        ),
-                        html.input([
-                          attribute.class(
-                            "w-full py-1.5 px-2 text-sm bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/70",
-                          ),
-                          attribute.placeholder("Search..."),
-                          attribute.type_("text"),
-                          event.on_input(messages.UserSearchTerm),
-                        ]),
-                      ],
-                    ),
-                  ]),
-                ],
-              ),
-              html.div([attribute.class("flex-auto w-5/12")], [
-                html.menu([attribute.class("text-right")], [
-                  html.ul(
+                  // Search input with improved mobile styling
+                  html.div(
                     [
-                      attribute.id("menu_1_inside"),
                       attribute.class(
-                        "menu menu-horizontal bg-base-200/90 rounded-box shadow-sm",
+                        "w-full md:w-4/12 flex items-center justify-center",
                       ),
                     ],
-                    menu,
+                    [
+                      html.div([attribute.class("relative w-full max-w-xs")], [
+                        html.div(
+                          [
+                            attribute.class(
+                              "flex items-center h-8 bg-base-200/90 border border-base-300/80 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary focus-within:shadow-md transition-all duration-200 w-full ring-1 ring-inset ring-base-content/10",
+                            ),
+                          ],
+                          [
+                            html.span(
+                              [attribute.class("pl-3 text-base-content/80")],
+                              [
+                                html.span(
+                                  [attribute.class("i-tabler-search w-4 h-4")],
+                                  [],
+                                ),
+                              ],
+                            ),
+                            html.input([
+                              attribute.class(
+                                "w-full py-1.5 px-2 text-sm bg-transparent border-none focus:outline-none text-base-content placeholder-base-content/70",
+                              ),
+                              attribute.placeholder("Search..."),
+                              attribute.type_("text"),
+                              event.on_input(messages.UserSearchTerm),
+                            ]),
+                          ],
+                        ),
+                      ]),
+                    ],
                   ),
-                ]),
-              ]),
+                  // Menu with mobile-optimized layout and enhanced contrast
+                  html.div(
+                    [
+                      attribute.class(
+                        "w-full md:w-5/12 flex justify-center md:justify-end",
+                      ),
+                    ],
+                    [
+                      html.menu([attribute.class("w-full md:w-auto")], [
+                        html.ul(
+                          [
+                            attribute.id("menu_1_inside"),
+                            attribute.class(
+                              "menu menu-horizontal flex-col md:flex-row bg-base-200 md:bg-base-200/90 rounded-box shadow-sm w-full md:w-auto divide-y md:divide-y-0 divide-base-300/40",
+                            ),
+                          ],
+                          menu,
+                        ),
+                      ]),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
-          // Content - Improved spacing and responsiveness
+          // Content - Improved mobile spacing
           html.div(
             [
               attribute.class(
-                "col-span-5 row-span-7 row-start-2 md:col-span-4 md:row-span-11 md:col-start-2 md:row-start-2 overflow-auto min-h-full p-4 md:p-6 lg:p-8",
+                "col-span-5 row-span-7 row-start-2 md:col-span-4 md:row-span-11 md:col-start-2 md:row-start-2 overflow-auto min-h-full p-3 md:p-6 lg:p-8",
               ),
             ],
             [
-              html.div([attribute.class("max-w-4xl mx-auto")], [content]),
+              html.div(
+                [attribute.class("max-w-4xl mx-auto space-y-4 md:space-y-6")],
+                [content],
+              ),
               html.br([]),
             ],
           ),
-          // Post meta - Better styling and readability
+          // Post meta - Enhanced mobile layout
           html.div(
             [
               attribute.class(
-                "col-span-5 row-span-4 row-start-9 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:max-w-[20VW] md:p-3 break-words shadow-inner",
+                "col-span-5 row-span-4 row-start-9 md:row-span-8 md:col-span[] md:col-start-1 md:row-start-2 min-h-full bg-base-200 rounded-br-2xl overflow-auto w-full md:w-fit md:max-w-[20VW] p-4 md:p-3 break-words shadow-inner",
               ),
             ],
             [post_meta],
