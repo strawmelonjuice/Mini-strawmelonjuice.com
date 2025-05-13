@@ -280,19 +280,19 @@ fn compute_menus(content: List(contenttypes.Content), model: Model) {
 // This is actually where the real magic happens
 fn add_each_menu(
   rest: List(Int),
-  gotten: dict.Dict(Int, List(#(String, String))),
+  gotten: dict.Dict(Int, List(model_type.MenuItem)),
   items: List(contenttypes.Content),
-) -> dict.Dict(Int, List(#(String, String))) {
+) -> dict.Dict(Int, List(model_type.MenuItem)) {
   case rest {
     [] -> gotten
     [current_menu, ..rest] -> {
-      let hits =
-        list.filter_map(items, fn(item) {
+      let hits: List(model_type.MenuItem) =
+        list.filter_map(items, fn(item) -> Result(model_type.MenuItem, Nil) {
           case item.data {
             contenttypes.PageData(m) -> {
               case m |> list.contains(current_menu) {
                 True -> {
-                  Ok(#(item.title, item.permalink))
+                  Ok(model_type.MenuItem(name: item.title, to: item.permalink))
                 }
                 False -> Error(Nil)
               }
@@ -300,6 +300,7 @@ fn add_each_menu(
             _ -> Error(Nil)
           }
         })
+        |> list.sort(fn(itema, itemb) { string.compare(itema.name, itemb.name) })
       dict.insert(gotten, current_menu, hits)
       |> add_each_menu(rest, _, items)
     }
