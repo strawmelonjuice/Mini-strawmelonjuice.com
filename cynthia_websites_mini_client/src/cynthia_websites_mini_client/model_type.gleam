@@ -12,7 +12,7 @@ pub type Model {
     /// Menu's stored readily  for themes to pick up.
     /// Structure:
     /// Dict(which_menu: Int, List(#(to, from)))
-    computed_menus: Dict(Int, List(#(String, String))),
+    computed_menus: Dict(Int, List(MenuItem)),
     /// Status
     /// Allows us to trigger the error page from the update function, without the need for more variants of Model.
     ///
@@ -24,5 +24,14 @@ pub type Model {
     other: Dict(String, String),
     /// Session storage
     sessionstore: storage.Storage,
+  )
+}
+
+pub type MenuItem {
+  MenuItem(
+    /// The name of the link
+    name: String,
+    /// The path to the link
+    to: String,
   )
 }

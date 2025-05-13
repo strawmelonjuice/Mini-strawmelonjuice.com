@@ -524,6 +524,11 @@ fn github_common(
                       Error(_) -> []
                       Ok(mobile_menu_items) -> {
                         list.map(mobile_menu_items, fn(item) {
+                          // Convert item to tuple, this is not the best approach, but it works as well as refactoring for custom type here.
+                          let item = {
+                            let model_type.MenuItem(name:, to:) = item
+                            #(name, to)
+                          }
                           // Handle empty URLs as links to homepage
                           let item = case item.1 {
                             "" -> #(item.0, "/")
@@ -727,7 +732,12 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
     Error(_) -> []
     // Return empty list if no menu items
     Ok(menu_items) -> {
-      list.map(menu_items, fn(item) {
+      list.map(menu_items, fn(menu_item) {
+        // Convert item to tuple, this is not the best approach, but it works as well as refactoring for custom type here.
+        let item = {
+          let model_type.MenuItem(name:, to:) = menu_item
+          #(name, to)
+        }
         // Handle empty URLs as links to homepage
         let item = case item.1 {
           "" -> #(item.0, "/")

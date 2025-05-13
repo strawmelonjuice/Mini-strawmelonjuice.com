@@ -229,8 +229,9 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
     Error(_) -> []
     Ok(menu_items) -> {
       list.map(menu_items, fn(item) {
-        let item = case item.1 {
-          "" -> #(item.0, "/")
+        let item = case item {
+          model_type.MenuItem(name:, to: "") ->
+            model_type.MenuItem(name:, to: "/")
           _ -> item
         }
 
@@ -239,15 +240,15 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
             [
               attribute.class(
                 "px-4 py-2 transition-colors duration-200 font-serif "
-                <> case hash == item.1 {
+                <> case hash == item.to {
                   True -> "text-primary italic border-b-2 border-primary/30"
                   False ->
                     "text-base-content/70 hover:text-primary hover:italic"
                 },
               ),
-              attribute.href(utils.phone_home_url() <> "#" <> item.1),
+              attribute.href(utils.phone_home_url() <> "#" <> item.to),
             ],
-            [html.text(item.0)],
+            [html.text(item.name)],
           ),
         ])
       })

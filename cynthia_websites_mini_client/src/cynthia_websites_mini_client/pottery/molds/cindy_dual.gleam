@@ -361,24 +361,25 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
   let content = model.computed_menus
   case dict.get(content, 1) {
     Error(_) -> []
-    Ok(dookie) -> {
-      list.map(dookie, fn(a) {
-        let a = case a.1 {
-          "" -> #(a.0, "/")
-          _ -> a
+    Ok(menu_items) -> {
+      list.map(menu_items, fn(this_item) {
+        let current_item = case this_item {
+          model_type.MenuItem(name:, to: "") ->
+            model_type.MenuItem(name:, to: "/")
+          _ -> this_item
         }
         html.li([], [
           html.a(
             [
               attribute.class({
-                case hash == a.1 {
+                case hash == current_item.to {
                   True -> "menu-active menu-focused active font-medium"
                   False -> "hover:bg-base-300/50 transition-colors duration-200"
                 }
               }),
-              attribute.href(utils.phone_home_url() <> "#" <> a.1),
+              attribute.href(utils.phone_home_url() <> "#" <> current_item.to),
             ],
-            [html.text(a.0)],
+            [html.text(current_item.name)],
           ),
         ])
       })
@@ -390,26 +391,27 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
 pub fn menu_2(from model: model_type.Model) -> List(Element(messages.Msg)) {
   let hash = model.path
   let content = model.computed_menus
-
   case dict.get(content, 2) {
     Error(_) -> []
     Ok(menu_items) -> {
-      list.map(menu_items, fn(item) {
-        let item = case item.1 {
-          "" -> #(item.0, "/")
-          _ -> item
+      list.map(menu_items, fn(a) {
+        let a = case a {
+          model_type.MenuItem(name:, to: "") ->
+            model_type.MenuItem(name:, to: "/")
+          _ -> a
         }
-
         html.li([], [
           html.a(
             [
-              attribute.class(case hash == item.1 {
-                True -> "active btn btn-sm btn-primary"
-                False -> "btn btn-sm btn-outline btn-primary"
+              attribute.class({
+                case hash == a.to {
+                  True -> "menu-active menu-focused active font-medium"
+                  False -> "hover:bg-base-300/50 transition-colors duration-200"
+                }
               }),
-              attribute.href(utils.phone_home_url() <> "#" <> item.1),
+              attribute.href(utils.phone_home_url() <> "#" <> a.to),
             ],
-            [html.text(item.0)],
+            [html.text(a.name)],
           ),
         ])
       })

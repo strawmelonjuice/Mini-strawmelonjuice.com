@@ -357,24 +357,25 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
   let content = model.computed_menus
   case dict.get(content, 1) {
     Error(_) -> []
-    Ok(dookie) -> {
-      list.map(dookie, fn(a) {
-        let a = case a.1 {
-          "" -> #(a.0, "/")
+    Ok(menu_items) -> {
+      list.map(menu_items, fn(a) {
+        let a = case a {
+          model_type.MenuItem(name:, to: "") ->
+            model_type.MenuItem(name:, to: "/")
           _ -> a
         }
         html.li([], [
           html.a(
             [
               attribute.class({
-                case hash == a.1 {
+                case hash == a.to {
                   True -> "menu-active menu-focused active font-medium"
                   False -> "hover:bg-base-300/50 transition-colors duration-200"
                 }
               }),
-              attribute.href(utils.phone_home_url() <> "#" <> a.1),
+              attribute.href(utils.phone_home_url() <> "#" <> a.to),
             ],
-            [html.text(a.0)],
+            [html.text(a.name)],
           ),
         ])
       })

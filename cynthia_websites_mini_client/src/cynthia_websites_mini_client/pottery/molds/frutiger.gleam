@@ -207,6 +207,11 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
     Error(_) -> []
     Ok(menu_items) -> {
       list.map(menu_items, fn(item) {
+        // Convert item to tuple, this is not the best approach, but it works as well as refactoring for custom type here.
+        let item = {
+          let model_type.MenuItem(name:, to:) = item
+          #(name, to)
+        }
         let item = case item.1 {
           "" -> #(item.0, "/")
           _ -> item
