@@ -377,8 +377,7 @@ A classic, book-inspired theme optimized for long-form reading. Features traditi
 > - Post Metadata Display: Right sidebar
 > - Focus: Navigation
 
-> **cindy-landing**
-> \_Note: this layout only exists for pages, on posts, it'll fall back to cindy-simple.
+> **cindy-landing** > \_Note: this layout only exists for pages, on posts, it'll fall back to cindy-simple.
 >
 > - Primary Menu: ✅
 > - Secondary Menu: ❌
