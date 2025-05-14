@@ -21,26 +21,31 @@ jobs:
             arch: x64
             ext: ""
             bin_name: cynthiaweb-mini-linux-x64
-          - os: windows
-            runner: windows-latest
-            arch: x64
-            ext: ".exe"
-            bin_name: cynthiaweb-mini-windows-x64.exe
-          - os: macos
-            runner: macos-latest
-            arch: arm64
-            ext: ""
-            bin_name: cynthiaweb-mini-macos-intel
-          - os: macos
-            runner: macos-13
-            arch: intel
-            ext: ""
-            bin_name: cynthiaweb-mini-macos-x64
           - os: ubuntu
             runner: ubuntu-24.04-arm
             arch: arm64
             ext: ""
             bin_name: cynthiaweb-mini-linux-arm64
+          - os: windows
+            runner: windows-latest
+            arch: x64
+            ext: ".exe"
+            bin_name: cynthiaweb-mini-windows-x64.exe
+          - os: windows
+            runner: windows-latest
+            arch: arm64
+            ext: ".exe"
+            bin_name: cynthiaweb-mini-windows-arm64.exe
+          - os: macos
+            runner: macos-latest
+            arch: arm64
+            ext: ""
+            bin_name: cynthiaweb-mini-macos-arm
+          - os: macos
+            runner: macos-13
+            arch: intel
+            ext: ""
+            bin_name: cynthiaweb-mini-macos-intel
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
