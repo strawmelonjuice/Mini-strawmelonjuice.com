@@ -1,7 +1,6 @@
 import gleam/float
 import gleam/http
 import gleam/http/request.{type Request}
-import gleam/javascript/array.{type Array}
 import gleam/order
 import gleam/string
 import gleam/time/timestamp
