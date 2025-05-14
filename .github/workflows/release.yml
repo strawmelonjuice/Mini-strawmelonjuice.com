@@ -5,11 +5,12 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   build:
-    permissions:
-      contents: write
-      id-token: write
     name: Build ${{ matrix.os }} ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     strategy:
