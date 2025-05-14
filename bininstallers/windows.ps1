@@ -1,5 +1,5 @@
 # Check if running on Windows
-if (-not $IsWindows) {
+if ($Env:OS -ne "Windows_NT") {
     Write-Host "This script is for Windows only. Please use the bash script for Linux or macOS." -ForegroundColor Red
     exit 1
 }
@@ -30,7 +30,7 @@ try {
 }
 
 $url = "https://github.com/CynthiaWebsiteEngine/Mini/releases/download/v${release}/cynthiaweb-mini-${det_os}-${det_arch}.exe"
-$installDir = "$HOME\.local\bin\mini"
+$installDir = "$HOME\bin\mini"
 $exePath = "$installDir\cynthiaweb-mini.exe"
 
 Write-Host "Downloading " -ForegroundColor Blue -NoNewline
