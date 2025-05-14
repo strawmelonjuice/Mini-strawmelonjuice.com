@@ -21,11 +21,11 @@ jobs:
             arch: x64
             ext: ""
             bin_name: cynthiaweb-mini-linux-x64
-          # - os: windows
-          #   runner: windows-latest
-          #   arch: x64
-          #   ext: ".exe"
-          #   bin_name: cynthiaweb-mini-windows-x64.exe
+          - os: windows
+            runner: windows-latest
+            arch: x64
+            ext: ".exe"
+            bin_name: cynthiaweb-mini-windows-x64.exe
           - os: macos
             runner: macos-latest
             arch: arm64
@@ -51,7 +51,7 @@ jobs:
       - name: Install Gleam on Windows
         if: runner.os == 'Windows'
         run: |
-         winget install gleam.gleam -s winget
+          winget install gleam.gleam -s winget
       - name: Build and bundle
         run: |
           bun install
