@@ -55,7 +55,7 @@ pub fn handle_request(
         ),
       )
       let model = mutable_reference.get(mutable_model)
-      case model.cached_response {
+      let re = case model.cached_response {
         Some(res_string) -> {
           // Cache hit! Return the cached response string so that it can be used in the response body
           res_string |> promise.resolve
@@ -79,7 +79,8 @@ pub fn handle_request(
           |> promise.resolve
         }
       }
-      |> response.set_body(response.new(), _)
+      use body <- promise.await(re)
+      response.set_body(response.new(), body)
       |> response.set_headers(
         [#("Content-Type", "application/json; charset=utf-8")]
         |> array.from_list(),
