@@ -28,7 +28,12 @@ jobs:
           #   bin_name: cynthiaweb-mini-windows-x64.exe
           - os: macos
             runner: macos-latest
-            arch: x64
+            arch: arm64
+            ext: ""
+            bin_name: cynthiaweb-mini-macos-intel
+          - os: macos
+            runner: macos-13
+            arch: intel
             ext: ""
             bin_name: cynthiaweb-mini-macos-x64
           - os: ubuntu
