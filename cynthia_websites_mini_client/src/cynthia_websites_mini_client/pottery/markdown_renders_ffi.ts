@@ -4,7 +4,10 @@ import Token from "markdown-it/lib/token.mjs";
 // commonmark mode
 const markdown = markdownit("commonmark");
 
-export function custom_render(text: string, phone_home_url: () => string): string {
+export function custom_render(
+  text: string,
+  phone_home_url: () => string,
+): string {
   let mdast = markdown.parse(text, {});
   mdast.forEach((token: Token) => {
     (function find_link_refs(current_token) {

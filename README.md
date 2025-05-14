@@ -10,6 +10,7 @@ as for example custom formats are out of the optional.
 In return, Cynthia Mini comes with pre-made themes with each some customisable options!
 
 ## Themes
+
 A Cynthia Mini theme consists of the combination of a predefined colourscheme and layout. You can [add your own](https://github.com/CynthiaWebsiteEngine/Mini/blob/main/docs/contributing/add-theme.md) if you'd like!
 
 [Some themes are coming in!](https://github.com/CynthiaWebsiteEngine/Mini/issues/1)
@@ -49,6 +50,7 @@ Static mode allows you to pre-generate your website content into static files th
 This approach provides the benefits of a static site generator (hosting on any web server, improved security, faster load times) while retaining the dynamic features of Cynthia Mini through client-side rendering.
 
 To use static mode:
+
 ```
 cynthiaweb-mini static
 ```

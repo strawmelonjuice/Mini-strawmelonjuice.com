@@ -369,65 +369,65 @@ A classic, book-inspired theme optimized for long-form reading. Features traditi
 >   - Post Metadata Display: Right sidebar
 >   - Focus: Simplicity
 
-
->  **cindy-dual**
->   - Primary Menu: ✅
->   - Secondary Menu: ✅
->   - Responsive Design: ✅
->   - Post Metadata Display: Right sidebar
->   - Focus: Navigation
-
+> **cindy-dual**
+>
+> - Primary Menu: ✅
+> - Secondary Menu: ✅
+> - Responsive Design: ✅
+> - Post Metadata Display: Right sidebar
+> - Focus: Navigation
 
 > **cindy-landing**
-> _Note: this layout only exists for pages, on posts, it'll fall back to cindy-simple.
->   - Primary Menu: ✅
->   - Secondary Menu: ❌
->   - Responsive Design: ✅
->   - Post Metadata Display: Hidden
->   - Focus: Conversion & visual impact
->   - Special Features: Optimized for landing pages
+> \_Note: this layout only exists for pages, on posts, it'll fall back to cindy-simple.
+>
+> - Primary Menu: ✅
+> - Secondary Menu: ❌
+> - Responsive Design: ✅
+> - Post Metadata Display: Hidden
+> - Focus: Conversion & visual impact
+> - Special Features: Optimized for landing pages
 
 ### Other Layouts
 
 > **minimalist**
->   - Primary Menu: ✅
->   - Secondary Menu: ❌
->   - Responsive Design: ✅
->   - Post Metadata Display: Inline (above content)
->   - Focus: Content readability & simplicity
->   - Special Features: Distraction-free reading experience, clean typography
-
+>
+> - Primary Menu: ✅
+> - Secondary Menu: ❌
+> - Responsive Design: ✅
+> - Post Metadata Display: Inline (above content)
+> - Focus: Content readability & simplicity
+> - Special Features: Distraction-free reading experience, clean typography
 
 > **oceanic**
->   - Primary Menu: ✅
->   - Secondary Menu: ✅
->   - Responsive Design: ✅
->   - Post Metadata Display: Left sidebar
->   - Focus: Visual appeal
-
+>
+> - Primary Menu: ✅
+> - Secondary Menu: ✅
+> - Responsive Design: ✅
+> - Post Metadata Display: Left sidebar
+> - Focus: Visual appeal
 
 > **github**
->   - Primary Menu: ✅
->   - Secondary Menu: ❌
->   - Responsive Design: ✅
->   - Post Metadata Display: Left sidebar
->   - Focus: Technical content
-
+>
+> - Primary Menu: ✅
+> - Secondary Menu: ❌
+> - Responsive Design: ✅
+> - Post Metadata Display: Left sidebar
+> - Focus: Technical content
 
 > **documentation**
->   - Primary Menu: ✅
->   - Secondary Menu: ❌
->   - Responsive Design: ✅
->   - Post Metadata Display: Right sidebar (on large screens)
->   - Focus: Technical documentation and tutorials
->   - Special Features: Collapsible sidebar navigation, optimized for long-form technical content
-
+>
+> - Primary Menu: ✅
+> - Secondary Menu: ❌
+> - Responsive Design: ✅
+> - Post Metadata Display: Right sidebar (on large screens)
+> - Focus: Technical documentation and tutorials
+> - Special Features: Collapsible sidebar navigation, optimized for long-form technical content
 
 > **sepia**
->   - Primary Menu: ✅
->   - Secondary Menu: ❌
->   - Responsive Design: ✅
->   - Post Metadata Display: Inline (above content)
->   - Focus: Long-form reading & literary content
->   - Special Features: Paper texture background, decorative flourishes, drop caps for titles, classic typography
-
+>
+> - Primary Menu: ✅
+> - Secondary Menu: ❌
+> - Responsive Design: ✅
+> - Post Metadata Display: Inline (above content)
+> - Focus: Long-form reading & literary content
+> - Special Features: Paper texture background, decorative flourishes, drop caps for titles, classic typography

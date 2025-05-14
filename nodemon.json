@@ -10,7 +10,5 @@
     "./cynthia_websites_mini_client/src",
     "./cynthia_websites_mini_server/src"
   ],
-  "ignore": [
-    "./cynthia_websites_mini_server/src/client_code_generated_ffi.ts"
-  ]
+  "ignore": ["./cynthia_websites_mini_server/src/client_code_generated_ffi.ts"]
 }
