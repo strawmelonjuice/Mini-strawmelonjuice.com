@@ -48,12 +48,12 @@ jobs:
         if: runner.os != 'windows'
         with:
           gleam-version: "1.9.1"
-      - uses: Cyberboss/install-winget@v1
+      - uses: winpax/scoop-setup@v1.0.0
         if: runner.os == 'windows'
       - name: Install Gleam on Windows
         if: runner.os == 'windows'
         run: |
-          winget install gleam.gleam -s winget
+          scoop install gleam
       - name: Build and bundle
         run: |
           bun install
