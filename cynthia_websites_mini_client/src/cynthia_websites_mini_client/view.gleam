@@ -31,11 +31,18 @@ pub fn main(model: Model) -> Element(Msg) {
         })
       let content = case model.path {
         "!" <> a -> {
+          let #(tit, desc) = case content.filename {
+            "notfound.md" -> #(None, None)
+            _ -> #(Some(content.title), Some(content.description))
+          }
           case a {
             "/category/" <> category -> {
-              let title = "Posts in category: " <> category
+              let title = option.unwrap(tit, "Posts in category: " <> category)
               let description =
-                "A postlist of all posts in the category: " <> category
+                option.unwrap(
+                  desc,
+                  "A postlist of all posts in the category: " <> category,
+                )
 
               contenttypes.Content(
                 title:,
@@ -52,8 +59,12 @@ pub fn main(model: Model) -> Element(Msg) {
               )
             }
             "/tag/" <> tag -> {
-              let title = "Posts with tag: " <> tag
-              let description = "A postlist of all posts tagged with " <> tag
+              let title = option.unwrap(tit, "Posts with tag: " <> tag)
+              let description =
+                option.unwrap(
+                  desc,
+                  "A postlist of all posts tagged with " <> tag,
+                )
               contenttypes.Content(
                 title:,
                 description:,
@@ -66,8 +77,9 @@ pub fn main(model: Model) -> Element(Msg) {
               )
             }
             "/search/" <> search_term -> {
-              let title = "Search results for: " <> search_term
-              let description = ""
+              let title =
+                option.unwrap(tit, "Search results for: " <> search_term)
+              let description = option.unwrap(desc, "")
               contenttypes.Content(
                 title:,
                 description:,
@@ -83,7 +95,7 @@ pub fn main(model: Model) -> Element(Msg) {
               )
             }
             _ -> {
-              let title = "All posts"
+              let title = option.unwrap(tit, "All posts")
               let description = "A postlist of all posts."
               contenttypes.Content(
                 title:,
