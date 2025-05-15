@@ -92,9 +92,9 @@ jobs:
           release_name: Release ${{ github.ref_name }}
           body: |
             ## Release ${{ github.ref_name }}
-            
+
             This is a new release of Cynthia Mini Website Engine.
-            
+
             ### Installing Cynthia Mini
 
             There are two officially supported methods of installing Cynthia Mini.
