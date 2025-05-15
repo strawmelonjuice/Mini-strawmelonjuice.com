@@ -99,7 +99,7 @@ jobs:
             To install the pre-release version, you can use the following command:
 
             ```bash
-            bun install -g cynthiaweb-mini@${{ github.ref_name }}
+            bun install -g @cynthiaweb/cynthiaweb-mini@${{ github.ref_name }}
             ```
             Note: All releases, including pre-releases, are tagged `latest` on the npm registry. Use a specific version tag if you want to install.
 
