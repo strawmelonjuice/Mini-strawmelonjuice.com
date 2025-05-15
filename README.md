@@ -9,13 +9,38 @@ as for example custom formats are out of the optional.
 
 In return, Cynthia Mini comes with pre-made themes with each some customisable options!
 
+## Documentation
+
+For complete documentation, please visit the [Cynthia Mini Documentation](https://cynthiawebsiteengine.github.io/Mini-docs/#/).
+
+## Quick setup (READ THE DOCS!)
+
+
+
+```bash
+# Install from NPM
+bun install -g @cynthiaweb/mini
+
+# Or install using binary installer script
+curl -fsSL https://cynthiawebsiteengine.github.io/Mini-docs/assets/install.sh | bash
+
+# See https://cynthiawebsiteengine.github.io/Mini-docs/#/install for more
+```
+
+To create a new site:
+
+```bash
+# Create a new directory and initialize
+mkdir my-site
+cd my-site
+cynthiaweb-mini init
+```
+
 ## Themes
 
-A Cynthia Mini theme consists of the combination of a predefined colourscheme and layout. You can [add your own](https://github.com/CynthiaWebsiteEngine/Mini/blob/main/docs/contributing/add-theme.md) if you'd like!
+A Cynthia Mini theme consists of the combination of a predefined colourscheme and layout. For information about available themes and how to create your own, see the [themes documentation](https://cynthiawebsiteengine.github.io/Mini-docs/#/about-themes).
 
-[Some themes are coming in!](https://github.com/CynthiaWebsiteEngine/Mini/issues/1)
-
-Also see [list of themes](https://github.com/CynthiaWebsiteEngine/Mini/blob/main/docs/themes.md)
+Also see [list of themes](https://cynthiawebsiteengine.github.io/Mini-docs/#/themes)
 
 ## Functionality
 
