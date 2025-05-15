@@ -48,7 +48,7 @@ pub fn main() {
       config.initcfg()
       |> promise.resolve
     }
-    ["help", ..] | ["--help", ..] | ["-h", ..] | [] -> {
+   ["man", ..] |["help", ..] | ["--help", ..] | ["-h", ..] | [] -> {
       case process.argv() |> array.to_list() |> list.drop(2) {
         [] -> console.error("No subcommand given.\n")
         _ -> Nil
