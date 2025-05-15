@@ -5,7 +5,7 @@ import cynthia_websites_mini_shared/timestamps
 import gleam/bool
 import gleam/int
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{Some}
 import gleam/string
 import gleeunit
 import gleeunit/should
