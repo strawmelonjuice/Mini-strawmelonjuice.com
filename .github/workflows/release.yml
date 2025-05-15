@@ -90,6 +90,47 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
+          body: |
+            ## Release ${{ github.ref_name }}
+            
+            This is a new release of Cynthia Mini Website Engine.
+            
+            ### Installing Cynthia Mini
+
+            There are two officially supported methods of installing Cynthia Mini.
+
+            #### With Bun (recommended method)
+
+            If you have [Bun](https://bun.sh/) installed, you can install Cynthia Mini by just running:
+
+            ```sh
+            bun install -g @cynthiaweb/cynthiaweb-mini@${{ github.ref_name }}
+            ```
+            Note: All releases, including pre-releases, are tagged `latest` on the npm registry. Use a specific version tag if you want to install.
+
+            This installs this release from NPM.
+
+            #### With binary installer script (installs the binaries found below)
+
+            If you prefer not to use Bun, or can't use it to install, you can also use these binary install scripts:
+
+            ##### For Linux and MacOS
+
+            ```bash
+            curl -fsSL https://cynthiawebsiteengine.github.io/Mini-docs/assets/install.sh | bash
+            ```
+
+            ##### For Windows
+
+            ```powershell
+            powershell -c "irm https://cynthiawebsiteengine.github.io/Mini-docs/assets/install.ps1 | iex"
+            ```
+
+            This removes the need for Bun, but the cynthiaweb-mini CLI will be quite a big bigger in file size.
+
+            *You can obviously also install it manually by downloading the binaries below.*
+
+            See <https://cynthiawebsiteengine.github.io/Mini-docs/#/install> for more information.
           draft: false
           prerelease: false
 

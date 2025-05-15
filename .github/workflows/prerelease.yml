@@ -91,6 +91,22 @@ jobs:
           release_name: Pre-release ${{ github.ref_name }}
           draft: false
           prerelease: true
+          body: |
+            Pre-release of cynthiaweb-mini for ${{ github.ref_name }}.
+            This is a pre-release version.
+
+            ## Installation
+            To install the pre-release version, you can use the following command:
+
+            ```bash
+            bun install -g cynthiaweb-mini@${{ github.ref_name }}
+            ```
+            Note: All releases, including pre-releases, are tagged `latest` on the npm registry. Use a specific version tag if you want to install.
+
+            Or you can download the binaries directly from the release assets.
+            The binary install script is not available for pre-release versions.
+
+            See <https://cynthiawebsiteengine.github.io/Mini-docs/#/install> for more information.
 
       - name: Upload Release Assets
         run: |
