@@ -1,21 +1,22 @@
 # CynthiaWebsiteEngine-mini
 
-Simplified version of CynthiaWeb. Not supporting most of the features.
-Simply put, goal is to run a really
-simple server here, serving static stuff and having the client do the rest.
+A lightweight website engine focused on simplicity and ease of use. Perfect for small to medium websites that need both static and dynamic capabilities.
 
-This leaves a lot of customisation options in the bin,
-as for example custom formats are out of the optional.
+## Key Features
 
-In return, Cynthia Mini comes with pre-made themes with each some customisable options!
+- 🚀 Simple setup and configuration
+- 🎨 Beautiful pre-made themes
+- 📝 Markdown and HTML support
+- 🔧 Static site generation
+- 🔌 Plugin support (coming in v2)
 
 ## Documentation
 
 For complete documentation, please visit the [Cynthia Mini Documentation](https://cynthiawebsiteengine.github.io/Mini-docs/#/).
 
-## Quick setup (READ THE DOCS!)
+## Quick setup (PLEASE READ THE DOCS INSTEAD!)
 
-```bash
+```sh
 # Install from NPM
 bun install -g @cynthiaweb/mini
 
@@ -27,60 +28,33 @@ curl -fsSL https://cynthiawebsiteengine.github.io/Mini-docs/assets/install.sh | 
 
 To create a new site:
 
-```bash
+```sh
 # Create a new directory and initialize
 mkdir my-site
 cd my-site
 cynthiaweb-mini init
 ```
 
-## Themes
+And then host it in dynamic mode:
 
-A Cynthia Mini theme consists of the combination of a predefined colourscheme and layout. For information about available themes and how to create your own, see the [themes documentation](https://cynthiawebsiteengine.github.io/Mini-docs/#/about-themes).
-
-Also see [list of themes](https://cynthiawebsiteengine.github.io/Mini-docs/#/themes)
-
-## Functionality
-
-CynthiaWeb-mini has functionality that moves away from the enormous
-approach that [CynthiaWebSiteEngine v2 and v3](https://github.com/strawmelonjuice/CynthiaWebSiteEngine)
-have, and instead takes an approach closer to that of the
-[original `strawmelonjuice.PHP` engine](https://github.com/strawmelonjuice/strawmelonjuice.com).
-
-Part of, or possibly the entirety of [the well-interfaced
-`CynthiaV3`'s plugin support](https://www.npmjs.com/package/@cynthiaweb/plugin-api) will be added in afterwards, be it
-split over the server and client.
-
-The configuration structure is also simplified,
-it now consists of Markdown files and their
-corresponding metadata files in JSON.
-Global configuration is done in the `cynthia-mini.toml` file.
-
-### Caching
-
-Cynthia Mini diverges from Cynthia "Full" in that on Cynthia "Full", the server processes all the config into simple
-HTML, whereas on Cynthia Mini, all the server does is serve up the data. The frontend parses everything.
-
-#### Static mode
-
-Static mode allows you to pre-generate your website content into static files that can be deployed to any web server. When running Cynthia Mini with the `static` or `pregenerate` command, it will:
-
-1. Load your content and configuration from the `content` directory and `cynthia-mini.toml`
-2. Generate a complete `site.json` file containing all your site data
-3. Create an `index.html` file with the Cynthia Mini client embedded in it to render your site
-4. Output everything to an `out` directory that can be deployed anywhere
-
-This approach provides the benefits of a static site generator (hosting on any web server, improved security, faster load times) while retaining the dynamic features of Cynthia Mini through client-side rendering.
-
-To use static mode:
-
-```
-cynthiaweb-mini static
+```sh
+cynthiaweb-mini dynamic
 ```
 
-After generation, you can serve the output directory with any static file server.
+For more info on modes and commands see the [Cynthia Mini Documentation](https://cynthiawebsiteengine.github.io/Mini-docs/#/) and `cynthiaweb-mini help`.
 
-### Example config directory structure
+## Overview
+
+Cynthia Mini is the simplified version of CynthiaWeb that focuses on serving static content while letting the client handle the presentation. It features:
+
+- Simple configuration using Markdown and JSON (you can use )
+- Pre-made themes with customization options
+- Static site generation for easy deployment
+- Client-side rendering for dynamic features
+
+For detailed information about configuration, theming, and deployment, check out our [documentation](https://cynthiawebsiteengine.github.io/Mini-docs/#/).
+
+## Example Structure
 
 ```directory
 ./content/
@@ -101,4 +75,10 @@ After generation, you can serve the output directory with any static file server
 ./cynthia-mini.toml
 ```
 
-Something like this.
+## Contributing
+
+Contributions are welcome! Whether it's adding new themes, improving documentation, or fixing bugs, please feel free to contribute.
+
+## Licence
+
+[AGPLv3 Licence](LICENSE)
