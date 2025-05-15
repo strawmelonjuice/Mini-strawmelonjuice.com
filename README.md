@@ -47,7 +47,7 @@ For more info on modes and commands see the [Cynthia Mini Documentation](https:/
 
 Cynthia Mini is the simplified version of CynthiaWeb that focuses on serving static content while letting the client handle the presentation. It features:
 
-- Simple configuration using Markdown and JSON (you can use )
+- Simple configuration using Markdown and JSON (you can use HTML or plain text instead of markdown)
 - Pre-made themes with customization options
 - Static site generation for easy deployment
 - Client-side rendering for dynamic features
