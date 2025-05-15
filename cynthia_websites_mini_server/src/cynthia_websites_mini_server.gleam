@@ -39,44 +39,84 @@ pub fn main() {
     <> "!",
   )
   case process.argv() |> array.to_list() |> list.drop(2) {
-    ["dynamic", ..] ->
-      dynamic_site_server(mutable_model_type.new()) |> promise.resolve
+    ["dynamic", ..] | ["host", ..] ->
+      dynamic_site_server(mutable_model_type.new(), 60_000) |> promise.resolve
+    ["preview", ..] ->
+      dynamic_site_server(mutable_model_type.new(), 20) |> promise.resolve
     ["pregenerate", ..] | ["static"] -> static_site_server()
-    ["help", ..] | ["--help", ..] | ["-h", ..] -> {
+    ["init", ..] | ["initialise", ..] -> {
+      config.initcfg()
+      |> promise.resolve
+    }
+    ["help", ..] | ["--help", ..] | ["-h", ..] | [] -> {
+      case process.argv() |> array.to_list() |> list.drop(2) {
+        [] -> console.error("No subcommand given.\n")
+        _ -> Nil
+      }
       console.log(
-        "\nCynthia Mini - A lightweight server for building websites\n\n"
+        "\nCynthia Website Engine Mini - Creating websites from simple files\n\n"
         <> "Usage:\n"
-        <> "  cynthia-mini [command]\n\n"
+        <> premixed.text_bright_cyan("\tcynthiaweb-mini")
+        <> " "
+        <> premixed.text_bright_orange("[command]")
+        <> " \n"
         <> "Commands:\n"
-        <> "  dynamic      Start a dynamic website server\n"
-        <> "  static       Generate a static website\n"
-        <> "  pregenerate  Alias for static\n"
-        <> "  help        Show this help message\n\n"
-        <> "For more information, visit: https://github.com/CynthiaWebsiteEngine/Mini",
+        // Init:
+        <> string.concat([
+          premixed.text_pink("\tinit"),
+          " | ",
+          premixed.text_pink("initialise\n"),
+        ])
+        <> "\t\t\t\tInitialise the config file then exit\n\n"
+        // Dynamic:
+        <> string.concat([
+          premixed.text_pink("\tdynamic"),
+          " | ",
+          premixed.text_pink("host\n"),
+        ])
+        <> "\t\t\t\tStart a dynamic website server\n\n"
+        // Pregenerate:
+        <> string.concat([
+          premixed.text_pink("\tstatic"),
+          " | ",
+          premixed.text_pink("pregenerate\n"),
+        ])
+        <> "\t\t\t\tGenerate a static website\n\n"
+        // Preview:
+        <> premixed.text_pink("\tpreview\n")
+        <> "\t\t\t\tStart a dynamic website server for previewing\n"
+        <> "\t\t\t\tthis is the same as dynamic, but with a shorter\n"
+        <> "\t\t\t\tinterval for the cache\n\n"
+        // Help:
+        <> premixed.text_lilac("\thelp")
+        <> "\n"
+        <> "\t\t\t\tShow this help message\n\n"
+        <> "For more information, visit: "
+        <> premixed.text_blue(
+          "https://cynthiawebsiteengine.github.io/Mini-docs",
+        )
+        <> ".\n",
       )
       |> promise.resolve
     }
     [a, ..] | [a] ->
       console.error(
-        "Unknown subcommand: ´"
+        premixed.text_error_red("Unknown subcommand: ")
+        <> "´"
         <> premixed.text_bright_orange(a)
-        <> "´. Please try with "
-        <> premixed.text_green("´dynamic´")
-        <> " or "
-        <> premixed.text_green("´static´")
-        <> " instead.",
-      )
-      |> promise.resolve
-
-    [] ->
-      console.error(
-        "No subcommand given. Please try with ´dynamic´ or ´static´ instead.",
+        <> "´. Please try with ´"
+        <> premixed.text_green("dynamic")
+        <> "´ or ´"
+        <> premixed.text_green("static")
+        <> "´ instead. Or use ´"
+        <> premixed.text_purple("help")
+        <> "´ to see a list of all subcommands.\n",
       )
       |> promise.resolve
   }
 }
 
-fn dynamic_site_server(mutmodel: mutable_model_type.MutableModel) {
+fn dynamic_site_server(mutmodel: mutable_model_type.MutableModel, lease: Int) {
   console.info("Cynthia Mini is in dynamic site mode!")
   let model = mutmodel |> mutable_reference.get
   let conf = model.config
@@ -145,7 +185,7 @@ fn dynamic_site_server(mutmodel: mutable_model_type.MutableModel) {
           <> "/",
         ),
       )
-      global.set_interval(60_000, fn() {
+      global.set_interval(lease, fn() {
         mutable_reference.update(mutmodel, fn(model) {
           case model.cached_response {
             None -> model
