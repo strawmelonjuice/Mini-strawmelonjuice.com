@@ -351,7 +351,22 @@ fn dialog_initcfg() {
       process.exit(1)
       panic as "We should not reach here"
     }
-    True -> Nil
+    True -> initcfg()
+  }
+}
+
+pub fn initcfg() {
+  console.log("Creating Cynthia Mini configuration...")
+  // Check if cynthia-mini.toml exists
+  case files.file_exist(process.cwd() <> "/cynthia-mini.toml") {
+    True -> {
+      console.error(
+        "Error: A config already exists in this directory. Please remove it and try again.",
+      )
+      process.exit(1)
+      panic as "We should not reach here"
+    }
+    False -> Nil
   }
   let assert Ok(_) =
     simplifile.create_directory_all(process.cwd() <> "/content")
@@ -364,7 +379,9 @@ fn dialog_initcfg() {
   theme = \"autumn\"
   # Theme to use for dark mode - default themes: night, default-dark
   theme_dark = \"night\"
-  # Primary color for accents and highlights
+  # For some browsers, this will change the colour of UI elements such as the address bar
+  # and the status bar on mobile devices.
+  # This is a hex colour, e.g. #FFFFFF
   colour = \"#FFFFFF\"
   # Your website's name, displayed in various places
   site_name = \"My Site\"
