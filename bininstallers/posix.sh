@@ -60,6 +60,12 @@ if ! command -v grep &> /dev/null; then
 fi
 
 release=$(curl -s "https://api.github.com/repos/CynthiaWebsiteEngine/Mini/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+
+if [[ -z "$release" ]]; then
+    echo -e "${RED}Failed to fetch release information from GitHub${NC}"
+    exit 1
+fi
+
 url="https://github.com/CynthiaWebsiteEngine/Mini/releases/download/v${release}/cynthiaweb-mini-${vis_os}-${det_arch}"
 bin_dir="$HOME/.local/bin/mini"
 temp_file=$(mktemp -d)/cynthiaweb-mini

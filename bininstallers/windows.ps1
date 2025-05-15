@@ -24,6 +24,10 @@ Write-Host "$det_os ($det_arch)"
 # Get latest release
 try {
     $release = (Invoke-RestMethod "https://api.github.com/repos/CynthiaWebsiteEngine/Mini/releases/latest").tag_name.TrimStart('v')
+    if ([string]::IsNullOrWhiteSpace($release)) {
+        Write-Host "Failed to fetch release information from GitHub" -ForegroundColor Red
+        exit 1
+    }
 } catch {
     Write-Host "Failed to fetch latest release information" -ForegroundColor Red
     exit 1
