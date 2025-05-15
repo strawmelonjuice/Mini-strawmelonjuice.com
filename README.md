@@ -15,8 +15,6 @@ For complete documentation, please visit the [Cynthia Mini Documentation](https:
 
 ## Quick setup (READ THE DOCS!)
 
-
-
 ```bash
 # Install from NPM
 bun install -g @cynthiaweb/mini
