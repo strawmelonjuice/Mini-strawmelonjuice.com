@@ -1,0 +1,30 @@
+name: autofix.ci
+on:
+  pull_request:
+  push:
+permissions: {}
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: |
+          bun x prettier . --write 
+          git restore --source=HEAD --staged --worktree -- ./.github
+      - uses: autofix-ci/action@v1
+        with:
+          commit-message: "Apply Prettier format"
+  buildscript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: gleam-lang/setup-gleam@v1.0.2
+        with:
+          gleam-version: "1.9.1"
+      - run: |
+          bun build.ts fmt
+      - uses: autofix-ci/action@v1
+        with:
+          commit-message: "Apply build script's format"

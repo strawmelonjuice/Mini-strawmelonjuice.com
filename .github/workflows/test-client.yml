@@ -2,10 +2,8 @@ name: Client tests
 
 on:
   push:
-    branches:
-      - master
-      - main
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
