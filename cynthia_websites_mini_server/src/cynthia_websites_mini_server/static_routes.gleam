@@ -30,6 +30,7 @@ pub fn index_html(gc: configtype.SharedCynthiaConfigGlobalOnly) {
 <title>&lt;&lt;site hosted by Cynthia mini&gt;&gt;</title>
 <meta property='og:site_name' content='" <> gc.global_site_name <> "'/>
 <meta property='og:description' content='" <> gc.global_site_description <> "'/>
+<meta name='theme-color' content='" <> gc.global_colour <> "' />
 <link rel='shortcut icon' href='./assets/site_icon.png' type='image/x-icon'/>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'>
