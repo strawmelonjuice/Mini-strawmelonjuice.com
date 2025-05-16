@@ -4,7 +4,7 @@ We warmly welcome contributions to the CynthiaWebsiteEngine Mini project. This d
 
 ## Code of Conduct
 
-This project adheres to our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+This project adheres to our [Code of Conduct](https://github.com/CynthiaWebsiteEngine/Mini/blob/main/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
 ## Getting Started
 
