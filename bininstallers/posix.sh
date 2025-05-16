@@ -23,15 +23,17 @@ if [[ -f /proc/version ]]; then
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   det_os="macos"
 elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-  det_os="windows"
+  det_os="windows-cygwin"
 else
   echo -e "${RED}Unsupported operating system${NC}"
   exit 1
 fi
 # Set visualization OS variable
 vis_os="${det_os}"
-if [[ "$det_os" == "windows-wsl" ]]; then
+use_os="${det_os}"
+if [[ "$det_os" == "windows-wsl" || "$det_os" == "windows-cygwin" ]]; then
   vis_os="windows"
+  use_os="linux"
 fi
 
 # OS architecture
@@ -49,6 +51,9 @@ echo -e "${BLUE}Detected OS:${NC} $vis_os ($det_arch)"
 
 if [[ "$det_os" == "windows-wsl" ]]; then
   echo -e "${YELLOW}Running in WSL. Be aware that there is also a Windows installer available!${NC}"
+fi
+if [[ "$det_os" == "windows-cygwin" ]]; then
+  echo -e "${YELLOW}Running in Cygwin. This is untested! Using linux version now, but please use the windows or WSL-linux version if you run into trouble.${NC}"
 fi
 
 # Check if the user has curl installed
@@ -74,7 +79,7 @@ if [[ -z "$release" ]]; then
   exit 1
 fi
 
-url="https://github.com/CynthiaWebsiteEngine/Mini/releases/download/v${release#v}/cynthiaweb-mini-${vis_os}-${det_arch}"
+url="https://github.com/CynthiaWebsiteEngine/Mini/releases/download/v${release#v}/cynthiaweb-mini-${use_os}-${det_arch}"
 
 if [[ -n "$CYNTHIAWEB_MINI_INSTALL_DIR" ]]; then
   bin_dir="$CYNTHIAWEB_MINI_INSTALL_DIR"
