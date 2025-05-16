@@ -2,14 +2,6 @@
 
 We warmly welcome contributions to the CynthiaWebsiteEngine Mini project. This document provides guidelines and information for contributors.
 
-## Table of Contents
-
-1. [Code of Conduct](#code-of-conduct)
-2. [Getting Started](#getting-started)
-3. [How to Contribute](#how-to-contribute)
-4. [Development Process](#development-process)
-5. [Submission Guidelines](#submission-guidelines)
-
 ## Code of Conduct
 
 This project adheres to our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
@@ -82,7 +74,7 @@ Please refer to our [Theme Contribution Guide](https://cynthiawebsiteengine.gith
 
 ### Testing
 
-- Write tests for new features
+- Write tests for new features where possible
 - Update tests for modified code
 - Ensure all tests pass before submitting
 - Aim for comprehensive test coverage
