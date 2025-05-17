@@ -447,11 +447,11 @@ This page will only show up if you have a layout with two or more menus availabl
       ),
       ext_item(
         to: "themes.md",
-        from: "https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini/refs/heads/main/docs/themes.md",
+        from: "https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini-docs/refs/heads/main/content/3.%20customisation/3.2-themes.md",
         with: contenttypes.Content(
           filename: "themes.md",
           title: "Themes",
-          description: "External page example, using the theme list.",
+          description: "External page example, using the theme list, downloading from <https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini-docs/refs/heads/main/content/3.%20customisation/3.2-themes.md>",
           layout: "theme",
           permalink: "/themes",
           data: contenttypes.PageData(in_menus: [1]),
