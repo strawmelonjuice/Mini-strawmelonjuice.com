@@ -104,7 +104,7 @@ jobs:
             Note: All releases, including pre-releases, are tagged `latest` on the npm registry. Use a specific version tag if you want to install.
 
             Or you can download the binaries directly from the release assets.
-            The binary install script is not available for pre-release versions.
+            The binary install script will with default behaviour not install pre-release versions.
 
             See <https://cynthiawebsiteengine.github.io/Mini-docs/#/install> for more information.
 
