@@ -23,7 +23,7 @@ export function custom_render(
             !current_token.attrs[0][1].startsWith(phone_home_url() + "#")
           ) {
             const original_href: string = current_token.attrs[0][1];
-            const new_href: string = "/#" + original_href;
+            const new_href: string = phone_home_url() + "#" + original_href;
             current_token.attrs[0][1] = new_href;
             // console.log(original_href + " -> " + current_token.attrs[0][1]);
           }
