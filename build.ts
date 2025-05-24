@@ -559,7 +559,7 @@ switch (process.argv[2].toLowerCase()) {
           });
         }
       } else {
-        console.info("Starting Cynthia Mini as server.");
+        console.info("Starting Cynthia Mini as server (preview mode).");
         Bun.spawnSync({
           cmd: [
             "bun",
@@ -567,7 +567,7 @@ switch (process.argv[2].toLowerCase()) {
               __dirname,
               "./cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts",
             ),
-            "dynamic",
+            "preview",
           ],
           stdout: "inherit",
           stderr: "inherit",
