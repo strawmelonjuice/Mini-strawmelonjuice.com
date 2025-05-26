@@ -6,7 +6,9 @@ import cynthia_websites_mini_server/mutable_model_type
 import cynthia_websites_mini_server/static_routes
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/web
+import cynthia_websites_mini_shared
 import cynthia_websites_mini_shared/configtype
+import gleam/bool
 import gleam/int
 import gleam/javascript/array
 import gleam/javascript/promise
@@ -32,12 +34,26 @@ pub fn main() {
       process.exit(1)
     }
   }
+  case
+    bool.or(
+      { process.argv() |> array.to_list() |> list.contains("--version") },
+      { process.argv() |> array.to_list() |> list.contains("-v") },
+    )
+  {
+    True -> {
+      console.log(cynthia_websites_mini_shared.version())
+      process.exit(0)
+    }
+    False -> Nil
+  }
+
   console.log(
     premixed.text_green("Hello from Cynthia Mini! ")
     <> "Running in "
     <> premixed.text_bright_orange(process.cwd())
     <> "!",
   )
+
   case process.argv() |> array.to_list() |> list.drop(2) {
     ["dynamic", ..] | ["host", ..] ->
       dynamic_site_server(mutable_model_type.new(), 60_000) |> promise.resolve
