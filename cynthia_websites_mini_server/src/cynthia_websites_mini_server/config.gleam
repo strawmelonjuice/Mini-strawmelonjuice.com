@@ -2,7 +2,10 @@ import bungibindies/bun
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
+import cynthia_websites_mini_shared/configurable_variables
 import cynthia_websites_mini_shared/contenttypes
+import gleam/bit_array
+import gleam/bool
 import gleam/dict
 import gleam/dynamic/decode
 import gleam/fetch
@@ -25,10 +28,8 @@ import tom
 /// # Config.load()
 /// Loads the configuration from the `cynthia-mini.toml` file and the content from the `content` directory.
 /// Then saves the configuration to the database.
-/// If an override environment variable or call param is provided, it will use that database file instead, and load from
-/// there. It will not need any files to exist in the filesystem (except for the SQLite file) in that case.
 pub fn load() -> Promise(configtype.CompleteData) {
-  let global_config = capture_config()
+  use global_config <- promise.await(capture_config())
   use content_list <- promise.await(content_getter())
   let content = case content_list {
     Ok(lis) -> lis
@@ -55,7 +56,8 @@ pub fn capture_config() {
       Nil
     }
   }
-  let global_config = case parse_configtoml() {
+  use parse_configtoml_result <- promise.await(parse_configtoml())
+  let global_config = case parse_configtoml_result {
     Ok(config) -> config
     Error(why) -> {
       premixed.text_error_red(
@@ -67,10 +69,11 @@ pub fn capture_config() {
     }
   }
   global_config
+  |> promise.resolve()
 }
 
 fn parse_configtoml() {
-  use str <- result.try(
+  use str <- promise.try_await(
     fs.read_file_sync(files.path_normalize(
       process.cwd() <> "/cynthia-mini.toml",
     ))
@@ -78,15 +81,18 @@ fn parse_configtoml() {
       premixed.text_error_red("Error: Could not read cynthia-mini.toml: " <> e)
       process.exit(1)
     })
-    |> result.map_error(string.inspect),
+    |> result.map_error(string.inspect)
+    |> promise.resolve(),
   )
-  use res <- result.try(tom.parse(str) |> result.map_error(string.inspect))
+  use res <- promise.try_await(
+    tom.parse(str) |> result.map_error(string.inspect) |> promise.resolve(),
+  )
 
-  use config <- result.try(
+  use config <- promise.try_await(
     cynthia_config_global_only_exploiter(res)
-    |> result.map_error(string.inspect),
+    |> promise.map(result.map_error(_, string.inspect)),
   )
-  Ok(config)
+  promise.resolve(Ok(config))
 }
 
 type ConfigTomlDecodeError {
@@ -95,53 +101,76 @@ type ConfigTomlDecodeError {
   FieldError(String)
 }
 
-fn cynthia_config_global_only_exploiter(o: dict.Dict(String, tom.Toml)) {
-  use global_theme <- result.try({
-    use field <- result.try(
-      tom.get(o, ["global", "theme"])
-      |> result.replace_error(FieldError("config->global.theme does not exist")),
-    )
-    tom.as_string(field)
-    |> result.map_error(TomlGetStringError)
-  })
-  use global_theme_dark <- result.try({
-    use field <- result.try(
-      tom.get(o, ["global", "theme_dark"])
-      |> result.replace_error(FieldError(
-        "config->global.theme_dark does not exist",
-      )),
-    )
-    tom.as_string(field)
-    |> result.map_error(TomlGetStringError)
-  })
-  use global_colour <- result.try({
-    use field <- result.try(
-      tom.get(o, ["global", "colour"])
-      |> result.replace_error(FieldError("config->global.colour does not exist")),
-    )
-    tom.as_string(field)
-    |> result.map_error(TomlGetStringError)
-  })
-  use global_site_name <- result.try({
-    use field <- result.try(
-      tom.get(o, ["global", "site_name"])
-      |> result.replace_error(FieldError(
-        "config->global.site_name does not exist",
-      )),
-    )
-    tom.as_string(field)
-    |> result.map_error(TomlGetStringError)
-  })
-  use global_site_description <- result.try({
-    use field <- result.try(
-      tom.get(o, ["global", "site_description"])
-      |> result.replace_error(FieldError(
-        "config->global.site_description does not exist",
-      )),
-    )
-    tom.as_string(field)
-    |> result.map_error(TomlGetStringError)
-  })
+fn cynthia_config_global_only_exploiter(
+  o: dict.Dict(String, tom.Toml),
+) -> Promise(
+  Result(configtype.SharedCynthiaConfigGlobalOnly, ConfigTomlDecodeError),
+) {
+  use global_theme <- promise.try_await(
+    {
+      use field <- result.try(
+        tom.get(o, ["global", "theme"])
+        |> result.replace_error(FieldError(
+          "config->global.theme does not exist",
+        )),
+      )
+      tom.as_string(field)
+      |> result.map_error(TomlGetStringError)
+    }
+    |> promise.resolve(),
+  )
+  use global_theme_dark <- promise.try_await(
+    {
+      use field <- result.try(
+        tom.get(o, ["global", "theme_dark"])
+        |> result.replace_error(FieldError(
+          "config->global.theme_dark does not exist",
+        )),
+      )
+      tom.as_string(field)
+      |> result.map_error(TomlGetStringError)
+    }
+    |> promise.resolve(),
+  )
+  use global_colour <- promise.try_await(
+    {
+      use field <- result.try(
+        tom.get(o, ["global", "colour"])
+        |> result.replace_error(FieldError(
+          "config->global.colour does not exist",
+        )),
+      )
+      tom.as_string(field)
+      |> result.map_error(TomlGetStringError)
+    }
+    |> promise.resolve(),
+  )
+  use global_site_name <- promise.try_await(
+    {
+      use field <- result.try(
+        tom.get(o, ["global", "site_name"])
+        |> result.replace_error(FieldError(
+          "config->global.site_name does not exist",
+        )),
+      )
+      tom.as_string(field)
+      |> result.map_error(TomlGetStringError)
+    }
+    |> promise.resolve(),
+  )
+  use global_site_description <- promise.try_await(
+    {
+      use field <- result.try(
+        tom.get(o, ["global", "site_description"])
+        |> result.replace_error(FieldError(
+          "config->global.site_description does not exist",
+        )),
+      )
+      tom.as_string(field)
+      |> result.map_error(TomlGetStringError)
+    }
+    |> promise.resolve(),
+  )
   let server_port =
     option.from_result({
       use field <- result.try(
@@ -176,6 +205,239 @@ fn cynthia_config_global_only_exploiter(o: dict.Dict(String, tom.Toml)) {
     }
     _ -> True
   }
+  let other_vars = case result.map(tom.get(o, ["variables"]), tom.as_table) {
+    Ok(Ok(d)) ->
+      {
+        dict.map_values(d, fn(key, unasserted_value) {
+          let somewhat_asserted_value = case unasserted_value {
+            tom.InlineTable(inline) -> {
+              case inline |> dict.to_list() {
+                [#("url", tom.String(url))] -> {
+                  let start = bun.nanoseconds()
+                  console.log(
+                    "Downloading external data ´"
+                    <> premixed.text_blue(url)
+                    <> "´...",
+                  )
+
+                  let assert Ok(req) = request.to(url)
+                  use resp <- promise.await(
+                    promise.map(fetch.send(req), fn(e) {
+                      case e {
+                        Ok(v) -> v
+                        Error(_) -> {
+                          console.error(
+                            "There was an error while trying to download '"
+                            <> url |> premixed.text_bright_yellow()
+                            <> "' to a variable.",
+                          )
+                          process.exit(1)
+                          panic as "We should not reach here."
+                        }
+                      }
+                    }),
+                  )
+                  use resp <- promise.await(
+                    promise.map(fetch.read_bytes_body(resp), fn(e) {
+                      case e {
+                        Ok(v) -> v
+                        Error(_) -> {
+                          console.error(
+                            "There was an error while trying to download '"
+                            <> url |> premixed.text_bright_yellow()
+                            <> "' to a variable.",
+                          )
+                          process.exit(1)
+                          panic as "We should not reach here."
+                        }
+                      }
+                    }),
+                  )
+                  let end = bun.nanoseconds()
+                  let duration_ms = { end -. start } /. 1_000_000.0
+                  case resp.status {
+                    200 -> {
+                      console.log(
+                        "Downloaded external content ´"
+                        <> premixed.text_blue(url)
+                        <> "´ in "
+                        <> int.to_string(duration_ms |> float.truncate)
+                        <> "ms!",
+                      )
+                      [
+                        bit_array.base64_encode(resp.body, True),
+                        configurable_variables.var_bitstring,
+                      ]
+                    }
+                    _ -> {
+                      console.error(
+                        "There was an error while trying to download '"
+                        <> url |> premixed.text_bright_yellow()
+                        <> "' to a variable.",
+                      )
+                      process.exit(1)
+                      panic as "We should not reach here."
+                    }
+                  }
+                  |> promise.resolve()
+                }
+                [#("path", tom.String(path))] -> {
+                  // let file = bun.file(path)
+                  // use content <- promise.await(bunfile.text())
+                  // `bunfile.text()` pretends it's infallible but is not. It should return a promised result. 
+                  // 
+                  // Also see: https://github.com/strawmelonjuice/bungibindies/issues/2
+                  // Also missing: bunfile.bits(), but that is also because the bitarray and byte array transform is scary to me.
+                  //
+                  // For now, this means we continue using the sync simplifile.read_bits() function, 
+                  case simplifile.read_bits(path) {
+                    Ok(bits) -> [
+                      bit_array.base64_encode(bits, True),
+                      configurable_variables.var_bitstring,
+                    ]
+                    Error(_) -> {
+                      console.error(
+                        "Unable to read file '"
+                        <> path |> premixed.text_bright_yellow()
+                        <> "' to variable.",
+                      )
+                      process.exit(1)
+                      panic as "Should not reach here."
+                    }
+                  }
+                  |> promise.resolve()
+                }
+                _ ->
+                  [configurable_variables.var_unsupported]
+                  |> promise.resolve()
+              }
+            }
+            _ -> {
+              case unasserted_value {
+                tom.Bool(z) -> [
+                  bool.to_string(z),
+                  configurable_variables.var_boolean,
+                ]
+                tom.Date(date) -> [
+                  date.year |> int.to_string,
+                  date.month |> int.to_string,
+                  date.day |> int.to_string,
+                  configurable_variables.var_date,
+                ]
+                tom.DateTime(tom.DateTimeValue(date, time, offset)) -> {
+                  case offset {
+                    tom.Local -> [
+                      int.to_string(date.year),
+                      int.to_string(date.month),
+                      int.to_string(date.day),
+                      int.to_string(time.hour),
+                      int.to_string(time.minute),
+                      int.to_string(time.second),
+                      int.to_string(time.millisecond),
+                      configurable_variables.var_datetime,
+                    ]
+                    _ -> [configurable_variables.var_unsupported]
+                  }
+                }
+                tom.Float(a) -> [
+                  float.to_string(a),
+                  configurable_variables.var_float,
+                ]
+                tom.Int(b) -> [int.to_string(b), configurable_variables.var_int]
+                tom.String(guitar) -> [
+                  guitar,
+                  configurable_variables.var_string,
+                ]
+                tom.Time(time) -> [
+                  int.to_string(time.hour),
+                  int.to_string(time.minute),
+                  int.to_string(time.second),
+                  int.to_string(time.millisecond),
+                  configurable_variables.var_time,
+                ]
+                _ -> [configurable_variables.var_unsupported]
+              }
+              |> promise.resolve()
+            }
+          }
+          use conclusion <- promise.await(
+            somewhat_asserted_value
+            |> promise.map(fn(somewhat_asserted_value) {
+              let assert Ok(conclusion) = somewhat_asserted_value |> list.last()
+                as "This must be a value, since we just actively set it above."
+              conclusion
+            }),
+          )
+          use somewhat_asserted_value <- promise.await(somewhat_asserted_value)
+          let z: Result(List(String), ConfigTomlDecodeError) = case
+            conclusion == configurable_variables.var_unsupported
+          {
+            True ->
+              Error(FieldError(
+                "variables->" <> key <> " does not contain a supported value.",
+              ))
+            False -> {
+              {
+                {
+                  configurable_variables.typecontrolled
+                  |> list.key_find(key)
+                  |> result.unwrap(conclusion)
+                }
+                == conclusion
+              }
+              |> bool.guard(Ok(somewhat_asserted_value), fn() {
+                Error(FieldError(
+                  "variables->"
+                  <> key
+                  <> " does not contain the expected value. --> Expected: "
+                  <> configurable_variables.typecontrolled
+                  |> list.key_find(key)
+                  |> result.unwrap(conclusion)
+                  <> ", got: "
+                  <> conclusion,
+                ))
+              })
+            }
+          }
+          promise.resolve(z)
+        })
+      }
+      |> dict.to_list()
+      |> list.map(fn(x) {
+        let #(key, promise_of_a_value) = x
+        use value <- promise.await(promise_of_a_value)
+        promise.resolve(#(key, value))
+      })
+      |> promise.await_list()
+    _ -> promise.resolve([])
+  }
+  use other_vars <- promise.await(other_vars)
+  // A kind of manual result.all()
+  let other_vars = case
+    list.find_map(other_vars, fn(le) {
+      let #(_key, result_of_value): #(
+        String,
+        Result(List(String), ConfigTomlDecodeError),
+      ) = le
+      case result_of_value {
+        Error(err) -> Ok(err)
+        _ -> Error(Nil)
+      }
+    })
+  {
+    Ok(pq) -> Error(pq)
+    Error(Nil) -> {
+      other_vars
+      |> list.map(fn(it) {
+        let assert Ok(b) = it.1
+        #(it.0, b)
+      })
+      |> Ok
+    }
+  }
+
+  use other_vars <- promise.try_await(other_vars |> promise.resolve)
+
   Ok(configtype.SharedCynthiaConfigGlobalOnly(
     global_theme:,
     global_theme_dark:,
@@ -186,7 +448,9 @@ fn cynthia_config_global_only_exploiter(o: dict.Dict(String, tom.Toml)) {
     server_host:,
     git_integration:,
     comment_repo:,
+    other_vars:,
   ))
+  |> promise.resolve()
 }
 
 fn content_getter() -> promise.Promise(
@@ -247,7 +511,7 @@ fn get_inner_and_meta(
 
   use inner_plain <- promise.try_await({
     // This case also check if the permalink starts with "!", in which case it is a content list.
-    // Content lists will be generated on the client side, and their pre-given content 
+    // Content lists will be generated on the client side, and their pre-given content
     // will be discarded, so loading it in from anywhere would be a waste of resources.
     case string.starts_with(permalink, "!"), possibly_extern {
       True, _ -> promise.resolve(Ok(""))
@@ -408,6 +672,61 @@ pub fn initcfg() {
   # This will allow Cynthia Mini to detect the git repository
   # For example linking to the commit hash in the footer
   git = true
+ 
+  [variables]
+  # You can define your own variables here, which can be used in templates.
+
+  ## ownit_template
+  ## 
+  ## Use this to define your own template for the 'ownit' layout.
+  ##
+  ## The template will be used for the 'ownit' layout, which is used for pages and posts.
+  ## You can use the following variables in the template:
+  ##  - body: string (The main HTML content)
+  ##  - is_post: boolean (True if the current item is a post, false if it's a page)
+  ##  - title: string (The title of the page or post)
+  ##  - description: string (The description of the page or post)
+  ##  - site_name: string (The global site name)
+  ##  - category: string (The category of the post, empty for pages)
+  ##  - date_modified: string (The last modification date of the post, empty for pages)
+  ##  - date_published: string (The publication date of the post, empty for pages)
+  ##  - tags: string[] (An array of tags for the post, empty for pages)
+  ##  - menu_1_items: [string, string][] (Array of menu items for menu 1, e.g., [[\"Home\", \"/\"], [\"About\", \"/about\"]])
+  ##  - menu_2_items: [string, string][] (Array of menu items for menu 2)
+  ##  - menu_3_items: [string, string][] (Array of menu items for menu 3)
+  ownit_template = \"\"\"
+ <div class=\"p-4\">
+  <h1 class=\"text-3xl font-bold mb-4\">{{ title }}</h1>
+  <nav class=\"mb-4\">
+    <p class=\"font-semibold\">Menu:</p>
+    <ul class=\"menu bg-base-200 w-56 rounded-box\">
+      {{#each menu_1_items}}
+        <li><a href=\"{{this.[1]}}\">{{this.[0]}}</a></li>
+      {{/each}}
+    </ul>
+  </nav>
+  {{#if is_post}}
+  <p class=\"text-sm text-gray-600 mb-2\">
+    Published: {{ date_published }}
+    {{#if category }} | Category: <span class=\"badge badge-outline\">{{ category }}</span>{{/if}}
+  </p>
+  {{/if}}
+  <div class=\"divider\"></div>
+    <div class=\"prose max-w-none my-4\">
+      {{{ body }}}
+    </div>
+    {{#if is_post}}
+      {{#if tags}}
+      <div class=\"divider\"></div>
+      <p class=\"text-sm text-gray-600 mt-2\">Tags:
+        {{#each tags}}
+          <span class=\"badge badge-secondary badge-outline mr-1\">{{this}}</span>
+        {{/each}}
+      </p>
+      {{/if}}
+    {{/if}}
+    </div>  
+  \"\"\"
 
   [posts]
   # Enable comments on posts using utteranc.es
@@ -462,7 +781,7 @@ This page will only show up if you have a layout with two or more menus availabl
       ),
       ext_item(
         to: "themes.md",
-        from: "https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini-docs/refs/heads/main/content/3.%20customisation/3.2-themes.md",
+        from: "https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini-docs/refs/heads/main/content/3.%20Customisation/3.2-themes.md",
         with: contenttypes.Content(
           filename: "themes.md",
           title: "Themes",
