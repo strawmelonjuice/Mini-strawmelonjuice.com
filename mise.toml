@@ -1,3 +1,15 @@
 [tools]
 bun = "latest"
 gleam = "latest"
+[tasks.generate-prelude]
+description = "Generate Gleam prelude for TypeScript FFI"
+run = "gleam export typescript-prelude > prelude.ts"
+
+[tasks.install-bun-deps]
+description = "Install Bun dependencies"
+run = "bun install"
+
+[tasks.build-client]
+description = "Build the client-side code and bundle it with Bun"
+run = ["gleam "]
+dir ="{{ config_root }}/cynthia_websites_mini_client"
