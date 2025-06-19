@@ -114,11 +114,9 @@ pub fn main(
     }
   }
 
-  let menu_1_items = {
-    dict.get(model.computed_menus, 1)
-    |> result.unwrap([])
-    |> list.map(fn(item) {
-      let to = case item.to {
+let menu_map = fn(item: model_type.MenuItem) { 
+      
+     let to = case item.to {
         "/" <> _ -> {
           // If the link starts with a slash, we assume it's a local link.
           "#" <> item.to
@@ -129,50 +127,28 @@ pub fn main(
         }
         _ -> {
           // Otherwise, we keep the link as is.
-          item.to
+           item.to
         }
       }
+      
+      [item.name, to] |> array.from_list }
 
-      [item.name, to] |> array.from_list
-    })
+  let menu_1_items = {
+    dict.get(model.computed_menus, 1)
+    |> result.unwrap([])
+    |> list.map(menu_map)
     |> array.from_list
   }
   let menu_2_items = {
     dict.get(model.computed_menus, 2)
     |> result.unwrap([])
-    |> list.map(fn(item) {
-      let to = case item.to {
-        "/" <> _ -> {
-          // If the link starts with a slash, we assume it's a local link.
-          "#" <> item.to
-        }
-        _ -> {
-          // Otherwise, we keep the link as is.
-          item.to
-        }
-      }
-
-      [item.name, to] |> array.from_list
-    })
+    |> list.map(menu_map)
     |> array.from_list
   }
   let menu_3_items = {
     dict.get(model.computed_menus, 3)
     |> result.unwrap([])
-    |> list.map(fn(item) {
-      let to = case item.to {
-        "/" <> _ -> {
-          // If the link starts with a slash, we assume it's a local link.
-          "#" <> item.to
-        }
-        _ -> {
-          // Otherwise, we keep the link as is.
-          item.to
-        }
-      }
-
-      [item.name, to] |> array.from_list
-    })
+    |> list.map(menu_map)
     |> array.from_list
   }
 
