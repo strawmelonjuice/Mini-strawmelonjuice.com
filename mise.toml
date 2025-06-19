@@ -1,15 +1,50 @@
 [tools]
 bun = "latest"
 gleam = "latest"
+# ###########################################################################
+# Preparation tasks:
+# ###########################################################################
+
 [tasks.generate-prelude]
 description = "Generate Gleam prelude for TypeScript FFI"
-run = "gleam export typescript-prelude > prelude.ts"
+run = [
+  "gleam export typescript-prelude > ./cynthia_websites_mini_client/prelude.ts",
+  "gleam export typescript-prelude > ./cynthia_websites_mini_server/prelude.ts",
+]
+
+[tasks.bun-install]
+run = "bun install"
+
+# ###########################################################################
+# Build tasks:
+# ###########################################################################
 
 [tasks.install-bun-deps]
 description = "Install Bun dependencies"
 run = "bun install"
 
 [tasks.build-client]
+run = [
+  "gleam build",
+  """
+  cat <<EOF   > ./build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts
+  import { main } from "./cynthia_websites_mini_client.mjs";document.addEventListener("DOMContentLoaded", main());
+EOF
+  """,
+  """
+  bun build "./build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts" --outdir "./build/bundled/" --minify-whitespace --minify-syntax
+  """,
+]
 description = "Build the client-side code and bundle it with Bun"
-run = ["gleam "]
-dir ="{{ config_root }}/cynthia_websites_mini_client"
+dir = "{{ config_root }}/cynthia_websites_mini_client"
+
+[tasks.generate-styles]
+# This might be the only thing build.ts should still do, beit with a different file name maybe.
+#
+# Since we really really rely on js type quirks, I think we do @expect-error a lot in that code as well.
+
+description = "Register themes into a Daisy+Tailwind config and compile them together to the end CSS."
+run = "..."
+
+[tasks.build-server]
+description = "Builds "
