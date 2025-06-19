@@ -1,6 +1,13 @@
 [tools]
 bun = "latest"
 gleam = "latest"
+
+# /================================== Tasks ================================\
+# |             These tasks are in comment-split sections                   |
+# |               so that they can later be split into                      |
+# |                    separate task-toml files.                            |
+# \=========================================================================/
+
 # ###########################################################################
 # Preparation tasks:
 # ###########################################################################
@@ -13,6 +20,7 @@ run = [
 ]
 
 [tasks.bun-install]
+description = "Installs Bun's dependencies"
 run = "bun install"
 
 # ###########################################################################
@@ -47,4 +55,4 @@ description = "Register themes into a Daisy+Tailwind config and compile them tog
 run = "..."
 
 [tasks.build-server]
-description = "Builds "
+description = "Build the server-side code and bundle it with Bun."
