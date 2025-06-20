@@ -2,6 +2,7 @@
 //MISE description="Bump or set the version of the project and trigger a new release."
 //MISE depends=["test-all"]
 //MISE dir = "{{ config_root }}"
+//MISE confirm = "Are you sure you want to bump the version and create a new release?"
 const config_root = process.env.MISE_CONFIG_ROOT || ".";
 import { version as currentVersion } from "../../package.json" assert { type: "json" };
 import semver from "semver";
