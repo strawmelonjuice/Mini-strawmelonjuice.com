@@ -1,6 +1,9 @@
 name = "cynthia_websites_mini_server"
 target = "javascript"
 gleam = ">= 1.9.0"
+version = "1.0.6"
+
+
 
 [javascript]
 runtime = "bun"

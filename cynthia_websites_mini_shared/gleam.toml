@@ -1,5 +1,8 @@
 name = "cynthia_websites_mini_shared"
 target = "javascript"
+version = "1.0.6"
+
+
 [javascript]
 runtime = "bun"
 typescript_declarations = true

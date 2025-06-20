@@ -3,18 +3,24 @@
 //MISE depends=["test-all"]
 //MISE dir = "{{ config_root }}"
 const config_root = process.env.MISE_CONFIG_ROOT || ".";
-import {version as currentVersion} from "../../package.json" assert { type: "json" };
+import { version as currentVersion } from "../../package.json" assert { type: "json" };
+import semver from "semver";
 
-// This script is used to bump or set the version of the project and trigger a new release.
+// Parse arguments and flags
+const args = process.argv.slice(2);
+const allowDirty = args.includes("--allow-dirty");
+const noCommit = args.includes("--no-commit");
+const noPush = args.includes("--no-push");
+
 // Firstly it should check for any uncommitted changes in the repository. If there are any, it should exit with an error.
 const difIndex = Bun.spawnSync(["git", "status", "-s"], {
-  cwd: config_root,
+    cwd: config_root,
 });
-if (difIndex.stdout.toString().trim() !== "") {
-  console.error("There are uncommitted changes in the repository. Please commit or stash them before running this script.");
-  console.log("Changed files:");
-  console.log(difIndex.stdout.toString().trim());
-  process.exit(1);
+if (difIndex.stdout.toString().trim() !== "" && !allowDirty) {
+    console.error("There are uncommitted changes in the repository. Please commit or stash them before running this script, or use --allow-dirty to override.");
+    console.log("Changed files:");
+    console.log(difIndex.stdout.toString().trim());
+    process.exit(1);
 }
 // Secondly it should check if the current branch is clean and up to date with the remote branch.
 const difBranch = Bun.spawnSync(["git", "rev-parse", "--abbrev-ref", "HEAD"], {
@@ -29,7 +35,6 @@ if (branch !== remote) {
     console.error(`The current branch (${branch}) is not up to date with the remote branch (${remote}). Please pull the latest changes before running this script.`);
     process.exit(1);
 }
-
 // Thirdly it should check if the current branch is the main branch. If it is not, it should exit with an error.
 const difMain = Bun.spawnSync(["git", "branch", "--show-current"], {
     cwd: config_root,
@@ -43,19 +48,17 @@ if (mainBranch !== "main") {
 // Now, we want to know if the user wants to bump the version or set it to a specific value. The optional parameter is either "bump" or "set", followed by the version number.
 // It can also be `x.x.x` instead of `set`, or `+x.x.x` instead of `bump`, as a shorthand for the same operation. 
 // (The x's are numbers in this case, e.g., `+0.2.0` bumps the minor version by 2, while `1.2.3` sets the version to 1.2.3., you could call these 'relative' or 'absolute'.)
-const args = process.argv.slice(2);
 if (args.length === 0) {
     console.error("Please provide a version to bump or set. Usage: new-release <bump|set> <version>");
     process.exit(1);
-    }
+}
 const versionType = args[0];
 const versionValue = args[1] || "0.0.0"; // Default to 0.0.0 if no version is provided
-if (versionType !== "bump" && versionType !== "set" && !versionType.startsWith("x.") && !versionType.startsWith("+")) {
-    console.error("Invalid version type. Please use 'bump', 'set', or a shorthand like 'x.x.x' or '+x.x.x'.");
+if (versionType !== "bump" && versionType !== "set" && !semver.valid(versionType) && !versionType.startsWith("+")) {
+    console.error("Invalid version type, \"" + versionType + "\" Please use 'bump', 'set', or a shorthand like 'x.x.x' or '+x.x.x'.");
     process.exit(1);
 }
 // Determine the new version based on the type
-import semver from "semver";
 let newVersion: string = currentVersion;
 if (versionType === "bump") {
     // Bump the current version using semver.inc
@@ -65,22 +68,18 @@ if (versionType === "bump") {
 else if (versionType === "set") {
     // Set the version to the provided value
     if (!semver.valid(versionValue)) {
-        console.error("Invalid version format. Please use semantic versioning (e.g., x.x.x). (semver validation)");
+        console.error("Invalid version format. Please use semantic versioning (e.g., x.x.x, x.x.x-rc, x.x.x-beta.1, etc.). (semver validation)");
         process.exit(1);
     }
-    if (semver.lte(versionValue, currentVersion)) {
-        console.error(`The new version (${versionValue}) must be higher than the current version (${currentVersion}). (semver check)`);
-        process.exit(1);
+    // Allow prereleases to be set even if they are not higher than the current version, but warn if it's a downgrade
+    if (!semver.gt(versionValue, currentVersion) && semver.clean(versionValue) !== semver.clean(currentVersion)) {
+        console.warn(`Warning: The new version (${versionValue}) is not higher than the current version (${currentVersion}). Setting anyway because it may be a prerelease or a different build.`);
     }
     console.log(`Setting version to ${versionValue}`);
     newVersion = versionValue;
 }
-else if (/^\d+\.\d+\.\d+$/.test(versionType)) {
+else if (semver.valid(versionType)) {
     // Absolute version shorthand
-    if (!semver.valid(versionType)) {
-        console.error("Invalid version format. Please use semantic versioning (e.g., x.x.x). (semver validation)");
-        process.exit(1);
-    }
     newVersion = versionType;
 } else if (versionType.startsWith("+")) {
     // Relative version bump shorthand
@@ -111,69 +110,75 @@ if (newVersion === currentVersion) {
 // If we reach this point, we can proceed with the version update.
 
 // Now we can update the package.json file with the new version
-import {writeFileSync} from "fs";
-import {join} from "path";
+import { writeFileSync } from "fs";
+import { join } from "path";
 const packageJsonPath = join(config_root, "package.json");
 const packageJson = JSON.parse(await Bun.file(packageJsonPath).text());
 packageJson.version = newVersion;
 writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n", "utf-8");
 
 // Also update all three gleam.toml files in the project
-import {readFileSync} from "fs";
-import {resolve} from "path";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 const gleamTomlPaths = [
     "cynthia_websites_mini_shared/gleam.toml",
     "cynthia_websites_mini_server/gleam.toml",
     "cynthia_websites_mini_client/gleam.toml"
 ];
-gleamTomlPaths.forEach((path) => {
-    const fullPath = resolve(config_root, path);
+gleamTomlPaths.forEach((TomlPath) => {
+    const fullPath = resolve(config_root, TomlPath);
     const gleamToml = readFileSync(fullPath, "utf-8");
     const updatedGleamToml = gleamToml.replace(/version = ".*"/, `version = "${newVersion}"`);
     try {
         writeFileSync(fullPath, updatedGleamToml, "utf-8");
-        console.log(`Updated ${path} to version ${newVersion}`);
+        console.log(`Updated ${TomlPath} to version ${newVersion}`);
     } catch (err) {
-        console.error(`Failed to update ${path}. Please check the file permissions and try again.`);
+        console.error(`Failed to update ${TomlPath}. Please check the file permissions and try again.`);
         process.exit(1);
     }
 });
 
 // Finally, we commit the changes and create a new tag for the release
-const commitMessage = `v${newVersion}`;
-const commitResult = Bun.spawnSync(["git", "commit", "-am", commitMessage], {
-    cwd: config_root,
-});
-if (commitResult.exitCode !== 0) {
-    console.error("Failed to commit changes. Please check the output above for details.");
-    if (commitResult.stderr) {
-        console.error(commitResult.stderr.toString());
+if (!noCommit) {
+    const commitMessage = `v${newVersion}`;
+    const commitResult = Bun.spawnSync(["git", "commit", "-am", commitMessage], {
+        cwd: config_root,
+    });
+    if (commitResult.exitCode !== 0) {
+        console.error("Failed to commit changes. Please check the output above for details.");
+        if (commitResult.stderr) {
+            console.error(commitResult.stderr.toString());
+        }
+        process.exit(1);
     }
-    process.exit(1);
-}
-const tagResult = Bun.spawnSync(["git", "tag", `v${newVersion}`], {
-    cwd: config_root,
-});
-if (tagResult.exitCode !== 0) {
-    console.error("Failed to create tag. Please check the output above for details.");
-    if (tagResult.stderr) {
-        console.error(tagResult.stderr.toString());
+    const tagResult = Bun.spawnSync(["git", "tag", `v${newVersion}`], {
+        cwd: config_root,
+    });
+    if (tagResult.exitCode !== 0) {
+        console.error("Failed to create tag. Please check the output above for details.");
+        if (tagResult.stderr) {
+            console.error(tagResult.stderr.toString());
+        }
+        process.exit(1);
     }
-    process.exit(1);
+} else {
+    console.log("Skipping commit and tag as --no-commit flag is set.");
 }
 
 // Push the changes and the new tag to the remote repository
-
-// Temporarily commented out to avoid pushing automatically while testing this script
-
-// const pushResult = Bun.spawnSync(["git", "push", "origin", mainBranch, "--tags"], {
-//     cwd: config_root,
-// });
-// if (pushResult.exitCode !== 0) {
-//     console.error("Failed to push changes to the remote repository. Please check the output above for details.");
-//     if (pushResult.stderr) {
-//         console.error(pushResult.stderr.toString());
-//     }
-//     process.exit(1);
-// }
+if (noPush) {
+    console.log("Skipping push to remote repository as --no-push flag is set.");
+}
+else if (!noCommit) {
+    const pushResult = Bun.spawnSync(["git", "push", "origin", mainBranch, "--tags"], {
+        cwd: config_root,
+    });
+    if (pushResult.exitCode !== 0) {
+        console.error("Failed to push changes to the remote repository. Please check the output above for details.");
+        if (pushResult.stderr) {
+            console.error(pushResult.stderr.toString());
+        }
+        process.exit(1);
+    }
+}
 console.log(`Successfully bumped version from ${currentVersion} to ${newVersion} and created a new release!`);

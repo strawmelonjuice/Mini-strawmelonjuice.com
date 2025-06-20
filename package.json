@@ -15,6 +15,9 @@
     "nodemon": "^3.1.9",
     "@types/clean-css": "^4.2.11",
     "@types/markdown-it": "^14.1.2",
+    "@types/moment": "^2.13.0",
+    "@types/node": "^24.0.0",
+    "@types/semver": "^7.3.10",
     "autoprefixer": "^10.4.20",
     "clean-css": "^5.3.3",
     "daisyui": "^4.12.23",
@@ -23,7 +26,8 @@
     "postcss": "^8.5.1",
     "tailwindcss": "3.4.17",
     "typescript": "^5.0.0",
-    "handlebars": "^4.7.8"
+    "handlebars": "^4.7.8",
+    "semver": "^7.7.2"
   },
   "scripts": {
     "bundle": "mise run bundle-server",
@@ -36,8 +40,5 @@
     "prepack": "bun run bundle",
     "run-in-test": "mise run run-dev",
     "test": "mise run test-all"
-  },
-  "dependencies": {
-    "semver": "^7.7.2"
   }
 }
