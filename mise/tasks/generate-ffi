@@ -1,6 +1,6 @@
 #!/usr/bin/env -S bun
 //MISE description="Generates themes, CSS, and bundles client into server FFI"
-//MISE wait_for="build-client"
+//MISE wait_for=["build-client","bun-install"]
 //MISE dir = "{{ config_root }}"
 import themeconf from "../../themes.json";
 import { writeFileSync, readFileSync, existsSync } from "fs";
