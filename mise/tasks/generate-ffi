@@ -46,8 +46,13 @@ for (const theme of themeconf) {
   daisyui_themes.push(theme.daisyUI);
 }
 themes_gleam_content += `]\n`;
+// Write the generated Gleam file, creating the directory if it doesn't exist
+const shared_ui_dir = path.join(config_root, "/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui");
+if (!existsSync(shared_ui_dir)) {
+  require("fs").mkdirSync(shared_ui_dir, { recursive: true });
+}
 writeFileSync(
-  path.join(config_root, "/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui/themes_generated.gleam"),
+  path.join(shared_ui_dir, "themes_generated.gleam"),
   themes_gleam_content
 );
 
