@@ -3,10 +3,13 @@
 //MISE wait_for=["build-client","bun-install"]
 //MISE dir = "{{ config_root }}"
 import themeconf from "../../themes.json";
-import { writeFileSync, readFileSync, existsSync } from "fs";
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from "fs";
 import CleanCSS from "clean-css";
 import { argv } from "process";
 import path from "path";
+import postcss from "postcss";
+import tailwindcss from "tailwindcss";
+import daisyui from "daisyui";
 
 const config_root = process.env.MISE_CONFIG_ROOT || ".";
 
@@ -49,7 +52,7 @@ themes_gleam_content += `]\n`;
 // Write the generated Gleam file, creating the directory if it doesn't exist
 const shared_ui_dir = path.join(config_root, "/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui");
 if (!existsSync(shared_ui_dir)) {
-  require("fs").mkdirSync(shared_ui_dir, { recursive: true });
+  mkdirSync(shared_ui_dir, { recursive: true });
 }
 writeFileSync(
   path.join(shared_ui_dir, "themes_generated.gleam"),
@@ -71,13 +74,11 @@ const tailwindconfig = {
     `${config_root}/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui.gleam`,
   ],
   theme: { extend: {} },
-  plugins: [require("daisyui")],
+  plugins: [daisyui],
 };
 writeFileSync(path.join(config_root, "/tailwind.config.mjs"), `export default ${JSON.stringify(tailwindconfig, null, 2)};\n`);
 
 // 3. Build CSS
-const postcss = require("postcss");
-const tailwindcss = require("tailwindcss");
 const sourceCSS = `
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
 @import url('https://fontlay.com/css2?family=Fira+Mono:wght@400;500;700&family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Quicksand:wght@300..700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
