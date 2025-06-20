@@ -1,4 +1,1 @@
 * text=auto
-# EXCLUUUUDE YOU
-./build.ts -linguist-detectable
-build.ts linguist-detectable=false
