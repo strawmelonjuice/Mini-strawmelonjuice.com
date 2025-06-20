@@ -23,6 +23,7 @@
     "postcss": "^8.5.1",
     "tailwindcss": "3.4.17",
     "typescript": "^5.0.0"
+    "handlebars": "^4.7.8"
   },
   "scripts": {
     "bundle": "mise run bundle-server",

@@ -35,6 +35,7 @@ pub fn test_model() -> mutable_reference.MutableReference(
       server_host: Some("localhost"),
       git_integration: True,
       comment_repo: Some("CynthiaWebsiteEngine/Mini-docs"),
+      other_vars: [],
     ),
   )
   |> mutable_reference.new()

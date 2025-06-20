@@ -1,6 +1,8 @@
 import cynthia_websites_mini_shared/contenttypes.{type Content}
+import gleam/dict.{type Dict}
 import gleam/dynamic/decode
 import gleam/json
+import gleam/list
 import gleam/option.{type Option, None, Some}
 
 pub type CompleteData {
@@ -14,6 +16,7 @@ pub type CompleteData {
     server_host: Option(String),
     comment_repo: Option(String),
     git_integration: Bool,
+    other_vars: List(#(String, List(String))),
     content: List(Content),
   )
 }
@@ -29,6 +32,7 @@ pub fn encode_complete_data_for_client(complete_data: CompleteData) -> json.Json
     server_host: _,
     comment_repo:,
     git_integration:,
+    other_vars:,
     content:,
   ) = complete_data
   json.object([
@@ -42,6 +46,12 @@ pub fn encode_complete_data_for_client(complete_data: CompleteData) -> json.Json
       None -> json.null()
       Some(value) -> json.string(value)
     }),
+    #(
+      "configurable_variables",
+      json.array(other_vars, fn(item) -> json.Json {
+        json.object([#(item.0, json.array(item.1, json.string))])
+      }),
+    ),
     #("content", json.array(content, contenttypes.encode_content)),
   ])
 }
@@ -78,6 +88,13 @@ pub fn complete_data_decoder() -> decode.Decoder(CompleteData) {
     "content",
     decode.list(contenttypes.content_decoder()),
   )
+  use other_vars <- decode.field("configurable_variables", {
+    decode.list(decode.dict(decode.string, decode.list(decode.string)))
+    |> decode.map(list.fold(_, dict.new(), dict.merge))
+  })
+
+  let other_vars = dict.to_list(other_vars)
+
   decode.success(CompleteData(
     global_theme:,
     global_theme_dark:,
@@ -88,6 +105,7 @@ pub fn complete_data_decoder() -> decode.Decoder(CompleteData) {
     server_host:,
     comment_repo:,
     git_integration:,
+    other_vars:,
     content:,
   ))
 }
@@ -103,6 +121,7 @@ pub type SharedCynthiaConfigGlobalOnly {
     server_host: Option(String),
     comment_repo: Option(String),
     git_integration: Bool,
+    other_vars: List(#(String, List(String))),
   )
 }
 
@@ -116,6 +135,7 @@ pub const default_shared_cynthia_config_global_only: SharedCynthiaConfigGlobalOn
   server_host: None,
   comment_repo: None,
   git_integration: True,
+  other_vars: [],
 )
 
 pub fn merge(
@@ -132,6 +152,7 @@ pub fn merge(
     server_host: orig.server_host,
     comment_repo: orig.comment_repo,
     git_integration: orig.git_integration,
+    other_vars: orig.other_vars,
     content:,
   )
 }

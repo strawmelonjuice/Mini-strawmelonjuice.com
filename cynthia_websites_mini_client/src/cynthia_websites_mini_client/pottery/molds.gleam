@@ -1,6 +1,8 @@
 // Imports
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type
+import cynthia_websites_mini_client/pottery/oven
+import gleam/bool
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode.{type Dynamic}
 import lustre/element.{type Element}
@@ -14,6 +16,7 @@ import cynthia_websites_mini_client/pottery/molds/frutiger
 import cynthia_websites_mini_client/pottery/molds/github_layout
 import cynthia_websites_mini_client/pottery/molds/minimalist
 import cynthia_websites_mini_client/pottery/molds/oceanic_layout
+import cynthia_websites_mini_client/pottery/molds/ownit
 import cynthia_websites_mini_client/pottery/molds/pastels
 
 /// Molds is the name we use for templating here.
@@ -23,11 +26,20 @@ pub fn into(
   using model: model_type.Model,
 ) -> fn(Element(messages.Msg), Dict(String, decode.Dynamic)) ->
   element.Element(messages.Msg) {
-  let is_post = case theme_type {
-    "post" -> True
-    "page" -> False
-    _ -> panic as "Unknown content type"
+  let #(v, is_post) = case theme_type {
+    "post" -> #(True, True)
+    "page" -> #(True, False)
+    _ -> #(False, False)
   }
+  // This handles the rare case where content is not a post and not a page, which should be never.
+  use <- bool.guard(!v, fn(_, _) {
+    oven.error(
+      error_message: "Could not determine if this is a post or a page. (Got: '"
+        <> theme_type
+        <> "'.)",
+      recoverable: True,
+    )
+  })
   case layout {
     // Add your layout handler here!
     "cindy" | "cindy-simple" -> {
@@ -182,9 +194,22 @@ pub fn into(
         }
       }
     }
+    "ownit" -> {
+      // Ownit does not split between pages and posts, it is a single layout, split in the template.
+      fn(content: Element(messages.Msg), metadata: Dict(String, Dynamic)) -> Element(
+        messages.Msg,
+      ) {
+        ownit.main(
+          from: content,
+          with: metadata,
+          store: model,
+          is_post: is_post,
+        )
+      }
+    }
     other -> {
       let f = "Unknown layout name: " <> other
-      panic as f
+      fn(_, _) -> Element(messages.Msg) { oven.error(f, True) }
     }
   }
 }
