@@ -63,6 +63,7 @@ run = "rm -rf ./test/*"
 [tasks.build-client]
 
 run = [
+  "bun ../mise/tasks/generate-ffi --only-themes",
   "gleam build",
   """
   cat <<EOF   > ./build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts
@@ -194,13 +195,15 @@ run = [
 [tasks.test-client]
 hide = true
 description = "Run tests for client"
-run = ["gleam test"]
+depends = "build-client"
+run = ["gleam test --runtime bun"]
 dir = "./cynthia_websites_mini_client"
 
 [tasks.test-server]
 hide = true
 description = "Run tests for server"
-run = ["gleam test"]
+depends = "build-server"
+run = ["gleam test --runtime bun"]
 dir = "./cynthia_websites_mini_server"
 
 [tasks.test-all]

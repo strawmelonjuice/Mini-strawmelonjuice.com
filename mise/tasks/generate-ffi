@@ -3,12 +3,16 @@
 //MISE wait_for="build-client"
 //MISE dir = "{{ config_root }}"
 import themeconf from "../../themes.json";
-import path from "path";
-import { writeFileSync, readFileSync } from "fs";
+import { writeFileSync, readFileSync, existsSync } from "fs";
 import CleanCSS from "clean-css";
+import { argv } from "process";
+import path from "path";
+
+const config_root = process.env.MISE_CONFIG_ROOT || ".";
+
 
 // 1. Generate Gleam theme file
-const daisyui_themes: any[] = [];
+const daisyui_themes = [];
 let themes_gleam_content = `
 // This file is generated in Cynthia Mini's build process.
 // Do not edit it manually.
@@ -43,22 +47,28 @@ for (const theme of themeconf) {
 }
 themes_gleam_content += `]\n`;
 writeFileSync(
-  "./cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui/themes_generated.gleam",
+  path.join(config_root, "/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui/themes_generated.gleam"),
   themes_gleam_content
 );
+
+// If this is part of the client's build process, we stop here. The themes file is still generated, but the CSS and client bundle will not be created.
+if (argv.includes("--only-themes")) {
+  console.log("[codegen] Themes generated.");
+  process.exit(0);
+}
 
 // 2. Generate Tailwind config
 const tailwindconfig = {
   daisyui: { themes: daisyui_themes },
   content: [
-    "./cynthia_websites_mini_client/**/*{.gleam,.ts}",
-    "./cynthia_websites_mini_server/src/cynthia_websites_mini_server/static_routes.gleam",
-    "./cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui.gleam",
+    `${config_root}/cynthia_websites_mini_client/**/*{.gleam,.ts}`,
+    `${config_root}/cynthia_websites_mini_server/src/cynthia_websites_mini_server/static_routes.gleam`,
+    `${config_root}/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui.gleam`,
   ],
   theme: { extend: {} },
   plugins: [require("daisyui")],
 };
-writeFileSync("./tailwind.config.mjs", `export default ${JSON.stringify(tailwindconfig, null, 2)};\n`);
+writeFileSync(path.join(config_root, "/tailwind.config.mjs"), `export default ${JSON.stringify(tailwindconfig, null, 2)};\n`);
 
 // 3. Build CSS
 const postcss = require("postcss");
@@ -84,18 +94,19 @@ body, p, a, button, .text-sm, .text-base {
 let css = "/* Something has gone wrong building this CSS. */";
 await postcss([tailwindcss({ ...tailwindconfig })])
   .process(sourceCSS, { from: undefined })
-  .then((genned_css: {css: string}) => { css = genned_css.css; })
-  .catch((err: any) => { console.error(err); });
+  .then((genned_css) => { css = genned_css.css; })
+  .catch((err) => { console.error(err); });
 const minified_css = new CleanCSS({ level: 2 }).minify(css).styles;
 
 // 4. Bundle client script and CSS into server FFI
+
 const client_script = JSON.stringify(
-  await Bun.file("./cynthia_websites_mini_client/build/bundled/cynthia_websites_mini_client.js").text()
+  await Bun.file(path.join(config_root, "cynthia_websites_mini_client/build/bundled/cynthia_websites_mini_client.js")).text()
 );
 const client_styles = JSON.stringify(minified_css);
 writeFileSync(
-  "./cynthia_websites_mini_server/src/client_code_generated_ffi.ts",
+  path.join(config_root, "cynthia_websites_mini_server/src/client_code_generated_ffi.ts"),
   `export function client_script() { return ${client_script}; }\nexport function client_styles() { return ${client_styles}; }\n`
 );
 
-console.log("[codegen] Themes, CSS, and client bundle FFI generated.");
+console.log("Themes, CSS, and client bundle FFI generated.");
