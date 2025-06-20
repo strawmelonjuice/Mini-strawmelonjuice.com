@@ -1,0 +1,101 @@
+#!/usr/bin/env -S bun
+//MISE description="Generates themes, CSS, and bundles client into server FFI"
+//MISE wait_for="build-client"
+//MISE dir = "{{ config_root }}"
+import themeconf from "../../themes.json";
+import path from "path";
+import { writeFileSync, readFileSync } from "fs";
+import CleanCSS from "clean-css";
+
+// 1. Generate Gleam theme file
+const daisyui_themes: any[] = [];
+let themes_gleam_content = `
+// This file is generated in Cynthia Mini's build process.
+// Do not edit it manually.
+pub type SharedCynthiaTheme {
+  SharedCynthiaTheme(
+    name: String,
+    fonts: List(String),
+    fonts_mono: List(String),
+    font_size: Float,
+    font_size_mono: Float,
+    prevalence: ThemePrevalence,
+    daisy_ui_theme_name: String,
+    layout: String,
+  )
+}
+
+pub type ThemePrevalence {
+  ThemeDark
+  ThemeLight
+}
+
+pub const themes = [
+`;
+for (const theme of themeconf) {
+  let prevalence = "ThemeLight";
+  if (theme.prevalence === "dark") prevalence = "ThemeDark";
+  const daisy_ui_theme_name = (typeof theme.daisyUI === "string") ? theme.daisyUI : Object.keys(theme.daisyUI)[0];
+  const font_size = theme["font-size"].toString().includes(".") ? theme["font-size"] : `${theme["font-size"]}.0`;
+  const font_size_mono = theme["font-size-mono"].toString().includes(".") ? theme["font-size-mono"] : `${theme["font-size-mono"]}.0`;
+  themes_gleam_content += `  SharedCynthiaTheme(\n    name: \"${theme.name}\",\n    fonts: ${JSON.stringify(theme.fonts)},\n    fonts_mono: ${JSON.stringify(theme["fonts-mono"])},\n    font_size: ${font_size},\n    font_size_mono: ${font_size_mono},\n    prevalence: ${prevalence},\n    daisy_ui_theme_name: \"${daisy_ui_theme_name}\",\n    layout: \"${theme.layout}\"\n  ),\n`;
+  daisyui_themes.push(theme.daisyUI);
+}
+themes_gleam_content += `]\n`;
+writeFileSync(
+  "./cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui/themes_generated.gleam",
+  themes_gleam_content
+);
+
+// 2. Generate Tailwind config
+const tailwindconfig = {
+  daisyui: { themes: daisyui_themes },
+  content: [
+    "./cynthia_websites_mini_client/**/*{.gleam,.ts}",
+    "./cynthia_websites_mini_server/src/cynthia_websites_mini_server/static_routes.gleam",
+    "./cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui.gleam",
+  ],
+  theme: { extend: {} },
+  plugins: [require("daisyui")],
+};
+writeFileSync("./tailwind.config.mjs", `export default ${JSON.stringify(tailwindconfig, null, 2)};\n`);
+
+// 3. Build CSS
+const postcss = require("postcss");
+const tailwindcss = require("tailwindcss");
+const sourceCSS = `
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
+@import url('https://fontlay.com/css2?family=Fira+Mono:wght@400;500;700&family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Quicksand:wght@300..700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+h1, h2, h3, h4, h5, h6, .text-lg, .text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl {
+  font-family: 'Red Hat Display', sans-serif;
+}
+body, p, a, button, .text-sm, .text-base {
+  font-family: 'Quicksand', sans-serif;
+}
+@layer base {
+  ul ul { list-style-type: revert; }
+  li { padding-left: 30px; }
+}
+`;
+
+let css = "/* Something has gone wrong building this CSS. */";
+await postcss([tailwindcss({ ...tailwindconfig })])
+  .process(sourceCSS, { from: undefined })
+  .then((genned_css: {css: string}) => { css = genned_css.css; })
+  .catch((err: any) => { console.error(err); });
+const minified_css = new CleanCSS({ level: 2 }).minify(css).styles;
+
+// 4. Bundle client script and CSS into server FFI
+const client_script = JSON.stringify(
+  await Bun.file("./cynthia_websites_mini_client/build/bundled/cynthia_websites_mini_client.js").text()
+);
+const client_styles = JSON.stringify(minified_css);
+writeFileSync(
+  "./cynthia_websites_mini_server/src/client_code_generated_ffi.ts",
+  `export function client_script() { return ${client_script}; }\nexport function client_styles() { return ${client_styles}; }\n`
+);
+
+console.log("[codegen] Themes, CSS, and client bundle FFI generated.");

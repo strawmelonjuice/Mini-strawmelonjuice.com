@@ -11,17 +11,13 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - uses: gleam-lang/setup-gleam@v1.0.2
-        with:
-          gleam-version: "1.9.1"
+      - uses: jdx/mise-action@v2
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v4
         with:
           node-version: "20.x"
           registry-url: "https://registry.npmjs.org"
-      - run: bun install
-      - run: bun run bundle
+      - run: mise run bundle-server
       - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

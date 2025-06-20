@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: jdx/mise-action@v2
       - run: |
           bun x prettier . --write 
           git restore --source=HEAD --staged --worktree -- ./.github
@@ -19,12 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - uses: gleam-lang/setup-gleam@v1.0.2
-        with:
-          gleam-version: "1.9.1"
+      - uses: jdx/mise-action@v2
       - run: |
-          bun build.ts fmt
+          mise run fmt-all
       - uses: autofix-ci/action@v1
         with:
           commit-message: "Apply build script's format"

@@ -1,6 +1,7 @@
 [tools]
 bun = "latest"
 gleam = "latest"
+watchexec = "latest"
 
 # /================================== Tasks ================================\
 # |             These tasks are in comment-split sections                   |
@@ -13,6 +14,7 @@ gleam = "latest"
 # ###########################################################################
 
 [tasks.generate-prelude]
+wait_for = "bun-install"
 description = "Generate Gleam prelude for TypeScript FFI"
 run = [
   "gleam export typescript-prelude > ./cynthia_websites_mini_client/prelude.ts",
@@ -20,18 +22,46 @@ run = [
 ]
 
 [tasks.bun-install]
-description = "Installs Bun's dependencies"
-run = "bun install"
+description = "Installs Bun's dependencies and prepares the environment"
+run = ["bun install", "chmod +x ./mise/tasks/generate-ffi"]
+
+
+[tasks.clean-client]
+hide = true
+description = "Clean client build artifacts"
+run = ["gleam clean", "rm -rf ./build", "rm -rf ./prelude.ts"]
+dir = "./cynthia_websites_mini_client"
+
+[tasks.clean-server]
+hide = true
+description = "Clean server build artifacts"
+run = ["gleam clean", "rm -rf ./build", "rm -rf ./prelude.ts", "rm -rf ./src/client_code_generated_ffi.ts"]
+dir = "./cynthia_websites_mini_server"
+
+[tasks.clean-shared]
+hide = true
+description = "Clean shared build artifacts"
+run = ["gleam clean", "rm -rf ./build"]
+dir = "./cynthia_websites_mini_shared"
+
+[tasks.clean-all]
+description = "Clean all build artifacts and generated files"
+depends = ["clean-client", "clean-server", "clean-shared"]
+run = ["rm -rf ./dist", "rm -rf ./node_modules/"]
+
+[tasks.clean-test]
+hide = false
+description = "Clean test build artifacts"
+run = "rm -rf ./test/*"
 
 # ###########################################################################
 # Build tasks:
 # ###########################################################################
 
-[tasks.install-bun-deps]
-description = "Install Bun dependencies"
-run = "bun install"
+
 
 [tasks.build-client]
+
 run = [
   "gleam build",
   """
@@ -40,9 +70,11 @@ run = [
 EOF
   """,
   """
-  bun build "./build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts" --outdir "./build/bundled/" --minify-whitespace --minify-syntax
+  bun build "./build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts" --outdir "./build/bundled/" --minify-whitespace --minify-syntax --target browser
   """,
 ]
+wait_for = "bun-install"
+depends = ["bun-install","generate-prelude"]
 description = "Build the client-side code and bundle it with Bun"
 dir = "{{ config_root }}/cynthia_websites_mini_client"
 
@@ -55,4 +87,122 @@ description = "Register themes into a Daisy+Tailwind config and compile them tog
 run = "..."
 
 [tasks.build-server]
+depends = ["bun-install","generate-prelude", "build-client", "generate-ffi"]
+wait_for = ["bun-install", "generate-prelude", "build-client", "generate-ffi"]
 description = "Build the server-side code and bundle it with Bun."
+run = [
+  "gleam build",
+  # Create a TypeScript file that imports the main function from the generated module.
+  "cat <<EOF   > ./build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts\nimport { main } from \"./cynthia_websites_mini_server.mjs\";main();\nEOF",
+  # Bundle the generated TypeScript file into a single JavaScript file.
+  "bun build \"./build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts\" --outdir \"./build/bundled/\" --minify-whitespace --minify-syntax --target bun",
+]
+dir = "{{ config_root }}/cynthia_websites_mini_server"
+
+
+[tasks.check-client]
+description = "Check Gleam code in client"
+run = ["gleam check"]
+dir = "./cynthia_websites_mini_client"
+
+
+# ###########################################################################
+# Development helpers:
+# ###########################################################################
+
+[tasks.check-server]
+description = "Check Gleam code in server"
+run = ["gleam check"]
+dir = "./cynthia_websites_mini_server"
+
+[tasks.check-all]
+description = "Check Gleam code in both client and server"
+depends = ["check-client", "check-server"]
+
+
+[tasks.fmt-client]
+hide = true
+description = "Format Gleam code in client"
+run = ["gleam format"]
+dir = "./cynthia_websites_mini_client"
+
+[tasks.fmt-server]
+hide = true
+description = "Format Gleam code in server"
+run = ["gleam format"]
+dir = "./cynthia_websites_mini_server"
+
+[tasks.fmt-shared]
+hide = true
+description = "Format Gleam code in shared"
+run = ["gleam format"]
+dir = "./cynthia_websites_mini_shared"
+
+[tasks.fmt-all]
+description = "Format Gleam code in both client and server"
+depends = ["fmt-client", "fmt-server", "fmt-shared"]
+
+
+# ###########################################################################
+# Publishing tasks:
+# ###########################################################################
+
+[tasks.bundle-server]
+description = "Bundle the server for production (with shebang)"
+depends = ["build-server","build-client"]
+run = [
+  # Create the dist directory if it doesn't exist.
+  "mkdir -p ./dist",
+  # Add a shebang line to the bundled file to make it executable.
+  "echo '#!/usr/bin/env bun' | cat - ./cynthia_websites_mini_server/build/bundled/cynthia_websites_mini_server.js > ./dist/cynthia_websites_mini_server.js",
+  # Make the bundled file executable.
+  "chmod +x ./dist/cynthia_websites_mini_server.js"
+]
+
+[tasks.publish]
+description = "Prepare a production build (build, bundle, etc.)"
+depends = ["build-client", "bundle-server"]
+
+# ###########################################################################
+# Run tasks:
+# ###########################################################################
+
+[tasks.run-dev]
+tools.watchexec = "latest"
+depends = "build-server"
+description = "Run the Cynthia Mini server in development mode"
+run = [
+  "bun ../cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts"
+]
+dir = "./test"
+[tasks.run-dev-static-server]
+tools.watchexec = "latest"
+depends = "build-server"
+description = "Run the Cynthia Mini server in development mode"
+run = [
+  "bun ../cynthia_websites_mini_server/build/dev/javascript/cynthia_websites_mini_server/cynthia_websites_mini_server.ts static","bun x serve ./out -s"
+]
+dir = "./test"
+
+
+[tasks.run-bundled]
+description = "Run the bundled Cynthia Mini server from dist/"
+run = [
+  "./dist/cynthia_websites_mini_server.js"
+]
+
+[tasks.test-client]
+hide = true
+description = "Run tests for client"
+run = ["gleam test"]
+dir = "./cynthia_websites_mini_client"
+
+[tasks.test-server]
+hide = true
+description = "Run tests for server"
+run = ["gleam test"]
+dir = "./cynthia_websites_mini_server"
+
+[tasks.test-all]
+description = "Run tests for both client and server"
+depends = ["test-client", "test-server"]
