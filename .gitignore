@@ -142,3 +142,6 @@ cynthia_websites_mini_client/prelude.ts
 
 # Test env
 test/*
+
+# Temporary files
+tailwind.config.mjs
