@@ -36,5 +36,8 @@
     "prepack": "bun run bundle",
     "run-in-test": "mise run run-dev",
     "test": "mise run test-all"
+  },
+  "dependencies": {
+    "semver": "^7.7.2"
   }
 }
