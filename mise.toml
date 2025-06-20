@@ -79,13 +79,6 @@ depends = ["bun-install","generate-prelude"]
 description = "Build the client-side code and bundle it with Bun"
 dir = "{{ config_root }}/cynthia_websites_mini_client"
 
-[tasks.generate-styles]
-# This might be the only thing build.ts should still do, beit with a different file name maybe.
-#
-# Since we really really rely on js type quirks, I think we do @expect-error a lot in that code as well.
-
-description = "Register themes into a Daisy+Tailwind config and compile them together to the end CSS."
-run = "..."
 
 [tasks.build-server]
 depends = ["bun-install","generate-prelude", "build-client", "generate-ffi"]
