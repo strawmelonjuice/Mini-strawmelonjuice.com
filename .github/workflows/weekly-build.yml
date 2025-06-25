@@ -1,0 +1,107 @@
+name: Weekly Build
+
+on:
+  # Run every Sunday at 3:00 AM UTC
+  schedule:
+    - cron: '0 3 * * 0'
+  # Allow manual triggering
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build and bundle package
+        run: mise run bundle-server
+
+      - name: Create package tarball
+        run: |
+          # Create a tarball similar to what npm pack would create
+          npm pack --dry-run > pack-files.txt 2>/dev/null || true
+          tar -czf cynthiaweb-mini-weekly.tgz \
+            --exclude=node_modules \
+            --exclude=.git \
+            --exclude=.github \
+            --exclude='cynthia_websites_mini_*/build' \
+            --exclude='**/*.test.*' \
+            --exclude=test \
+            package.json \
+            dist/ \
+            README.md \
+            LICENSE \
+            cynthia_websites_mini_server/build/bundled/ \
+            cynthia_websites_mini_client/build/bundled/
+
+      - name: Calculate build info
+        id: build_info
+        run: |
+          echo "build_date=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+          echo "commit_sha=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          echo "commit_short=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Delete existing weekly-build release
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Delete the release and tag if they exist
+          gh release delete weekly-build --yes || true
+          git push --delete origin weekly-build || true
+
+      - name: Create weekly-build release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create weekly-build \
+            --title "Weekly Build - ${{ steps.build_info.outputs.build_date }}" \
+            --notes "🔄 **Automated Weekly Build**
+
+          This is an automated weekly build of the Cynthia Mini Website Engine.
+
+          **Build Information:**
+          - 📅 **Built on:** ${{ steps.build_info.outputs.build_date }}
+          - 🔗 **Commit:** ${{ steps.build_info.outputs.commit_sha }}
+          - 🏷️ **Short hash:** ${{ steps.build_info.outputs.commit_short }}
+
+          **Installation:**
+          
+          You can install this weekly build directly from the tarball:
+          \`\`\`bash
+          bun install https://github.com/${{ github.repository }}/releases/download/weekly-build/cynthiaweb-mini-weekly.tgz
+          \`\`\`
+
+          Or download the tarball and install locally:
+          \`\`\`bash
+          curl -L -o cynthiaweb-mini-weekly.tgz https://github.com/${{ github.repository }}/releases/download/weekly-build/cynthiaweb-mini-weekly.tgz
+          npm install ./cynthiaweb-mini-weekly.tgz
+          \`\`\`
+
+          **⚠️ Note:** This is a development build and may contain experimental features or bugs. Use the official releases for production environments." \
+            --prerelease \
+            ./cynthiaweb-mini-weekly.tgz
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-build-package
+          path: ./cynthiaweb-mini-weekly.tgz
+          retention-days: 30
