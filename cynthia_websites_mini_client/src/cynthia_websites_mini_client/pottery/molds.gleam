@@ -18,6 +18,7 @@ import cynthia_websites_mini_client/pottery/molds/minimalist
 import cynthia_websites_mini_client/pottery/molds/oceanic_layout
 import cynthia_websites_mini_client/pottery/molds/ownit
 import cynthia_websites_mini_client/pottery/molds/pastels
+import cynthia_websites_mini_client/pottery/molds/strawmelonjuice_com
 
 /// Molds is the name we use for templating here.
 pub fn into(
@@ -41,6 +42,24 @@ pub fn into(
     )
   })
   case layout {
+    "strawmelonjuice.com" -> {
+      // This is a special case for the strawmelonjuice.com website.
+      // For testing purposes, it uses this layout until it's ready.
+      case is_post {
+        False -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) -> Element(messages.Msg) {
+          strawmelonjuice_com.page_layout(content, metadata, model)
+        }
+        True -> fn(
+          content: Element(messages.Msg),
+          metadata: Dict(String, Dynamic),
+        ) -> Element(messages.Msg) {
+          strawmelonjuice_com.post_layout(content, metadata, model)
+        }
+      }
+    }
     // Add your layout handler here!
     "cindy" | "cindy-simple" -> {
       // Cindy shows a different layout for pages and posts.
