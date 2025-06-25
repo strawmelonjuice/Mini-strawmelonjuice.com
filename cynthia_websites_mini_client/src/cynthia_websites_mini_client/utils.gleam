@@ -74,3 +74,6 @@ fn compares(a: String, b: String) -> String
 /// A js FFI implementation of string.trim, to also handle stuff like nbsp or emsp
 @external(javascript, "./utils_ffi.ts", "trims")
 pub fn js_trim(a: String) -> String
+
+@external(javascript, "./utils_ffi.ts", "set_theme_body")
+pub fn set_theme_body(themename: String) -> Nil
