@@ -280,6 +280,19 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       }
       #(Model(..model, other:), effect.none())
     }
+    messages.UserToggleStrawmelonMenu -> {
+      let other = case dict.get(model.other, "strawmelonmenu open") {
+        Ok(..) -> {
+          // is open, so close it
+          dict.delete(model.other, "strawmelonmenu open")
+        }
+        Error(..) -> {
+          // is closed, so open it
+          dict.insert(model.other, "strawmelonmenu open", dynamic.from(None))
+        }
+      }
+      #(Model(..model, other:), effect.none())
+    }
   }
 }
 

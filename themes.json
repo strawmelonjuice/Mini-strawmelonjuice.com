@@ -1,5 +1,85 @@
 [
   {
+    "name": "strawmelonjuice-dark",
+    "prevalence": "dark",
+    "fonts": [
+      "Inter",
+      "system-ui",
+      "sans-serif"
+    ],
+    "font-size": 16,
+    "fonts-mono": [
+      "JetBrains Mono",
+      "monospace"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "strawberry-dark": {
+        "base-100": "oklch(18% 0.04 265)",
+        "base-200": "oklch(23% 0.05 260)",
+        "base-300": "oklch(28% 0.06 255)",
+        "base-content": "oklch(92% 0.04 70)",
+        "primary": "oklch(45% 0.15 10)",
+        "primary-content": "oklch(95% 0.04 70)",
+        "secondary": "oklch(40% 0.1 140)",
+        "secondary-content": "oklch(95% 0.04 70)",
+        "accent": "oklch(80% 0.12 60)",
+        "accent-content": "oklch(20% 0.05 250)",
+        "neutral": "oklch(35% 0.05 25)",
+        "neutral-content": "oklch(90% 0.05 70)",
+        "info": "oklch(55% 0.12 210)",
+        "info-content": "oklch(95% 0.04 70)",
+        "success": "oklch(50% 0.12 150)",
+        "success-content": "oklch(95% 0.04 70)",
+        "warning": "oklch(65% 0.15 45)",
+        "warning-content": "oklch(20% 0.05 250)",
+        "error": "oklch(55% 0.2 350)",
+        "error-content": "oklch(95% 0.04 70)"
+      }
+    },
+    "layout": "strawmelonjuice.com"
+  },
+  {
+    "name": "strawmelonjuice-light",
+    "prevalence": "light",
+    "fonts": [
+      "Inter",
+      "system-ui",
+      "sans-serif"
+    ],
+    "font-size": 16,
+    "fonts-mono": [
+      "JetBrains Mono",
+      "monospace"
+    ],
+    "font-size-mono": 14,
+    "daisyUI": {
+      "strawberry-light": {
+        "base-100": "oklch(99% 0.01 15)",
+        "base-200": "oklch(96% 0.02 10)",
+        "base-300": "oklch(90% 0.035 5)",
+        "base-content": "oklch(20% 0.1 350)",
+        "primary": "oklch(65% 0.25 15)",
+        "primary-content": "oklch(98% 0.02 350)",
+        "secondary": "oklch(70% 0.18 130)",
+        "secondary-content": "oklch(20% 0.1 350)",
+        "accent": "oklch(85% 0.15 90)",
+        "accent-content": "oklch(25% 0.1 350)",
+        "neutral": "oklch(50% 0.05 30)",
+        "neutral-content": "oklch(95% 0.02 0)",
+        "info": "oklch(60% 0.15 240)",
+        "info-content": "oklch(98% 0.02 350)",
+        "success": "oklch(60% 0.16 160)",
+        "success-content": "oklch(20% 0.1 350)",
+        "warning": "oklch(70% 0.18 50)",
+        "warning-content": "oklch(25% 0.1 350)",
+        "error": "oklch(60% 0.2 0)",
+        "error-content": "oklch(98% 0.02 350)"
+      }
+    },
+    "layout": "strawmelonjuice.com"
+  },
+  {
     "name": "autumn",
     "prevalence": "light",
     "fonts": ["Fira Sans", "Ubuntu", "Noto Sans"],
