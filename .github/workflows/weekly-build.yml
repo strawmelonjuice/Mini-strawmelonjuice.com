@@ -89,13 +89,7 @@ jobs:
           bun install https://github.com/${{ github.repository }}/releases/download/weekly-build/cynthiaweb-mini-weekly.tgz
           \`\`\`
 
-          Or download the tarball and install locally:
-          \`\`\`bash
-          curl -L -o cynthiaweb-mini-weekly.tgz https://github.com/${{ github.repository }}/releases/download/weekly-build/cynthiaweb-mini-weekly.tgz
-          npm install ./cynthiaweb-mini-weekly.tgz
-          \`\`\`
-
-          **⚠️ Note:** This is a development build and may contain experimental features or bugs. Use the official releases for production environments." \
+          **⚠️ Note:** This is a personalised development build and may contain experimental features or bugs. Use the [official releases](https://github.com/CynthiaWebsiteEngine/Mini/releases) for your own installations." \
             --prerelease \
             ./cynthiaweb-mini-weekly.tgz
 
