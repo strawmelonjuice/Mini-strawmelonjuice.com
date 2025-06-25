@@ -16,3 +16,7 @@ export function compares(a: string, b: string): string {
 export function trims(str: string) {
   return str.trim();
 }
+
+export function set_theme_body(themename: string) {
+  document.body.setAttribute("data-theme", themename)
+}
