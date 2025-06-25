@@ -91,6 +91,26 @@ body, p, a, button, .text-sm, .text-base {
   ul ul { list-style-type: revert; }
   li { padding-left: 30px; }
 }
+[data-theme="strawberry-light"] div#content:not(.no-background) {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.412), rgba(0, 0, 0, 0.412)), /* 1 - (170/255) = 1 - 0.588 = 0.412 */
+    url(/assets/bgraster-l.png);
+  
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+[data-theme="strawberry-dark"] div#content:not(.no-background) {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.412), rgba(0, 0, 0, 0.412)), /* 1 - (170/255) = 1 - 0.588 = 0.412 */
+    url(/assets/bgraster-d.png);
+  
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
 `;
 
 let css = "/* Something has gone wrong building this CSS. */";
