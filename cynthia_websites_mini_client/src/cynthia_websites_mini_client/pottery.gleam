@@ -111,7 +111,9 @@ pub fn render_content(
     |> html.div([attribute.class("contents")], _)
   html.div(
     [
-      attribute("data-theme", def.daisy_ui_theme_name),
+{
+      utils.set_theme_body(def.daisy_ui_theme_name)
+      attribute("data-theme", def.daisy_ui_theme_name)},
       attribute.class("contents"),
     ],
     {
