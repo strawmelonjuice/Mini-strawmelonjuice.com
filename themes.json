@@ -2,16 +2,9 @@
   {
     "name": "strawmelonjuice-dark",
     "prevalence": "dark",
-    "fonts": [
-      "Inter",
-      "system-ui",
-      "sans-serif"
-    ],
+    "fonts": ["Inter", "system-ui", "sans-serif"],
     "font-size": 16,
-    "fonts-mono": [
-      "JetBrains Mono",
-      "monospace"
-    ],
+    "fonts-mono": ["JetBrains Mono", "monospace"],
     "font-size-mono": 14,
     "daisyUI": {
       "strawberry-dark": {
@@ -42,16 +35,9 @@
   {
     "name": "strawmelonjuice-light",
     "prevalence": "light",
-    "fonts": [
-      "Inter",
-      "system-ui",
-      "sans-serif"
-    ],
+    "fonts": ["Inter", "system-ui", "sans-serif"],
     "font-size": 16,
-    "fonts-mono": [
-      "JetBrains Mono",
-      "monospace"
-    ],
+    "fonts-mono": ["JetBrains Mono", "monospace"],
     "font-size-mono": 14,
     "daisyUI": {
       "strawberry-light": {
