@@ -18,5 +18,5 @@ export function trims(str: string) {
 }
 
 export function set_theme_body(themename: string) {
-  document.body.setAttribute("data-theme", themename)
+  document.body.setAttribute("data-theme", themename);
 }
