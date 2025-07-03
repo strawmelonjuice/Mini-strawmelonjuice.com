@@ -25,6 +25,11 @@ pub const typecontrolled = [
     "ownit_template",
     var_string,
   ),
+  #(
+    // Imports the badges json
+    "strawmelonjuice_badges",
+    var_string,
+  ),
 ]
 
 /// An unsupported type, this is for example the type of any array or sub-table, as those aren't supported.
