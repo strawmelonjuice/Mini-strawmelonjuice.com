@@ -5,6 +5,7 @@ import gleam/bool
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode.{type Dynamic}
+import gleam/json
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
@@ -102,7 +103,17 @@ pub fn page_layout(
                   [html.text("Badgies")],
                 ),
                 html.div([attribute.class("p-3")], [
-                  html.div([attribute.class("flex flex-wrap gap-2")], [badges()]),
+                  html.div([attribute.class("flex flex-wrap gap-2")], [
+                    badges({
+                      let assert Ok(badges_json_) =
+                        dict.get(model.other, "config_strawmelonjuice_badges")
+                      let assert Ok(badges_json) =
+                        decode.run(badges_json_, decode.string)
+                      let assert Ok(badge_list) =
+                        json.parse(badges_json, decode.list(badge_decoder()))
+                      badge_list
+                    }),
+                  ]),
                 ]),
               ],
             )
@@ -115,180 +126,112 @@ pub fn page_layout(
   theme_common(content, menu, page_meta, variables, model)
 }
 
-fn badges() -> Element(messages.Msg) {
+type Badge {
+  Badge(
+    clickable_url: String,
+    img_url: String,
+    img_alt: String,
+    img_title: String,
+    text_badge: String,
+  )
+}
+
+fn badge_decoder() -> decode.Decoder(Badge) {
+  use clickable_url <- decode.field("href", decode.string)
+  use img_url <- decode.field("src", decode.string)
+  use img_alt <- decode.field("alt", decode.string)
+  use img_title <- decode.field("title", decode.string)
+  use text_badge <- decode.field("text_badge", decode.string)
+  let clickable_url = case clickable_url {
+    "self" -> img_url
+    _ -> clickable_url
+  }
+  decode.success(Badge(
+    clickable_url:,
+    img_url:,
+    img_alt:,
+    img_title:,
+    text_badge:,
+  ))
+}
+
+type BadgeList =
+  List(Badge)
+
+fn badges(badge_list: BadgeList) -> Element(messages.Msg) {
   let badge_classes = "badge badge-dash badge-primary lg rounded-none m-1"
   let clickable_badge_classes = badge_classes <> " cursor-pointer"
-  html.div(
-    [],
-    [
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(badge_classes),
-        attribute.attribute("title", "intersectional feminism!"),
-        attribute.alt("feminism"),
-        attribute.src("/assets/img/badges/feminism.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(clickable_badge_classes),
-        attribute.attribute(
-          "onclick",
-          "window.open('/assets/img/badges/blinkiesCafe-xD.gif');",
-        ),
-        attribute.attribute(
-          "title",
-          "[Clickable] This page works better on a computer than on a smartphone :3",
-        ),
-        attribute.alt(
-          "This site works better on a computer than on a smartphone :3",
-        ),
-        attribute.src("/assets/img/badges/blinkiesCafe-xD.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(clickable_badge_classes),
-        attribute.attribute(
-          "onclick",
-          "window.open('https://www.tumblr.com/strawmelonjuice');",
-        ),
-        attribute.attribute("title", "[Clickable] Tumblr Tumblr Tumblr"),
-        attribute.alt("Tumblr"),
-        attribute.src("/assets/img/badges/blinkiesCafe-tumblr-grrll.gif"),
-      ]),
-      html.div([attribute.class(clickable_badge_classes)], [
+  // Let's start by determining the badge types we currently have.
+  // 1. A unclickable image badge
+  // 3. A clickable image badge
+  // 4. A clickable image+text badge
+  list.map(badge_list, fn(badge_item) {
+    let invalid = string.is_empty(badge_item.img_url)
+    let clickable = bool.negate(string.is_empty(badge_item.clickable_url))
+    let with_text = bool.negate(string.is_empty(badge_item.text_badge))
+    case invalid, clickable, with_text {
+      True, _, _ -> {
+        // No badge.
+        // maybe a placeholder.
+        element.none()
+      }
+      _, False, False -> {
+        // Case 1: Unclickable badge
         html.img([
           attribute.attribute("loading", "lazy"),
-          attribute.class("w-4 h-4"),
-          attribute.attribute("onclick", "window.open('https://gleam.run/');"),
-          attribute.attribute("title", "[Clickable] Written in Gleam"),
-          attribute.alt(""),
-          attribute.src("https://gleam.run/images/lucy/lucy.svg"),
-        ]),
-        html.text(" Made with Gleam"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(clickable_badge_classes),
-        attribute.attribute(
-          "onclick",
-          "window.open('https://yesterweb.org/no-to-web3/');",
-        ),
-        attribute.attribute("title", "[Clickable] Crypto's ewie."),
-        attribute.alt("badge saying 'Keep the web free, say no to web3'"),
-        attribute.src(
-          "https://yesterweb.org/no-to-web3/img/roly-saynotoweb3.gif",
-        ),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(clickable_badge_classes),
-        attribute.attribute(
-          "onclick",
-          "window.open('/assets/img/badges/blinkiesCafe-autism.gif');",
-        ),
-        attribute.attribute("title", "[Clickable] brain go brrr"),
-        attribute.alt("autism"),
-        attribute.src("/assets/img/badges/blinkiesCafe-autism.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(clickable_badge_classes),
-        attribute.attribute(
-          "onclick",
-          "window.open('https://www.mozilla.org/nl/firefox/new/?redirect_source=firefox-com');",
-        ),
-        attribute.attribute("title", "[Clickable] GET FIREFOX!!"),
-        attribute.alt("Get Firefox"),
-        attribute.src("/assets/img/badges/getfirefox.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(clickable_badge_classes),
-        attribute.attribute(
-          "onclick",
-          "window.open('/assets/img/badges/blinkiesCafe-L1.gif');",
-        ),
-        attribute.attribute("title", "[Clickable] AUTISM!"),
-        attribute.alt("I GOT AUTISM!"),
-        attribute.src("/assets/img/badges/blinkiesCafe-L1.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(clickable_badge_classes),
-        attribute.attribute("onclick", "window.open('https://polymc.org/');"),
-        attribute.attribute("title", "[Clickable] block game good"),
-        attribute.alt("minecraft"),
-        attribute.src("/assets/img/badges/minecraft.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(badge_classes),
-        attribute.attribute("title", "nerd"),
-        attribute.alt("nerd"),
-        attribute.src("/assets/img/badges/nerd.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(badge_classes),
-        attribute.attribute("title", "FUCK NAZIS!"),
-        attribute.alt("Fuck nazis"),
-        attribute.src("/assets/img/badges/fucknazis.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(badge_classes),
-        attribute.attribute(
-          "title",
-          "NFTs are thrash, and a perfect way to spend money on destroying the world.",
-        ),
-        attribute.alt("anti-nft's"),
-        attribute.src("/assets/img/badges/antinft.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(badge_classes),
-        attribute.attribute("title", "arch linux btw heheh"),
-        attribute.alt("Run linux"),
-        attribute.src("/assets/img/badges/linux80x15.png"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(badge_classes),
-        attribute.attribute("title", "Being a princess is a full time job <3"),
-        attribute.alt("Being a princess is a full time job"),
-        attribute.src("/assets/img/badges/beingaprincessisafulltimejob.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(badge_classes),
-        attribute.attribute("title", "We survived! We all did!"),
-        attribute.alt("Y2K-compliant"),
-        attribute.src("/assets/img/badges/y2k-compliant.gif"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(badge_classes),
-        attribute.attribute(
-          "title",
-          "I'm trans, and... girls... are... awesome!",
-        ),
-        attribute.alt("trans-lesbian flag"),
-        attribute.src("/assets/img/badges/transles80x31.png"),
-      ]),
-      html.img([
-        attribute.attribute("loading", "lazy"),
-        attribute.class(clickable_badge_classes),
-        attribute.attribute("onclick", "window.open('https://blinkies.cafe');"),
-        attribute.attribute(
-          "title",
-          "[Clickable] blinkies.cafe | make your own blinkies!",
-        ),
-        attribute.alt("blinkies.cafe"),
-        attribute.src("https://blinkies.cafe/b/display/blinkiesCafe-badge.gif"),
-      ]),
-    ]
-      |> list.shuffle,
-  )
+          attribute.class(badge_classes),
+          attribute.attribute("title", badge_item.img_title),
+          attribute.alt(badge_item.img_alt),
+          attribute.src(badge_item.img_url),
+        ])
+      }
+      _, False, True -> {
+        // Case 2: Nonexistent case -- Unclickable, with text
+        panic as "Nonexistent badge format"
+      }
+      _, True, False -> {
+        // Case 3: Clickable image badge
+        html.img([
+          attribute.attribute("loading", "lazy"),
+          attribute.class(clickable_badge_classes),
+          attribute.attribute(
+            "onclick",
+            "window.open('" <> badge_item.clickable_url <> "');",
+          ),
+          attribute.attribute("title", "[Clickable] " <> badge_item.img_title),
+          attribute.alt(badge_item.img_title),
+          attribute.src(badge_item.img_url),
+        ])
+      }
+      _, True, True -> {
+        // Case 4: Clickable, with text
+        html.div(
+          [
+            attribute.class(clickable_badge_classes),
+            attribute.attribute(
+              "onclick",
+              "window.open('" <> badge_item.clickable_url <> "');",
+            ),
+          ],
+          [
+            html.img([
+              attribute.attribute("loading", "lazy"),
+              attribute.class("w-4 h-4"),
+              attribute.attribute(
+                "title",
+                "[Clickable] " <> badge_item.img_title,
+              ),
+              attribute.alt(badge_item.img_alt),
+              attribute.src(badge_item.img_url),
+            ]),
+            html.text(" " <> badge_item.text_badge),
+          ],
+        )
+      }
+    }
+  })
+  |> list.shuffle
+  |> html.div([], _)
 }
 
 pub fn post_layout(
