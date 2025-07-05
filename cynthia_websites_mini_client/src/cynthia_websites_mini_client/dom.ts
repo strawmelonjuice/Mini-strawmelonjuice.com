@@ -51,16 +51,10 @@ export function destroy_comment_box() {
     if (comment_box) {
       // Remove the comment box from the DOM, but keep the element itself not to conflict with the next comment box
       // Define it as a capturing function, since we'll want to run it a few times actually.
-      const do_that = () => {
-        comment_box.innerHTML = "";
-        comment_box.removeAttribute("class");
-        comment_box.removeAttribute("style");
-      };
+      comment_box.innerHTML = "";
+      comment_box.removeAttribute("class");
+      comment_box.removeAttribute("style");
+      console.log(x);
     }
-    do_that();
-    setTimeout(do_that, 200);
-    setTimeout(do_that, 400);
-    setTimeout(do_that, 600);
-    console.log(x);
   }
 }
