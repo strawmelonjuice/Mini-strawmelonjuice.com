@@ -1,6 +1,7 @@
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type
 import cynthia_websites_mini_client/utils
+import cynthia_websites_mini_shared/configtype
 import gleam/bool
 import gleam/dict.{type Dict}
 import gleam/dynamic
@@ -107,10 +108,14 @@ pub fn page_layout(
                     badges({
                       let assert Ok(badges_json_) =
                         dict.get(model.other, "config_strawmelonjuice_badges")
+                        as "badges json not found in config"
                       let assert Ok(badges_json) =
                         decode.run(badges_json_, decode.string)
+                        |> echo
+                        as "Could not decode badges config into a json string."
                       let assert Ok(badge_list) =
                         json.parse(badges_json, decode.list(badge_decoder()))
+                        as "Could not parse badges json into a proper list of badges."
                       badge_list
                     }),
                   ]),
