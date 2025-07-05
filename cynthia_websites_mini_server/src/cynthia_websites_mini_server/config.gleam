@@ -209,7 +209,7 @@ fn cynthia_config_global_only_exploiter(
     Ok(Ok(d)) ->
       {
         dict.map_values(d, fn(key, unasserted_value) {
-          let somewhat_asserted_value = case unasserted_value {
+          let promise_of_a_somewhat_asserted_value = case unasserted_value {
             tom.InlineTable(inline) -> {
               case inline |> dict.to_list() {
                 [#("url", tom.String(url))] -> {
@@ -360,41 +360,70 @@ fn cynthia_config_global_only_exploiter(
               |> promise.resolve()
             }
           }
-          use conclusion <- promise.await(
-            somewhat_asserted_value
+          use reality <- promise.await(
+            promise_of_a_somewhat_asserted_value
             |> promise.map(fn(somewhat_asserted_value) {
               let assert Ok(conclusion) = somewhat_asserted_value |> list.last()
                 as "This must be a value, since we just actively set it above."
               conclusion
             }),
           )
-          use somewhat_asserted_value <- promise.await(somewhat_asserted_value)
+          use somewhat_asserted_value <- promise.await(
+            promise_of_a_somewhat_asserted_value,
+          )
+          let expectation =
+            configurable_variables.typecontrolled
+            |> list.key_find(key)
+            |> result.unwrap(reality)
+          // Sometimes, reality can be transitioned into expectation
+          // --that's a horrible joke.
+          let #(reality, expectation, somewhat_asserted_value) = {
+            case reality, expectation {
+              "bits", "string" -> {
+                let assert Ok(b64) = somewhat_asserted_value |> list.first()
+                let hopefully_bits = b64 |> bit_array.base16_decode
+                case hopefully_bits {
+                  Ok(bits) -> {
+                    case bits |> bit_array.to_string() {
+                      Ok(str) -> #(
+                        configurable_variables.var_unsupported,
+                        expectation,
+                        [str, configurable_variables.var_string],
+                      )
+                      Error(..) -> #(
+                        configurable_variables.var_unsupported,
+                        expectation,
+                        [configurable_variables.var_unsupported],
+                      )
+                    }
+                  }
+                  Error(..) -> {
+                    #(configurable_variables.var_unsupported, expectation, [
+                      configurable_variables.var_unsupported,
+                    ])
+                  }
+                }
+              }
+              _, _ -> #(reality, expectation, somewhat_asserted_value)
+            }
+          }
           let z: Result(List(String), ConfigTomlDecodeError) = case
-            conclusion == configurable_variables.var_unsupported
+            reality == configurable_variables.var_unsupported
           {
             True ->
               Error(FieldError(
                 "variables->" <> key <> " does not contain a supported value.",
               ))
             False -> {
-              {
-                {
-                  configurable_variables.typecontrolled
-                  |> list.key_find(key)
-                  |> result.unwrap(conclusion)
-                }
-                == conclusion
-              }
+              { expectation == reality }
               |> bool.guard(Ok(somewhat_asserted_value), fn() {
                 Error(FieldError(
                   "variables->"
                   <> key
                   <> " does not contain the expected value. --> Expected: "
-                  <> configurable_variables.typecontrolled
-                  |> list.key_find(key)
-                  |> result.unwrap(conclusion)
+                  <> expectation
                   <> ", got: "
-                  <> conclusion,
+                  <> reality,
                 ))
               })
             }
