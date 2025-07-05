@@ -135,7 +135,7 @@ fn postlist_to_html(
                       "list-col-wrap text-sm border-l-2 border-accent border-dotted pl-4 bg-secondary bg-opacity-10",
                     ),
                   ],
-                  [pottery.parse_html(post.description, "descr.md")],
+                  [pottery.parse_html(post.description, "descr.dj")],
                 ),
               ],
             ),
@@ -186,7 +186,7 @@ fn postlist_to_html(
                     "list-col-wrap text-sm border-l-2 border-accent border-dotted pl-4 bg-secondary bg-opacity-10",
                   ),
                 ],
-                [pottery.parse_html(page.description, "descr.md")],
+                [pottery.parse_html(page.description, "descr.dj")],
               )
             }),
           ])
