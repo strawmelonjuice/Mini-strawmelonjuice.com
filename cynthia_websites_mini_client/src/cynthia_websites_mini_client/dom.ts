@@ -46,11 +46,21 @@ export function apply_styles_to_comment_box() {
 
 export function destroy_comment_box() {
   // Destroy the comment box
-  const comment_box = document.querySelector("div.utterances");
-  if (comment_box) {
-    // Remove the comment box from the DOM, but keep the element itself not to conflict with the next comment box
-    comment_box.innerHTML = "";
-    comment_box.removeAttribute("class");
-    comment_box.removeAttribute("style");
+  const comment_boxes = document.querySelectorAll("div.utterances");
+  for (const comment_box of comment_boxes) {
+    if (comment_box) {
+      // Remove the comment box from the DOM, but keep the element itself not to conflict with the next comment box
+      // Define it as a capturing function, since we'll want to run it a few times actually.
+      const do_that = () => {
+        comment_box.innerHTML = "";
+        comment_box.removeAttribute("class");
+        comment_box.removeAttribute("style");
+      };
+    }
+    do_that();
+    setTimeout(do_that, 200);
+    setTimeout(do_that, 400);
+    setTimeout(do_that, 600);
+    console.log(x);
   }
 }
