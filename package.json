@@ -36,7 +36,7 @@
     "dev-static": "mise watch run-dev-static-server",
     "dev": "mise watch run-dev dynamic",
     "format": "mise run fmt-all",
-    "preinstall": "npx only-allow bun",
+    "install": "npx only-allow bun",
     "prepack": "bun run bundle",
     "run-in-test": "mise run run-dev",
     "test": "mise run test-all"
