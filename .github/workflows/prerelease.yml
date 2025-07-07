@@ -47,17 +47,11 @@ jobs:
             bin_name: cynthiaweb-mini-macos-intel
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - uses: gleam-lang/setup-gleam@v1.0.2
-        if: runner.os != 'windows'
+      - name: Install mise and let it install dependencies (Bun, Gleam, etc.)
+        uses: jdx/mise-action@v2
         with:
-          gleam-version: "1.9.1"
-      - uses: winpax/scoop-setup@v1.0.0
-        if: runner.os == 'windows'
-      - name: Install Gleam on Windows
-        if: runner.os == 'windows'
-        run: |
-          scoop install gleam
+          install: true
+          cache: true
       - name: Build and bundle
         run: |
           bun install
