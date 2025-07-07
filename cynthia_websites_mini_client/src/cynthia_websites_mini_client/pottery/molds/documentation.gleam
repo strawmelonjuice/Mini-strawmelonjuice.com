@@ -447,7 +447,18 @@ fn documentation_common(
                                       ],
                                       [html.text("Previous")],
                                     ),
-                                    html.span([], [html.text(item.name)]),
+                                    html.span([], [
+                                      element.unsafe_raw_html(
+                                        "span",
+                                        "span",
+                                        [],
+                                        houdini.escape(
+                                          utils.js_trim(odysseus.unescape(
+                                            item.name,
+                                          )),
+                                        ),
+                                      ),
+                                    ]),
                                   ]),
                                 ],
                               )
@@ -482,7 +493,18 @@ fn documentation_common(
                                         ],
                                         [html.text("Next")],
                                       ),
-                                      html.span([], [html.text(item.name)]),
+                                      html.span([], [
+                                        element.unsafe_raw_html(
+                                          "span",
+                                          "span",
+                                          [],
+                                          houdini.escape(
+                                            utils.js_trim(odysseus.unescape(
+                                              item.name,
+                                            )),
+                                          ),
+                                        ),
+                                      ]),
                                     ],
                                   ),
                                   html.span(
