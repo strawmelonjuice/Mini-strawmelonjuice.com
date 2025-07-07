@@ -1,4 +1,5 @@
 import bungibindies/bun
+import bungibindies/bun/spawn
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
@@ -15,7 +16,7 @@ import gleam/int
 import gleam/javascript/promise.{type Promise}
 import gleam/json
 import gleam/list
-import gleam/option
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleamy_lights/premixed
@@ -193,9 +194,9 @@ fn cynthia_config_global_only_exploiter(
     tom.get(o, ["posts", "comment_repo"]) |> result.map(tom.as_string)
   {
     Ok(Ok(field)) -> {
-      option.Some(field)
+      Some(field)
     }
-    _ -> option.None
+    _ -> None
   }
   let git_integration = case
     tom.get(o, ["integrations", "git"]) |> result.map(tom.as_bool)
@@ -506,7 +507,6 @@ fn content_getter() -> promise.Promise(
     |> list.map(get_inner_and_meta)
   }
   let content = promise.map(promise.await_list(promises), result.all)
-  content
 }
 
 fn get_inner_and_meta(
@@ -544,25 +544,59 @@ fn get_inner_and_meta(
     // will be discarded, so loading it in from anywhere would be a waste of resources.
     case string.starts_with(permalink, "!"), possibly_extern {
       True, _ -> promise.resolve(Ok(""))
-      False, option.None -> {
+      False, None -> {
         promise.resolve(
           simplifile.read(file)
           |> result.replace_error("FS error while reading ´" <> file <> "´."),
         )
       }
-      False, option.Some(p) -> get_ext(p)
+      False, Some(p) -> get_ext(p)
     }
   })
 
-  let decoder = contenttypes.content_decoder_and_merger(inner_plain, file)
-  let metadata =
-    json.parse(meta_json, decoder)
-    |> result.map_error(fn(e) {
-      "Some error decoding metadata for ´"
-      <> file |> premixed.text_magenta()
-      <> "´: "
-      <> string.inspect(e)
-    })
+  // Now, conversion to Djot for markdown files done in-place:
+  let converted: Result(#(String, String), String) = case
+    string.ends_with(file, "markdown")
+    |> bool.or(
+      string.ends_with(file, "md") |> bool.or(string.ends_with(file, "mdown")),
+    )
+  {
+    True -> {
+      use pandoc_path <- result.try(result.replace_error(
+        bun.which("pandoc"),
+        "There is a markdown file in Cynthia's content folder, but to convert that to Djot and display it, you need to have Pandoc installed on the PATH, which it is not!",
+      ))
+      let new_inner_plain: Result(String, String) =
+        spawn.sync(spawn.OptionsToSubprocess(
+          [pandoc_path, file, "-f", "gfm", "-t", "djot"],
+          cwd: Some(process.cwd()),
+          env: None,
+          stderr: Some(spawn.Pipe),
+          stdout: Some(spawn.Pipe),
+        ))
+        |> spawn.stdout()
+        |> result.replace_error("")
+      use new_inner_plain <- result.try(new_inner_plain)
+      Ok(#(new_inner_plain, file <> ".dj"))
+    }
+    False -> {
+      Ok(#(inner_plain, file))
+    }
+  }
+
+  let metadata = case converted {
+    Ok(#(inner_plain, file)) -> {
+      let decoder = contenttypes.content_decoder_and_merger(inner_plain, file)
+      json.parse(meta_json, decoder)
+      |> result.map_error(fn(e) {
+        "Some error decoding metadata for ´"
+        <> file |> premixed.text_magenta()
+        <> "´: "
+        <> string.inspect(e)
+      })
+    }
+    Error(l) -> Error(l)
+  }
 
   promise.resolve(metadata)
 }
