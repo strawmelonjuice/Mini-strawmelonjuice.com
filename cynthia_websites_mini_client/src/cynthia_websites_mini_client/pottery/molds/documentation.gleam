@@ -14,7 +14,7 @@ import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode.{type Dynamic}
 import gleam/list
-import gleam/option.{None}
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
 import houdini
@@ -408,6 +408,98 @@ fn documentation_common(
                     ])
                   }
                 },
+                // Navigation buttons
+                {
+                  case dict.get(model.computed_menus, 1) {
+                    Ok(menu_items) -> {
+                      let #(prev, next) =
+                        find_prev_next_links(menu_items, model.path)
+                      html.div(
+                        [
+                          attribute.class(
+                            "mt-8 flex justify-between border-t border-base-300 pt-4",
+                          ),
+                        ],
+                        [
+                          // Previous button
+                          case prev {
+                            Some(item) -> {
+                              html.a(
+                                [
+                                  attribute.class(
+                                    "flex items-center gap-2 px-4 py-2 rounded-md hover:bg-base-300/50 text-base-content/80 hover:text-base-content",
+                                  ),
+                                  attribute.href(
+                                    utils.phone_home_url() <> "#" <> item.to,
+                                  ),
+                                ],
+                                [
+                                  html.span(
+                                    [attribute.class("i-tabler-chevron-left")],
+                                    [],
+                                  ),
+                                  html.div([attribute.class("flex flex-col")], [
+                                    html.span(
+                                      [
+                                        attribute.class(
+                                          "text-xs text-base-content/60",
+                                        ),
+                                      ],
+                                      [html.text("Previous")],
+                                    ),
+                                    html.span([], [html.text(item.name)]),
+                                  ]),
+                                ],
+                              )
+                            }
+                            None -> html.div([], [])
+                          },
+                          // Next button
+                          case next {
+                            Some(item) -> {
+                              html.a(
+                                [
+                                  attribute.class(
+                                    "flex items-center gap-2 px-4 py-2 rounded-md hover:bg-base-300/50 text-base-content/80 hover:text-base-content",
+                                  ),
+                                  attribute.href(
+                                    utils.phone_home_url() <> "#" <> item.to,
+                                  ),
+                                ],
+                                [
+                                  html.div(
+                                    [
+                                      attribute.class(
+                                        "flex flex-col text-right",
+                                      ),
+                                    ],
+                                    [
+                                      html.span(
+                                        [
+                                          attribute.class(
+                                            "text-xs text-base-content/60",
+                                          ),
+                                        ],
+                                        [html.text("Next")],
+                                      ),
+                                      html.span([], [html.text(item.name)]),
+                                    ],
+                                  ),
+                                  html.span(
+                                    [attribute.class("i-tabler-chevron-right")],
+                                    [],
+                                  ),
+                                ],
+                              )
+                            }
+                            None -> html.div([], [])
+                          },
+                        ],
+                      )
+                    }
+                    Error(_) -> html.div([], [])
+                  }
+                },
               ],
             ),
           ],
@@ -529,6 +621,65 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
           ),
         ])
       })
+    }
+  }
+}
+
+/// Find the previous and next menu items relative to the current path
+fn find_prev_next_links(
+  menu_items: List(model_type.MenuItem),
+  current_path: String,
+) -> #(Option(model_type.MenuItem), Option(model_type.MenuItem)) {
+  find_prev_next_links_looped(menu_items, current_path, None)
+}
+
+fn find_prev_next_links_looped(
+  left_menu_items: List(model_type.MenuItem),
+  current_path: String,
+  last_item: Option(model_type.MenuItem),
+) -> #(Option(model_type.MenuItem), Option(model_type.MenuItem)) {
+  case left_menu_items, last_item {
+    // End of list, nothing found
+    [], None -> #(None, None)
+    // End of list after finding current, so we know the previous but no next
+    [], Some(last) -> #(Some(last), None)
+    // Single item with no history
+    [current], None -> {
+      case current.to == current_path {
+        True -> #(None, None)
+        False -> #(None, Some(current))
+      }
+    }
+    // Single item with history
+    [current], Some(last) -> {
+      case current.to == current_path {
+        True -> #(Some(last), None)
+        False -> #(Some(last), Some(current))
+      }
+    }
+    // Multiple items, no history yet
+    [head, ..rest], None -> {
+      case head.to == current_path {
+        True -> {
+          case list.first(rest) {
+            Ok(next) -> #(None, Some(next))
+            Error(_) -> #(None, None)
+          }
+        }
+        False -> find_prev_next_links_looped(rest, current_path, Some(head))
+      }
+    }
+    // Multiple items with history
+    [head, ..rest], Some(last) -> {
+      case head.to == current_path {
+        True -> {
+          case list.first(rest) {
+            Ok(next) -> #(Some(last), Some(next))
+            Error(_) -> #(Some(last), None)
+          }
+        }
+        False -> find_prev_next_links_looped(rest, current_path, Some(head))
+      }
     }
   }
 }
