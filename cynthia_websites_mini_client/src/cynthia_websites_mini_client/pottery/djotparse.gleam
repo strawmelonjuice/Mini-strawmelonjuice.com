@@ -2,6 +2,7 @@
 
 import cynthia_websites_mini_client/utils
 import gleam/dict.{type Dict}
+import gleam/int
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/string
@@ -15,29 +16,62 @@ import lustre/element.{type Element}
 import lustre/element/html
 
 pub fn entry_to_conversion(djot: String) -> List(Element(msg)) {
-  djot
-  |> preprocess_djot_extensions
-  |> jot.parse
-  |> document_to_lustre
+  echo "Original djot: " <> string.slice(djot, 0, 50) <> "..."
+  let preprocessed = preprocess_djot_extensions(djot)
+  echo "After preprocessing: " <> string.slice(preprocessed, 0, 50) <> "..."
+  let parsed = jot.parse(preprocessed)
+  echo "Parsed container count: " <> string.inspect(list.length(parsed.content))
+  document_to_lustre(parsed)
 }
 
-fn preprocess_djot_extensions(djot: String) -> String {
+pub fn preprocess_djot_extensions(djot: String) -> String {
   let normalized =
     djot
     |> string.replace("\r\n", "\n")
     // Normalize line endings
     |> string.replace("\r", "\n")
     // Handle old Mac line endings
+    |> string.replace("\\!", "!")
+    // Convert escaped exclamation marks
     |> string.trim()
   // Remove leading/trailing whitespace
+  echo "After normalization: " <> string.slice(normalized, 0, 50) <> "..."
 
-  normalized
-  |> preprocess_autolinks
-  |> preprocess_strikethrough
-  |> preprocess_tables
-  |> preprocess_blockquotes
-  |> preprocess_task_lists
-  |> preprocess_definition_lists
+  // Process heading attributes first to ensure IDs are attached correctly
+  let with_heading_attrs = preprocess_heading_attributes(normalized)
+  echo "After heading attributes: "
+    <> string.slice(with_heading_attrs, 0, 50)
+    <> "..."
+
+  // Fix multiline images
+  let with_fixed_images = preprocess_multiline_images(with_heading_attrs)
+  echo "After fixing multiline images: "
+    <> string.slice(with_fixed_images, 0, 50)
+    <> "..."
+
+  let with_autolinks = with_fixed_images |> preprocess_autolinks
+  echo "After autolinks: " <> string.slice(with_autolinks, 0, 50) <> "..."
+
+  let with_strikethrough = with_autolinks |> preprocess_strikethrough
+  echo "After strikethrough: "
+    <> string.slice(with_strikethrough, 0, 50)
+    <> "..."
+
+  let with_tables = with_strikethrough |> preprocess_tables
+  echo "After tables: " <> string.slice(with_tables, 0, 50) <> "..."
+
+  let with_blockquotes = with_tables |> preprocess_blockquotes
+  echo "After blockquotes: " <> string.slice(with_blockquotes, 0, 50) <> "..."
+
+  let with_task_lists = with_blockquotes |> preprocess_task_lists
+  echo "After task lists: " <> string.slice(with_task_lists, 0, 50) <> "..."
+
+  let with_definition_lists = with_task_lists |> preprocess_definition_lists
+  echo "After definition lists: "
+    <> string.slice(with_definition_lists, 0, 50)
+    <> "..."
+
+  with_definition_lists
 }
 
 fn document_to_lustre(document: Document) -> List(Element(msg)) {
@@ -77,64 +111,118 @@ fn container_to_lustre(
 ) {
   let element = case container {
     Paragraph(attrs, inlines) -> {
-      let in_a_list = case refs |> dict.get("am I in a list?") {
-        Ok(..) -> True
-        _ -> False
-      }
+      // Check if this paragraph is an ordered list
+      case is_ordered_list_paragraph(inlines) {
+        True -> {
+          // Extract the list items from the text
+          let items = extract_ordered_list_items(inlines)
 
-      html.p(
-        attributes_to_lustre(attrs, [
-          case in_a_list {
-            False -> attribute.class("mb-2")
-            True -> attribute.class("whitespace-nowrap")
-          },
-        ]),
-        inlines_to_lustre([], inlines, refs),
-      )
+          // Split the inlines to separate text from other elements like images
+          // (We don't need text_content anymore since we extract items directly)
+
+          let non_text_inlines =
+            list.filter(inlines, fn(inline) {
+              case inline {
+                Text(_) -> False
+                _ -> True
+              }
+            })
+
+          // Render as an ordered list
+          html.ol(
+            attributes_to_lustre(attrs, [attribute.class("list-decimal mb-4")]),
+            list.map(items, fn(item) {
+              let #(num, content) = item
+
+              // Add non-text inlines only to the last list item
+              let is_last_item = num == list.length(items)
+              let item_content = case
+                is_last_item,
+                list.length(non_text_inlines) > 0
+              {
+                True, True -> {
+                  // For the last item, include any non-text inlines (images, links, etc.)
+                  inlines_to_lustre(
+                    [],
+                    [Text(content), ..non_text_inlines],
+                    refs,
+                  )
+                }
+                _, _ -> {
+                  // For other items, just use the text
+                  [html.text(content)]
+                }
+              }
+
+              html.li([], item_content)
+            }),
+          )
+        }
+        False -> {
+          // Regular paragraph
+          let in_a_list = case refs |> dict.get("am I in a list?") {
+            Ok(..) -> True
+            _ -> False
+          }
+
+          html.p(
+            attributes_to_lustre(attrs, [
+              case in_a_list {
+                False -> attribute.class("mb-2")
+                True -> attribute.class("whitespace-nowrap")
+              },
+            ]),
+            inlines_to_lustre([], inlines, refs),
+          )
+        }
+      }
     }
     Heading(attrs, level, inlines) -> {
+      // Clean heading text to remove {#id} markup
+      let clean_inlines = clean_heading_text(inlines)
+
       case level {
         1 ->
           html.h1(
             attributes_to_lustre(attrs, [
               attribute.class("text-4xl font-bold text-accent"),
             ]),
-            inlines_to_lustre([], inlines, refs),
+            inlines_to_lustre([], clean_inlines, refs),
           )
         2 ->
           html.h2(
             attributes_to_lustre(attrs, [
               attribute.class("text-3xl font-bold text-accent"),
             ]),
-            inlines_to_lustre([], inlines, refs),
+            inlines_to_lustre([], clean_inlines, refs),
           )
         3 ->
           html.h3(
             attributes_to_lustre(attrs, [
               attribute.class("text-2xl font-bold text-accent"),
             ]),
-            inlines_to_lustre([], inlines, refs),
+            inlines_to_lustre([], clean_inlines, refs),
           )
         4 ->
           html.h4(
             attributes_to_lustre(attrs, [
               attribute.class("text-xl font-bold text-accent"),
             ]),
-            inlines_to_lustre([], inlines, refs),
+            inlines_to_lustre([], clean_inlines, refs),
           )
         5 ->
           html.h5(
             attributes_to_lustre(attrs, [
               attribute.class("text-lg font-bold text-accent"),
             ]),
-            inlines_to_lustre([], inlines, refs),
+            inlines_to_lustre([], clean_inlines, refs),
           )
         _ ->
           html.h6(
             attributes_to_lustre(attrs, [
               attribute.class("font-bold text-accent"),
             ]),
-            inlines_to_lustre([], inlines, refs),
+            inlines_to_lustre([], clean_inlines, refs),
           )
       }
     }
@@ -550,21 +638,90 @@ fn convert_table_to_raw(lines: List(String)) -> String {
   }
 }
 
-fn preprocess_blockquotes(djot: String) -> String {
-  djot
-  |> string.split("\n")
-  |> list.map(fn(line) {
-    case string.starts_with(string.trim(line), "> ") {
-      True -> {
-        let content = string.drop_start(string.trim(line), 2)
-        "```=html\n<blockquote class=\"border-l-4 border-accent pl-4 italic text-base-content/80 my-4\"><p class=\"mb-0\">"
-        <> content
-        <> "</p></blockquote>\n```"
-      }
-      False -> line
-    }
-  })
+pub fn preprocess_blockquotes(djot: String) -> String {
+  echo "Processing blockquotes..."
+
+  // Process blockquotes as groups, not individual lines
+  let lines = string.split(djot, "\n")
+  process_blockquote_lines(lines, [], [], False)
   |> string.join("\n")
+}
+
+fn process_blockquote_lines(
+  lines: List(String),
+  processed: List(String),
+  blockquote_buffer: List(String),
+  in_blockquote: Bool,
+) -> List(String) {
+  case lines {
+    [] -> {
+      // If we have a blockquote buffer at the end, process it
+      case in_blockquote {
+        True -> {
+          let blockquote =
+            convert_blockquote_to_raw(list.reverse(blockquote_buffer))
+          list.reverse([blockquote, ..processed])
+        }
+        False -> list.reverse(processed)
+      }
+    }
+
+    [line, ..rest] -> {
+      let trimmed = string.trim(line)
+      let is_blockquote_line = string.starts_with(trimmed, "> ")
+
+      case in_blockquote, is_blockquote_line {
+        // Continue collecting blockquote lines
+        True, True -> {
+          let content = string.drop_start(trimmed, 2) |> string.trim()
+          process_blockquote_lines(
+            rest,
+            processed,
+            [content, ..blockquote_buffer],
+            True,
+          )
+        }
+
+        // End of blockquote
+        True, False -> {
+          let blockquote =
+            convert_blockquote_to_raw(list.reverse(blockquote_buffer))
+          process_blockquote_lines(rest, [blockquote, ..processed], [], False)
+        }
+
+        // Start of blockquote
+        False, True -> {
+          let content = string.drop_start(trimmed, 2) |> string.trim()
+          process_blockquote_lines(rest, processed, [content], True)
+        }
+
+        // Regular line, not in blockquote
+        False, False -> {
+          process_blockquote_lines(rest, [line, ..processed], [], False)
+        }
+      }
+    }
+  }
+}
+
+fn convert_blockquote_to_raw(lines: List(String)) -> String {
+  // Join the blockquote lines with <br> for line breaks
+  let content =
+    lines
+    |> list.map(fn(line) {
+      case line {
+        "" -> "<br>"
+        // Empty line becomes a line break
+        _ -> line
+      }
+    })
+    |> string.join(" ")
+
+  echo "Converting blockquote to raw HTML: " <> content
+
+  "```=html\n<blockquote class=\"border-l-4 border-accent pl-4 italic text-base-content/80 my-4\"><p class=\"mb-0\">"
+  <> content
+  <> "</p></blockquote>\n```"
 }
 
 fn preprocess_task_lists(djot: String) -> String {
@@ -753,6 +910,54 @@ fn process_autolink_markers(input: String) -> String {
   }
 }
 
+// Check if paragraph inlines represent an ordered list
+fn is_ordered_list_paragraph(inlines: List(Inline)) -> Bool {
+  case inlines {
+    [Text(text), ..] -> {
+      let lines = string.split(text, "\n")
+
+      // Check if all lines match the ordered list pattern (number. content)
+      list.all(lines, fn(line) {
+        case string.split_once(line, ". ") {
+          Ok(#(num, _)) -> {
+            case int.parse(num) {
+              Ok(_) -> True
+              Error(_) -> False
+            }
+          }
+          Error(_) -> False
+        }
+      })
+      && list.length(lines) > 0
+    }
+    _ -> False
+  }
+}
+
+// Extract list items from paragraph text
+// Returns a list of tuples with (item number, item text content)
+fn extract_ordered_list_items(inlines: List(Inline)) -> List(#(Int, String)) {
+  case inlines {
+    [Text(text), ..] -> {
+      let lines = string.split(text, "\n")
+
+      // Parse each line into a tuple of (number, content)
+      list.filter_map(lines, fn(line) {
+        case string.split_once(line, ". ") {
+          Ok(#(num, content)) -> {
+            case int.parse(num) {
+              Ok(n) -> Ok(#(n, content))
+              Error(_) -> Error(Nil)
+            }
+          }
+          Error(_) -> Error(Nil)
+        }
+      })
+    }
+    _ -> []
+  }
+}
+
 // Debug function to test the pipeline
 pub fn debug_conversion(djot: String) -> String {
   let preprocessed = preprocess_djot_extensions(djot)
@@ -761,4 +966,242 @@ pub fn debug_conversion(djot: String) -> String {
   <> preprocessed
   <> "\n\nParsed containers count: "
   <> string.inspect(list.length(parsed.content))
+}
+
+// Debug function to test image processing
+pub fn debug_image_processing(djot: String) -> String {
+  echo "Processing image in: " <> string.slice(djot, 0, 100) <> "..."
+  let preprocessed = preprocess_djot_extensions(djot)
+  let parsed = jot.parse(preprocessed)
+
+  let image_count =
+    parsed.content
+    |> list.filter(fn(container) {
+      case container {
+        Paragraph(_, inlines) -> {
+          inlines
+          |> list.any(fn(inline) {
+            case inline {
+              Image(_, _) -> True
+              _ -> False
+            }
+          })
+        }
+        _ -> False
+      }
+    })
+    |> list.length
+
+  echo "Found " <> string.inspect(image_count) <> " image containers"
+
+  let result = document_to_lustre(parsed)
+  "Processed image content with "
+  <> string.inspect(list.length(result))
+  <> " elements"
+}
+
+pub fn preprocess_multiline_images(djot: String) -> String {
+  echo "Looking for multiline image references..."
+
+  djot
+  |> string.split("\n")
+  |> process_multiline_image_lines([], "")
+  |> string.join("\n")
+}
+
+fn process_multiline_image_lines(
+  lines: List(String),
+  processed: List(String),
+  buffer: String,
+) -> List(String) {
+  case lines {
+    [] -> list.reverse(processed)
+
+    [line, ..rest] -> {
+      let has_image_start = string.contains(line, "![")
+      let has_image_end = string.contains(line, ")")
+      let has_incomplete_image = has_image_start && !has_image_end
+
+      case buffer {
+        // No buffer yet
+        "" -> {
+          case has_incomplete_image {
+            // Start collecting a multiline image
+            True -> {
+              echo "Starting multiline image buffer with: " <> line
+              process_multiline_image_lines(rest, processed, line)
+            }
+            // Normal line
+            False ->
+              process_multiline_image_lines(rest, [line, ..processed], "")
+          }
+        }
+
+        // Continue collecting an existing multiline image
+        _ -> {
+          // If we have a buffer, we're in the middle of processing a multiline image
+          // We need to combine all lines until we find the closing parenthesis
+          case has_image_end {
+            // Complete the image and add to processed
+            True -> {
+              let complete_line = buffer <> " " <> line
+              echo "Completed multiline image: "
+                <> string.slice(complete_line, 0, 100)
+                <> "..."
+              process_multiline_image_lines(
+                rest,
+                [complete_line, ..processed],
+                "",
+              )
+            }
+            // Continue buffering
+            False -> {
+              echo "Continuing multiline image buffer with: " <> line
+              process_multiline_image_lines(
+                rest,
+                processed,
+                buffer <> " " <> line,
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Process heading attributes like {#id} before headings
+pub fn preprocess_heading_attributes(djot: String) -> String {
+  echo "Processing heading attributes..."
+
+  let lines = string.split(djot, "\n")
+  let processed = process_heading_attribute_lines(lines, [])
+  string.join(processed, "\n")
+}
+
+fn process_heading_attribute_lines(
+  lines: List(String),
+  processed: List(String),
+) -> List(String) {
+  case lines {
+    [] -> list.reverse(processed)
+
+    [line, ..rest] -> {
+      // Check for attribute pattern {#something} followed by heading
+      let is_attribute =
+        string.starts_with(string.trim(line), "{#")
+        && string.contains(line, "}")
+
+      case is_attribute, rest {
+        True, [next, ..next_rest] -> {
+          let next_trimmed = string.trim(next)
+          // Check if next line is a heading
+          case
+            string.starts_with(next_trimmed, "# ")
+            || string.starts_with(next_trimmed, "## ")
+            || string.starts_with(next_trimmed, "### ")
+            || string.starts_with(next_trimmed, "#### ")
+            || string.starts_with(next_trimmed, "##### ")
+            || string.starts_with(next_trimmed, "###### ")
+          {
+            True -> {
+              // Extract ID from {#id}
+              case string.split_once(line, "{#") {
+                Ok(#(_, with_id)) -> {
+                  case string.split_once(with_id, "}") {
+                    Ok(#(id, _)) -> {
+                      echo "Found heading ID: " <> id
+                      // Just add ID to the HTML attribute, don't include in visible text
+                      let modified_heading = next <> " {#" <> id <> "}"
+                      process_heading_attribute_lines(next_rest, [
+                        modified_heading,
+                        ..processed
+                      ])
+                    }
+                    Error(_) ->
+                      process_heading_attribute_lines(rest, [line, ..processed])
+                  }
+                }
+                Error(_) ->
+                  process_heading_attribute_lines(rest, [line, ..processed])
+              }
+            }
+
+            False -> process_heading_attribute_lines(rest, [line, ..processed])
+          }
+        }
+
+        _, _ -> process_heading_attribute_lines(rest, [line, ..processed])
+      }
+    }
+  }
+}
+
+// Clean heading text by removing any {#id} attributes
+fn clean_heading_text(inlines: List(Inline)) -> List(Inline) {
+  inlines
+  |> list.map(fn(inline) {
+    case inline {
+      Text(text) -> {
+        // Remove {#id} pattern from the text
+        case string.split_once(text, " {#") {
+          Ok(#(content, _)) -> Text(content)
+          Error(_) -> inline
+        }
+      }
+      _ -> inline
+    }
+  })
+}
+
+// Debug function to test specific example input
+pub fn debug_example(djot: String) -> String {
+  // Add specific debug for multiline images in this example
+  echo "\n---- Testing specific example input ----"
+
+  // Debug each step
+  let normalized =
+    djot
+    |> string.replace("\r\n", "\n")
+    |> string.replace("\r", "\n")
+    |> string.trim()
+  echo "\nAfter normalization:"
+  echo string.slice(normalized, 0, 100) <> "..."
+
+  // Debug the heading attributes
+  let with_heading_attrs = preprocess_heading_attributes(normalized)
+  echo "\nAfter heading attributes processing:"
+  echo string.slice(with_heading_attrs, 0, 100) <> "..."
+
+  // Debug specific image processing
+  echo "\nLooking for images in normalized input..."
+  let image_lines =
+    normalized
+    |> string.split("\n")
+    |> list.filter(fn(line) {
+      string.contains(line, "![") || string.contains(line, "](")
+    })
+  echo "Found potential image lines: " <> string.inspect(image_lines)
+
+  // Debug the multiline image processing specifically
+  let with_fixed_images = preprocess_multiline_images(with_heading_attrs)
+  echo "\nAfter fixing multiline images:"
+  echo string.slice(with_fixed_images, 0, 100) <> "..."
+
+  // Debug blockquotes
+  let after_blockquotes = preprocess_blockquotes(with_fixed_images)
+  echo "\nAfter blockquote processing:"
+  echo string.slice(after_blockquotes, 0, 100) <> "..."
+
+  // Full preprocessing and parsing
+  let preprocessed = preprocess_djot_extensions(djot)
+  echo "\n---- Final preprocessed content: ----"
+  echo preprocessed
+
+  let parsed = jot.parse(preprocessed)
+  let container_count = list.length(parsed.content)
+  echo "\nParsed containers count: " <> string.inspect(container_count)
+
+  // Return the preprocessed content for inspection
+  preprocessed
 }

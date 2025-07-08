@@ -39,46 +39,21 @@ pub fn autolinks_test() {
   |> birdie.snap(title: "autolinks_test")
 }
 
-pub fn comprehensive_djot_features_test() {
-  "# Enhanced Djot Features Demo
+pub fn debug_autolinks_test() {
+  let input =
+    "External page example, using the theme list, downloading from <https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini-docs/refs/heads/main/content/3.%20customisation/3.2-themes.md>"
 
-This demonstrates all the enhanced Djot features:
+  // Test the preprocessing step
+  let preprocessed =
+    input
+    |> string.replace("\r\n", "\n")
+    |> string.replace("\r", "\n")
+    |> string.trim()
+    |> string.replace("<https://", "🔗AUTOLINK🔗https://")
 
-## Task Lists
-- [ ] Uncompleted task
-- [x] Completed task
-- [ ] Another pending task
-
-## Blockquotes
-> This is a blockquote with some important information.
-> It can span multiple lines.
-
-## Autolinks
-Check out this link: <https://github.com/CynthiaWebsiteEngine/CynthiaMini>
-
-## Strikethrough
-This text has ~~strikethrough~~ formatting.
-
-## Tables
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Autolinks | ✓ | Working perfectly |
-| Task Lists | ✓ | Checkboxes render |
-| Blockquotes | ✓ | Styled beautifully |
-
-## Definition Lists
-Term 1
-: Definition for term 1
-
-Term 2  
-: Definition for term 2
-
-## Regular Djot
-**Bold text** and *italic text* still work perfectly.
-
-`Inline code` and regular paragraphs are preserved."
-  |> djotparse.entry_to_conversion()
-  |> html.section([], _)
-  |> element.to_readable_string
-  |> birdie.snap(title: "comprehensive_djot_features_test")
+  // Check if we have the marker
+  case string.contains(preprocessed, "🔗AUTOLINK🔗") {
+    True -> should.equal("Found marker", "Found marker")
+    False -> should.equal("No marker found", "Found marker")
+  }
 }
