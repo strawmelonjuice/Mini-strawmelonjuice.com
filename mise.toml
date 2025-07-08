@@ -23,7 +23,37 @@ run = [
 
 [tasks.bun-install]
 description = "Installs Bun's dependencies and prepares the environment"
-run = ["bun install", "chmod +x ./mise/tasks/generate-ffi"]
+run = ["bun install", "chmod +x ./generate-ffi"]
+run_windows = "bun install"
+
+[tasks.generate-ffi]
+description = "Generates themes, CSS, and bundles client into server FFI"
+wait_for=["build-client","bun-install"]
+dir = "{{ config_root }}"
+run = [
+  "bun ./generate-ffi",
+]
+# On Windows, Bun requires TypeScript files to have a `.ts` extension for compatibility.
+# Therefore, we need to rename `generate-ffi` to `generate-ffi.ts` before running it.
+# Then run it with Bun, and then rename it back.
+run_windows = [
+  "powershell -Command \"Rename-Item -Path './generate-ffi' -NewName 'generate-ffi.ts' -Force\"",
+  "bun ./generate-ffi.ts",
+  "powershell -Command \"Rename-Item -Path './generate-ffi.ts' -NewName 'generate-ffi' -Force\""
+]
+
+[tasks.generate-ffi-themes]
+description = "Generates themes for the client"
+run = [
+  "bun ./generate-ffi --only-themes",
+]
+# also run on Windows
+run_windows = [
+  "powershell -Command \"Rename-Item -Path './generate-ffi' -NewName 'generate-ffi.ts' -Force\"",
+  "bun ./generate-ffi.ts --only-themes",
+  "powershell -Command \"Rename-Item -Path './generate-ffi.ts' -NewName 'generate-ffi' -Force\""
+]
+
 
 
 [tasks.clean-client]
@@ -61,9 +91,7 @@ run = "rm -rf ./test/*"
 
 
 [tasks.build-client]
-
 run = [
-  "bun ../mise/tasks/generate-ffi --only-themes",
   "gleam build",
   """
   cat <<EOF   > ./build/dev/javascript/cynthia_websites_mini_client/cynthia_websites_mini_client.ts
@@ -75,7 +103,7 @@ EOF
   """,
 ]
 wait_for = "bun-install"
-depends = ["bun-install","generate-prelude"]
+depends = ["bun-install","generate-prelude", "generate-ffi-themes"]
 description = "Build the client-side code and bundle it with Bun"
 dir = "{{ config_root }}/cynthia_websites_mini_client"
 

@@ -1,6 +1,6 @@
 {
   "name": "@cynthiaweb/cynthiaweb-mini",
-  "version": "1.0.6",
+  "version": "1.1.6",
   "license": "AGPL-3.0-only",
   "repository": {
     "url": "https://github.com/CynthiaWebsiteEngine/Mini"
@@ -35,7 +35,6 @@
     "dev-static": "mise watch run-dev-static-server",
     "dev": "mise watch run-dev dynamic",
     "format": "mise run fmt-all",
-    "preinstall": "npx only-allow bun",
     "prepack": "bun run bundle",
     "run-in-test": "mise run run-dev",
     "test": "mise run test-all"
