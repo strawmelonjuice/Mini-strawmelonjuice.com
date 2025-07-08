@@ -566,7 +566,7 @@ fn get_inner_and_meta(
         bun.which("pandoc"),
         "There is a markdown file in Cynthia's content folder, but to convert that to Djot and display it, you need to have Pandoc installed on the PATH, which it is not!",
       ))
-      let new_inner_plain: Result(String, String) =
+      let pandoc_child =
         spawn.sync(spawn.OptionsToSubprocess(
           [pandoc_path, file, "-f", "gfm", "-t", "djot"],
           cwd: Some(process.cwd()),
@@ -574,11 +574,31 @@ fn get_inner_and_meta(
           stderr: Some(spawn.Pipe),
           stdout: Some(spawn.Pipe),
         ))
-        |> spawn.stdout()
+      let pandoc_child = case
+        {
+          let assert spawn.SyncSubprocess(asserted_sync_child) = pandoc_child
+          spawn.success(asserted_sync_child)
+        }
+      {
+        True -> Ok(pandoc_child)
+        False -> {
+          Error(
+            "There was an error while trying to convert '"
+            <> file |> premixed.text_bright_yellow()
+            <> "' to Djot: \n"
+            <> result.unwrap(spawn.stderr(pandoc_child), "")
+            <> "\n\nMake sure you have at least Pandoc 3.7.0 installed on your system, earlier versions may not work correctly.",
+          )
+        }
+      }
+      use pandoc_child <- result.try(pandoc_child)
+      let new_inner_plain: Result(String, String) =
+        spawn.stdout(pandoc_child)
         |> result.replace_error("")
       use new_inner_plain <- result.try(new_inner_plain)
       Ok(#(new_inner_plain, file <> ".dj"))
     }
+
     False -> {
       Ok(#(inner_plain, file))
     }
