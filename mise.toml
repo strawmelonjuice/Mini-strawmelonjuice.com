@@ -1,5 +1,6 @@
 [tools]
 bun = "latest"
+erlang = "27"
 gleam = "latest"
 watchexec = "latest"
 
