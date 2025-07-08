@@ -22,8 +22,6 @@ pub fn entry_to_conversion(djot: String) -> List(Element(msg)) {
 }
 
 fn preprocess_djot_extensions(djot: String) -> String {
-  echo "Original input: " <> djot
-
   let normalized =
     djot
     |> string.replace("\r\n", "\n")
@@ -33,19 +31,13 @@ fn preprocess_djot_extensions(djot: String) -> String {
     |> string.trim()
   // Remove leading/trailing whitespace
 
-  echo "After normalization: " <> normalized
-
-  let after_autolinks = preprocess_autolinks(normalized)
-  echo "After autolinks: " <> after_autolinks
-
-  let after_strikethrough = preprocess_strikethrough(after_autolinks)
-  echo "After strikethrough: " <> after_strikethrough
-
-  after_strikethrough
-  // |> preprocess_tables
-  // |> preprocess_blockquotes
-  // |> preprocess_task_lists
-  // |> preprocess_definition_lists
+  normalized
+  |> preprocess_autolinks
+  |> preprocess_strikethrough
+  |> preprocess_tables
+  |> preprocess_blockquotes
+  |> preprocess_task_lists
+  |> preprocess_definition_lists
 }
 
 fn document_to_lustre(document: Document) -> List(Element(msg)) {
@@ -626,11 +618,14 @@ fn process_definition_list_lines(
 
     [line, ..rest] -> {
       let trimmed = string.trim(line)
-      let is_term =
-        !string.starts_with(trimmed, ":")
-        && trimmed != ""
-        && !string.starts_with(trimmed, " ")
+      // More restrictive definition list detection:
+      // Only consider it a term if the NEXT line starts with ":"
       let is_definition = string.starts_with(trimmed, ":")
+      let next_line_is_definition = case rest {
+        [next, ..] -> string.starts_with(string.trim(next), ":")
+        [] -> False
+      }
+      let is_term = !is_definition && trimmed != "" && next_line_is_definition
 
       case in_list, is_term || is_definition {
         True, True ->
@@ -646,6 +641,7 @@ fn process_definition_list_lines(
               )
             }
             False -> {
+              // is_term is True
               process_definition_list_lines(rest, True, list_buffer, trimmed)
             }
           }
@@ -728,18 +724,12 @@ fn process_strikethrough_markers(input: String) -> String {
 
 fn preprocess_autolinks(djot: String) -> String {
   // Convert <url> to [url](url) format for proper Djot parsing
-  let result =
-    djot
-    |> string.replace("<https://", "🔗AUTOLINK🔗https://")
-    |> string.replace("<http://", "🔗AUTOLINK🔗http://")
-    |> string.replace("<ftp://", "🔗AUTOLINK🔗ftp://")
-    |> string.replace("<mailto:", "🔗AUTOLINK🔗mailto:")
-    |> process_autolink_markers()
-
-  // Debug output
-  echo "Input: " <> djot <> "\n" <> "Output: " <> result
-
-  result
+  djot
+  |> string.replace("<https://", "🔗AUTOLINK🔗https://")
+  |> string.replace("<http://", "🔗AUTOLINK🔗http://")
+  |> string.replace("<ftp://", "🔗AUTOLINK🔗ftp://")
+  |> string.replace("<mailto:", "🔗AUTOLINK🔗mailto:")
+  |> process_autolink_markers()
 }
 
 fn process_autolink_markers(input: String) -> String {
