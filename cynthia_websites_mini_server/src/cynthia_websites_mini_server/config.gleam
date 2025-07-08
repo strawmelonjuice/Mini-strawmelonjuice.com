@@ -562,6 +562,20 @@ fn get_inner_and_meta(
     )
   {
     True -> {
+      // If the file is external, we need to write it to a temporary file first.
+      let wri = case possibly_extern {
+        Some(..) -> {
+          simplifile.write(file, inner_plain)
+          |> result.replace_error(
+            "There was an error while writing the external content to '"
+            <> file |> premixed.text_bright_yellow()
+            <> "'.",
+          )
+        }
+        None -> Ok(Nil)
+      }
+      use _ <- result.try(wri)
+
       use pandoc_path <- result.try(result.replace_error(
         bun.which("pandoc"),
         "There is a markdown file in Cynthia's content folder, but to convert that to Djot and display it, you need to have Pandoc installed on the PATH, which it is not!",
@@ -596,6 +610,22 @@ fn get_inner_and_meta(
         spawn.stdout(pandoc_child)
         |> result.replace_error("")
       use new_inner_plain <- result.try(new_inner_plain)
+
+      // If the file was external, we need delete the temporary file.
+      let re = case possibly_extern {
+        Some(..) -> {
+          simplifile.delete(file)
+          |> result.replace_error(
+            "There was an error while deleting the temporary file '"
+            <> file |> premixed.text_bright_yellow()
+            <> "'.",
+          )
+        }
+        None -> Ok(Nil)
+      }
+
+      use _ <- result.try(re)
+
       Ok(#(new_inner_plain, file <> ".dj"))
     }
 
