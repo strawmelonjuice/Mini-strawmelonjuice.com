@@ -682,21 +682,33 @@ fn process_blockquote_lines(
 }
 
 fn convert_blockquote_to_raw(lines: List(String)) -> String {
-  // Join the blockquote lines with <br> for line breaks
   let content =
     lines
     |> list.map(fn(line) {
       case line {
-        "" -> "<br>"
-        // Empty line becomes a line break
+        // Any line without content should be an empty line broken.
+        "" -> "\n"
+        " " -> "\n"
+        "\\" -> ""
         _ -> line
       }
     })
-    |> string.join(" ")
+    |> string.join("\n")
 
-  "```=html\n<blockquote class=\"border-l-4 border-accent pl-4 italic text-base-content/80 my-4\"><p class=\"mb-0\">"
-  <> content
-  <> "</p></blockquote>\n```"
+  html.blockquote(
+    [
+      attribute.class(
+        "border-l-4 border-accent border-dotted pl-4 bg-secondary bg-opacity-10 mb-4 mt-4",
+      ),
+    ],
+    [html.pre([], [element.text(content)])],
+  )
+  |> element_to_raw
+}
+
+/// Converts a Lustre element to a raw block Djot representation.
+fn element_to_raw(elm: element.Element(a)) {
+  "```=html\n" <> { elm |> element.to_string } <> "\n```"
 }
 
 fn preprocess_task_lists(djot: String) -> String {
@@ -934,8 +946,7 @@ fn extract_ordered_list_items(inlines: List(Inline)) -> List(#(Int, String)) {
 }
 
 pub fn preprocess_multiline_images(djot: String) -> String {
-  djot
-  |> string.split("\n")
+  string.split(djot, "\n")
   |> process_multiline_image_lines([], "")
   |> string.join("\n")
 }
