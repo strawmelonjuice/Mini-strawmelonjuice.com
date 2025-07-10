@@ -1,7 +1,6 @@
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type
 import cynthia_websites_mini_client/utils
-import cynthia_websites_mini_shared/configtype
 import gleam/bool
 import gleam/dict.{type Dict}
 import gleam/dynamic
@@ -25,6 +24,61 @@ pub fn page_layout(
   let silly_allowed =
     bool.negate(string.contains(model.path, "portfolio"))
     && bool.negate(string.starts_with(model.path, "!"))
+
+  let #(badgies_wide, badgies_tall) = case silly_allowed {
+    True -> {
+      let badgies_inside = {
+        [
+          // Header for tags section
+          html.div(
+            [
+              attribute.class(
+                "bg-base-200 px-3 py-2 text-sm font-medium border-b border-base-300",
+              ),
+            ],
+            [html.text("Badgies")],
+          ),
+          html.div([attribute.class("p-3")], [
+            html.div([attribute.class("flex flex-wrap gap-2")], [
+              badges({
+                let assert Ok(badges_json_) =
+                  dict.get(model.other, "config_strawmelonjuice_badges")
+                  as "badges json not found in config"
+                let assert Ok(badges_json) =
+                  decode.run(badges_json_, decode.string)
+                  as "Could not decode badges config into a json string."
+                let assert Ok(badge_list) =
+                  json.parse(badges_json, decode.list(badge_decoder()))
+                  as "Could not parse badges json into a proper list of badges."
+                badge_list
+              }),
+            ]),
+          ]),
+        ]
+      }
+      #(
+        html.div(
+          [
+            attribute.id("da-badgies"),
+            attribute.class(
+              "border border-base-300 rounded-md overflow-hidden mb-4 bg-base-300 hidden md:block",
+            ),
+          ],
+          badgies_inside,
+        ),
+        html.div(
+          [
+            attribute.id("le-badgies"),
+            attribute.class(
+              "border border-base-300 rounded-md overflow-hidden mt-4 bg-base-300 md:hidden",
+            ),
+          ],
+          badgies_inside,
+        ),
+      )
+    }
+    False -> #(element.none(), element.none())
+  }
   // Load the primary navigation menu
   let menu = menu_1(model)
 
@@ -84,51 +138,19 @@ pub fn page_layout(
           }
           None -> element.none()
         },
-        case silly_allowed {
-          True ->
-            html.div(
-              [
-                attribute.id("da-badgies"),
-                attribute.class(
-                  "border border-base-300 rounded-md overflow-hidden mb-4 bg-base-300",
-                ),
-              ],
-              [
-                // Header for tags section
-                html.div(
-                  [
-                    attribute.class(
-                      "bg-base-200 px-3 py-2 text-sm font-medium border-b border-base-300",
-                    ),
-                  ],
-                  [html.text("Badgies")],
-                ),
-                html.div([attribute.class("p-3")], [
-                  html.div([attribute.class("flex flex-wrap gap-2")], [
-                    badges({
-                      let assert Ok(badges_json_) =
-                        dict.get(model.other, "config_strawmelonjuice_badges")
-                        as "badges json not found in config"
-                      let assert Ok(badges_json) =
-                        decode.run(badges_json_, decode.string)
-                        |> echo
-                        as "Could not decode badges config into a json string."
-                      let assert Ok(badge_list) =
-                        json.parse(badges_json, decode.list(badge_decoder()))
-                        as "Could not parse badges json into a proper list of badges."
-                      badge_list
-                    }),
-                  ]),
-                ]),
-              ],
-            )
-          False -> element.none()
-        },
+        badgies_wide,
       ],
     )
 
   // Assemble the complete layout using the common layout function
-  theme_common(content, menu, page_meta, variables, model)
+  theme_common(
+    content:,
+    menu:,
+    sidebar: page_meta,
+    underneath: badgies_tall,
+    variables:,
+    model:,
+  )
 }
 
 type Badge {
@@ -452,7 +474,14 @@ pub fn post_layout(
     )
 
   // Assemble the complete layout with sidebar content
-  theme_common(content, menu, post_meta, variables, model)
+  theme_common(
+    content: content,
+    menu: menu,
+    sidebar: post_meta,
+    underneath: element.none(),
+    variables: variables,
+    model:,
+  )
 }
 
 /// Shared layout structure for both pages and posts
@@ -464,11 +493,12 @@ pub fn post_layout(
 /// @param model Model with application state
 /// @return A complete HTML layout structure
 fn theme_common(
-  content: Element(messages.Msg),
-  menu: List(Element(messages.Msg)),
-  sidebar: Element(messages.Msg),
-  variables: Dict(String, Dynamic),
-  model: model_type.Model,
+  content content: Element(messages.Msg),
+  menu menu: List(Element(messages.Msg)),
+  sidebar sidebar: Element(messages.Msg),
+  underneath underneath: Element(messages.Msg),
+  variables variables: Dict(String, Dynamic),
+  model model: model_type.Model,
 ) -> Element(messages.Msg) {
   let menu_is_open = result.is_ok(dict.get(model.other, "strawmelonmenu open"))
   // Extract site name and determine if this is a post
@@ -798,6 +828,7 @@ fn theme_common(
               ])
             }
           },
+          underneath,
         ],
       ),
       html.div(
