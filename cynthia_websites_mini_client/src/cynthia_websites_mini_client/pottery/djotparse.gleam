@@ -578,9 +578,10 @@ fn convert_table_to_raw(lines: List(String)) -> String {
 
           let header_elements = {
             list.map(header_cells, fn(cell) {
-              html.th([attribute.class("px-4 py-2 text-left font-bold")], [
-                html.text(cell),
-              ])
+              html.th(
+                [attribute.class("px-4 py-2 text-left font-bold")],
+                entry_to_conversion(cell),
+              )
             })
           }
           let row_elements = {
@@ -593,7 +594,7 @@ fn convert_table_to_raw(lines: List(String)) -> String {
                         "px-4 py-2 border-t border-neutral-content",
                       ),
                     ],
-                    [html.text(cell)],
+                    entry_to_conversion(cell),
                   )
                 })
               })
