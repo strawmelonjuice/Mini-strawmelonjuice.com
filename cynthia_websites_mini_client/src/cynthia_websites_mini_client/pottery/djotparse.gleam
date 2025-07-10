@@ -24,33 +24,27 @@ pub fn entry_to_conversion(djot: String) -> List(Element(msg)) {
 pub fn preprocess_djot_extensions(djot: String) -> String {
   let normalized =
     djot
-    |> string.replace("\r\n", "\n")
     // Normalize line endings
+    |> string.replace("\r\n", "\n")
     |> string.replace("\r", "\n")
-    // Handle old Mac line endings
-    |> string.replace("\\!", "!")
     // Convert escaped exclamation marks
+    |> string.replace("\\!", "!")
+    // Remove leading/trailing whitespace
     |> string.trim()
-  // Remove leading/trailing whitespace
 
   // Process heading attributes first to ensure IDs are attached correctly
-  let with_heading_attrs = preprocess_heading_attributes(normalized)
-
+  preprocess_heading_attributes(normalized)
   // Fix multiline images
-  let with_fixed_images = preprocess_multiline_images(with_heading_attrs)
-
-  let with_autolinks = with_fixed_images |> preprocess_autolinks
-
-  let with_strikethrough = with_autolinks |> preprocess_strikethrough
-
-  let with_tables = with_strikethrough |> preprocess_tables
-  let with_blockquotes = with_tables |> preprocess_blockquotes
-
-  let with_task_lists = with_blockquotes |> preprocess_task_lists
-
-  let with_definition_lists = with_task_lists |> preprocess_definition_lists
-
-  with_definition_lists
+  |> preprocess_multiline_images()
+  // Preprocess autolinks
+  |> preprocess_autolinks
+  // Preprocess tables
+  |> preprocess_tables
+  // Preprocess blockquotes
+  |> preprocess_blockquotes
+  // Preprocess task lists
+  |> preprocess_task_lists
+  // And then out it goes!
 }
 
 fn document_to_lustre(document: Document) -> List(Element(msg)) {
@@ -577,38 +571,44 @@ fn convert_table_to_raw(lines: List(String)) -> String {
             })
             |> list.filter(fn(row) { list.length(row) > 0 })
 
-          let header_html =
-            header_cells
-            |> list.map(fn(cell) {
-              "<th class=\"px-4 py-2 text-left font-bold\">" <> cell <> "</th>"
+          let header_elements = {
+            list.map(header_cells, fn(cell) {
+              html.th([attribute.class("px-4 py-2 text-left font-bold")], [
+                html.text(cell),
+              ])
             })
-            |> string.join("")
-          let rows_html =
-            data_rows
-            |> list.map(fn(row) {
-              let cells_html =
-                row
-                |> list.map(fn(cell) {
-                  "<td class=\"px-4 py-2 border-t border-neutral-content\">"
-                  <> cell
-                  <> "</td>"
+          }
+          let row_elements = {
+            list.map(data_rows, fn(row) {
+              html.tr([], {
+                list.map(row, fn(cell) {
+                  html.td(
+                    [
+                      attribute.class(
+                        "px-4 py-2 border-t border-neutral-content",
+                      ),
+                    ],
+                    [html.text(cell)],
+                  )
                 })
-                |> string.join("")
-              "<tr class=\"hover:bg-base-200\">" <> cells_html <> "</tr>"
+              })
             })
-            |> string.join("")
+          }
 
-          let table_html =
-            "<table class=\"table table-zebra w-full my-4 border border-neutral-content\">"
-            <> "<thead class=\"bg-neutral text-neutral-content\">"
-            <> "<tr>"
-            <> header_html
-            <> "</tr></thead>"
-            <> "<tbody>"
-            <> rows_html
-            <> "</tbody></table>"
-
-          "```=html\n" <> table_html <> "\n```"
+          html.table(
+            [
+              attribute.class(
+                "table table-zebra w-full my-4 border border-neutral-content",
+              ),
+            ],
+            [
+              html.thead([attribute.class("bg-neutral text-neutral-content")], [
+                html.tr([], header_elements),
+                html.tbody([], row_elements),
+              ]),
+            ],
+          )
+          |> element_to_raw_djotstring
         }
         False -> string.join(lines, "\n")
       }
@@ -703,11 +703,11 @@ fn convert_blockquote_to_raw(lines: List(String)) -> String {
     ],
     [html.pre([], [element.text(content)])],
   )
-  |> element_to_raw
+  |> element_to_raw_djotstring
 }
 
 /// Converts a Lustre element to a raw block Djot representation.
-fn element_to_raw(elm: element.Element(a)) {
+fn element_to_raw_djotstring(elm: element.Element(a)) {
   "\n```=html\n" <> { elm |> element.to_string } <> "\n```\n"
 }
 
@@ -729,7 +729,7 @@ fn preprocess_task_lists(djot: String) -> String {
             element.text(content),
           ])
         }
-        |> element_to_raw
+        |> element_to_raw_djotstring
       }
       False ->
         case
@@ -747,131 +747,6 @@ fn preprocess_task_lists(djot: String) -> String {
     }
   })
   |> string.join("\n")
-}
-
-fn preprocess_definition_lists(djot: String) -> String {
-  let lines = string.split(djot, "\n")
-  process_definition_list_lines(lines, False, [], "")
-  |> string.join("\n")
-}
-
-fn process_definition_list_lines(
-  lines: List(String),
-  in_list: Bool,
-  list_buffer: List(String),
-  current_term: String,
-) -> List(String) {
-  case lines {
-    [] ->
-      case in_list {
-        True -> [convert_definition_list_to_raw(list_buffer)]
-        False -> []
-      }
-
-    [line, ..rest] -> {
-      let trimmed = string.trim(line)
-      // More restrictive definition list detection:
-      // Only consider it a term if the NEXT line starts with ":"
-      let is_definition = string.starts_with(trimmed, ":")
-      let next_line_is_definition = case rest {
-        [next, ..] -> string.starts_with(string.trim(next), ":")
-        [] -> False
-      }
-      let is_term = !is_definition && trimmed != "" && next_line_is_definition
-
-      case in_list, is_term || is_definition {
-        True, True ->
-          case is_definition {
-            True -> {
-              let definition = string.drop_start(trimmed, 1) |> string.trim()
-              let entry = current_term <> "|" <> definition
-              process_definition_list_lines(
-                rest,
-                True,
-                [entry, ..list_buffer],
-                "",
-              )
-            }
-            False -> {
-              // is_term is True
-              process_definition_list_lines(rest, True, list_buffer, trimmed)
-            }
-          }
-
-        True, False -> [
-          convert_definition_list_to_raw(list.reverse(list_buffer)),
-          line,
-          ..process_definition_list_lines(rest, False, [], "")
-        ]
-
-        False, True ->
-          case is_term {
-            True -> process_definition_list_lines(rest, True, [], trimmed)
-            False -> [
-              line,
-              ..process_definition_list_lines(rest, False, [], "")
-            ]
-          }
-
-        False, False -> [
-          line,
-          ..process_definition_list_lines(rest, False, [], "")
-        ]
-      }
-    }
-  }
-}
-
-fn convert_definition_list_to_raw(entries: List(String)) -> String {
-  case list.length(entries) > 0 {
-    True -> {
-      let dl_items =
-        entries
-        |> list.map(fn(entry) {
-          case string.split_once(entry, "|") {
-            Ok(#(term, definition)) ->
-              "<dt class=\"font-bold text-accent mt-4 first:mt-0\">"
-              <> term
-              <> "</dt>"
-              <> "<dd class=\"ml-4 text-base-content/80\">"
-              <> definition
-              <> "</dd>"
-            Error(_) -> ""
-          }
-        })
-        |> string.join("")
-
-      "```=html\n<dl class=\"my-4\">" <> dl_items <> "</dl>\n```"
-    }
-    False -> ""
-  }
-}
-
-fn preprocess_strikethrough(djot: String) -> String {
-  // Convert ~~text~~ to raw HTML <del>text</del>
-  djot
-  |> string.replace("~~", "🔗STRIKE🔗")
-  // Temporary marker to avoid conflicts
-  |> process_strikethrough_markers()
-}
-
-fn process_strikethrough_markers(input: String) -> String {
-  case string.split_once(input, "🔗STRIKE🔗") {
-    Ok(#(before, after)) -> {
-      case string.split_once(after, "🔗STRIKE🔗") {
-        Ok(#(middle, rest)) ->
-          before
-          <> "<del class=\"line-through opacity-70\">"
-          <> middle
-          <> "</del>"
-          <> process_strikethrough_markers(rest)
-        Error(_) -> before <> "~~" <> after
-        // Single marker, restore original
-      }
-    }
-    Error(_) -> input
-    // No markers found
-  }
 }
 
 fn preprocess_autolinks(djot: String) -> String {
