@@ -708,7 +708,7 @@ fn convert_blockquote_to_raw(lines: List(String)) -> String {
 
 /// Converts a Lustre element to a raw block Djot representation.
 fn element_to_raw(elm: element.Element(a)) {
-  "```=html\n" <> { elm |> element.to_string } <> "\n```"
+  "\n```=html\n" <> { elm |> element.to_string } <> "\n```\n"
 }
 
 fn preprocess_task_lists(djot: String) -> String {
@@ -719,9 +719,17 @@ fn preprocess_task_lists(djot: String) -> String {
     case string.starts_with(trimmed, "- [ ] ") {
       True -> {
         let content = string.drop_start(trimmed, 6)
-        "```=html\n<div class=\"flex items-center mb-2\"><input type=\"checkbox\" disabled class=\"mr-2 accent-primary\">"
-        <> content
-        <> "</div>\n```"
+        {
+          html.div([attribute.class("flex items-center mb-2")], [
+            html.input([
+              attribute.type_("checkbox"),
+              attribute.disabled(True),
+              attribute.class("mr-2 accent-primary"),
+            ]),
+            element.text(content),
+          ])
+        }
+        |> element_to_raw
       }
       False ->
         case
