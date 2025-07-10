@@ -22,20 +22,21 @@ pub fn entry_to_conversion(djot: String) -> List(Element(msg)) {
 }
 
 pub fn preprocess_djot_extensions(djot: String) -> String {
-  let normalized =
-    djot
-    // Normalize line endings
-    |> string.replace("\r\n", "\n")
-    |> string.replace("\r", "\n")
-    // Convert escaped exclamation marks
-    |> string.replace("\\!", "!")
-    // Remove leading/trailing whitespace
-    |> string.trim()
-
+  djot
+  // Normalize line endings
+  |> string.replace("\r\n", "\n")
+  |> string.replace("\r", "\n")
+  // Convert escaped exclamation marks
+  |> string.replace("\\!", "!")
+  // Remove leading/trailing whitespace
+  |> string.trim()
+  //
+  // Now that we've normalized the input, we can preprocess it further
+  //
   // Process heading attributes first to ensure IDs are attached correctly
-  preprocess_heading_attributes(normalized)
+  |> preprocess_heading_attributes
   // Fix multiline images
-  |> preprocess_multiline_images()
+  |> preprocess_multiline_images
   // Preprocess autolinks
   |> preprocess_autolinks
   // Preprocess tables
@@ -617,7 +618,7 @@ fn convert_table_to_raw(lines: List(String)) -> String {
   }
 }
 
-pub fn preprocess_blockquotes(djot: String) -> String {
+fn preprocess_blockquotes(djot: String) -> String {
   // Process blockquotes as groups, not individual lines
   let lines = string.split(djot, "\n")
   process_blockquote_lines(lines, [], [], False)
@@ -828,7 +829,7 @@ fn extract_ordered_list_items(inlines: List(Inline)) -> List(#(Int, String)) {
   }
 }
 
-pub fn preprocess_multiline_images(djot: String) -> String {
+fn preprocess_multiline_images(djot: String) -> String {
   string.split(djot, "\n")
   |> process_multiline_image_lines([], "")
   |> string.join("\n")
@@ -890,7 +891,7 @@ fn process_multiline_image_lines(
 }
 
 // Process heading attributes like {#id} before headings
-pub fn preprocess_heading_attributes(djot: String) -> String {
+fn preprocess_heading_attributes(djot: String) -> String {
   let lines = string.split(djot, "\n")
   let processed = process_heading_attribute_lines(lines, [])
   string.join(processed, "\n")
