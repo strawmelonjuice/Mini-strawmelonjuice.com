@@ -384,7 +384,11 @@ fn inline_to_lustre(
     Code(content) -> {
       [
         html.code(
-          [attribute.class("bg-neutral text-neutral-content p-1 rounded-lg")],
+          [
+            attribute.class(
+              "bg-neutral text-neutral-content p-1 rounded-lg mt-4 mb-4",
+            ),
+          ],
           [html.text(content)],
         ),
       ]
