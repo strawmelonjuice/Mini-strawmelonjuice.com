@@ -488,7 +488,8 @@ fn process_table_lines(
     [line, ..rest] -> {
       let trimmed = string.trim(line)
       let is_table_line = string.contains(line, "|") && trimmed != ""
-      let is_separator = string.contains(line, "|") && string.contains(line, "-")
+      let is_separator =
+        string.contains(line, "|") && string.contains(line, "-")
 
       case in_table, is_table_line || is_separator {
         True, True -> process_table_lines(rest, True, [line, ..table_buffer])
@@ -531,14 +532,17 @@ fn convert_table_to_raw(lines: List(String)) -> String {
               let has_pipes = string.contains(line, "|")
               let has_dashes = string.contains(line, "-")
               // A separator should be mostly dashes and pipes with minimal other content
-              let is_likely_separator = has_pipes && has_dashes && {
-                trimmed
-                |> string.to_graphemes
-                |> list.all(fn(char) {
-                  char == "|" || char == "-" || char == " " || char == ":"
-                })
-              }
-              
+              let is_likely_separator =
+                has_pipes
+                && has_dashes
+                && {
+                  trimmed
+                  |> string.to_graphemes
+                  |> list.all(fn(char) {
+                    char == "|" || char == "-" || char == " " || char == ":"
+                  })
+                }
+
               case is_likely_separator {
                 True -> Some(index)
                 False -> None
@@ -548,19 +552,22 @@ fn convert_table_to_raw(lines: List(String)) -> String {
         })
 
       case separator_index {
-        None -> string.join(lines, "\n") // No valid separator found
+        None -> string.join(lines, "\n")
+        // No valid separator found
         Some(sep_index) -> {
           // Split into header, separator, and rows
           let header_lines = list.take(lines, sep_index)
           let remaining = list.drop(lines, sep_index + 1)
 
           case header_lines {
-            [] -> string.join(lines, "\n") // No header
+            [] -> string.join(lines, "\n")
+            // No header
             _ -> {
               // Use the last header line if there are multiple
               let actual_header = case list.reverse(header_lines) {
                 [last_header, ..] -> last_header
-                [] -> "" // Should not happen since header_lines is not empty
+                [] -> ""
+                // Should not happen since header_lines is not empty
               }
 
               let header_cells =
@@ -571,7 +578,8 @@ fn convert_table_to_raw(lines: List(String)) -> String {
 
               // Validate that we have at least some header cells
               case list.length(header_cells) {
-                0 -> string.join(lines, "\n") // No valid header cells
+                0 -> string.join(lines, "\n")
+                // No valid header cells
                 _ -> {
                   let data_rows =
                     remaining
