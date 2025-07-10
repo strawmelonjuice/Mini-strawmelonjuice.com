@@ -1,5 +1,6 @@
 import birdie
 import cynthia_websites_mini_client/pottery/djotparse
+import cynthia_websites_mini_shared/configtype
 import gleam/string
 import gleeunit
 import gleeunit/should
@@ -57,4 +58,28 @@ pub fn debug_autolinks_test() {
     True -> should.equal("Found marker", "Found marker")
     False -> should.equal("No marker found", "Found marker")
   }
+}
+
+pub fn links_in_preprocessed_items_test() {
+  "- [ ] Task with [link](https://example.com)\n- [x] Completed task with [another link](https://test.com)\n\n> Blockquote with [a link](https://blockquote.example)"
+  |> djotparse.entry_to_conversion()
+  |> html.section([], _)
+  |> element.to_readable_string
+  |> birdie.snap(title: "links_in_preprocessed_items_test")
+}
+
+pub fn ordered_list_with_links_test() {
+  "1. First item with [link](https://first.com)\n2. Second item with [another link](https://second.com)\n3. Third item with **bold** and [link](https://third.com)"
+  |> djotparse.entry_to_conversion()
+  |> html.section([], _)
+  |> element.to_readable_string
+  |> birdie.snap(title: "ordered_list_with_links_test")
+}
+
+pub fn ootb_index_rendering_test() {
+  configtype.ootb_index
+  |> djotparse.entry_to_conversion()
+  |> html.body([], _)
+  |> element.to_readable_string
+  |> birdie.snap(title: "ootb_index_rendering_test")
 }

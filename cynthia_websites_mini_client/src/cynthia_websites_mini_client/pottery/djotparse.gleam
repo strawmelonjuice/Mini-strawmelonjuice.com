@@ -37,10 +37,12 @@ pub fn preprocess_djot_extensions(djot: String) -> String {
   |> preprocess_heading_attributes
   // Fix multiline images
   |> preprocess_multiline_images
+  // Preprocess tables BEFORE autolinks so autolinks don't break table structure
+  |> preprocess_tables
   // Preprocess autolinks
   |> preprocess_autolinks
-  // Preprocess tables
-  |> preprocess_tables
+  // Preprocess ordered lists
+  |> preprocess_ordered_lists
   // Preprocess blockquotes
   |> preprocess_blockquotes
   // Preprocess task lists
@@ -85,71 +87,21 @@ fn container_to_lustre(
 ) {
   let element = case container {
     Paragraph(attrs, inlines) -> {
-      // Check if this paragraph is an ordered list
-      case is_ordered_list_paragraph(inlines) {
-        True -> {
-          // Extract the list items from the text
-          let items = extract_ordered_list_items(inlines)
-
-          // Split the inlines to separate text from other elements like images
-          // (We don't need text_content anymore since we extract items directly)
-
-          let non_text_inlines =
-            list.filter(inlines, fn(inline) {
-              case inline {
-                Text(_) -> False
-                _ -> True
-              }
-            })
-
-          // Render as an ordered list
-          html.ol(
-            attributes_to_lustre(attrs, [attribute.class("list-decimal mb-4")]),
-            list.map(items, fn(item) {
-              let #(num, content) = item
-
-              // Add non-text inlines only to the last list item
-              let is_last_item = num == list.length(items)
-              let item_content = case
-                is_last_item,
-                list.length(non_text_inlines) > 0
-              {
-                True, True -> {
-                  // For the last item, include any non-text inlines (images, links, etc.)
-                  inlines_to_lustre(
-                    [],
-                    [Text(content), ..non_text_inlines],
-                    refs,
-                  )
-                }
-                _, _ -> {
-                  // For other items, just use the text
-                  [html.text(content)]
-                }
-              }
-
-              html.li([], item_content)
-            }),
-          )
-        }
-        False -> {
-          // Regular paragraph
-          let in_a_list = case refs |> dict.get("am I in a list?") {
-            Ok(..) -> True
-            _ -> False
-          }
-
-          html.p(
-            attributes_to_lustre(attrs, [
-              case in_a_list {
-                False -> attribute.class("mb-2")
-                True -> attribute.class("whitespace-nowrap")
-              },
-            ]),
-            inlines_to_lustre([], inlines, refs),
-          )
-        }
+      // Regular paragraph
+      let in_a_list = case refs |> dict.get("am I in a list?") {
+        Ok(..) -> True
+        _ -> False
       }
+
+      html.p(
+        attributes_to_lustre(attrs, [
+          case in_a_list {
+            False -> attribute.class("mb-2")
+            True -> attribute.class("whitespace-nowrap")
+          },
+        ]),
+        inlines_to_lustre([], inlines, refs),
+      )
     }
     Heading(attrs, level, inlines) -> {
       // Clean heading text to remove {#id} markup
@@ -529,25 +481,35 @@ fn process_table_lines(
   case lines {
     [] ->
       case in_table {
-        True -> [convert_table_to_raw(table_buffer)]
+        True -> [convert_table_to_raw(list.reverse(table_buffer))]
         False -> []
       }
 
     [line, ..rest] -> {
-      let is_table_line = string.contains(line, "|") && string.trim(line) != ""
+      let trimmed = string.trim(line)
+      let is_table_line = string.contains(line, "|") && trimmed != ""
       let is_separator =
         string.contains(line, "|") && string.contains(line, "-")
 
       case in_table, is_table_line || is_separator {
         True, True -> process_table_lines(rest, True, [line, ..table_buffer])
 
-        True, False -> [
-          convert_table_to_raw(list.reverse(table_buffer)),
-          line,
-          ..process_table_lines(rest, False, [])
-        ]
+        True, False -> {
+          // End of table - process accumulated buffer
+          case list.reverse(table_buffer) {
+            [] -> [line, ..process_table_lines(rest, False, [])]
+            table_lines -> [
+              convert_table_to_raw(table_lines),
+              line,
+              ..process_table_lines(rest, False, [])
+            ]
+          }
+        }
 
-        False, True -> process_table_lines(rest, True, [line])
+        False, True -> {
+          // Start of new table
+          process_table_lines(rest, True, [line])
+        }
 
         False, False -> [line, ..process_table_lines(rest, False, [])]
       }
@@ -557,68 +519,125 @@ fn process_table_lines(
 
 fn convert_table_to_raw(lines: List(String)) -> String {
   case lines {
-    [header, separator, ..rows] -> {
-      case string.contains(separator, "|") && string.contains(separator, "-") {
-        True -> {
-          let header_cells =
-            header
-            |> string.split("|")
-            |> list.map(string.trim)
-            |> list.filter(fn(cell) { cell != "" })
+    [] -> ""
+    [single_line] -> single_line
+    lines -> {
+      // Find the separator line (contains both | and - and looks like a separator)
+      let separator_index =
+        list.index_fold(lines, None, fn(acc, line, index) {
+          case acc {
+            Some(_) -> acc
+            None -> {
+              let trimmed = string.trim(line)
+              let has_pipes = string.contains(line, "|")
+              let has_dashes = string.contains(line, "-")
+              // A separator should be mostly dashes and pipes with minimal other content
+              let is_likely_separator =
+                has_pipes
+                && has_dashes
+                && {
+                  trimmed
+                  |> string.to_graphemes
+                  |> list.all(fn(char) {
+                    char == "|" || char == "-" || char == " " || char == ":"
+                  })
+                }
 
-          let data_rows =
-            rows
-            |> list.map(fn(row) {
-              row
-              |> string.split("|")
-              |> list.map(string.trim)
-              |> list.filter(fn(cell) { cell != "" })
-            })
-            |> list.filter(fn(row) { list.length(row) > 0 })
-
-          let header_elements = {
-            list.map(header_cells, fn(cell) {
-              html.th([attribute.class("px-4 py-2 text-left font-bold")], [
-                html.text(cell),
-              ])
-            })
+              case is_likely_separator {
+                True -> Some(index)
+                False -> None
+              }
+            }
           }
-          let row_elements = {
-            list.map(data_rows, fn(row) {
-              html.tr([], {
-                list.map(row, fn(cell) {
-                  html.td(
+        })
+
+      case separator_index {
+        None -> string.join(lines, "\n")
+        // No valid separator found
+        Some(sep_index) -> {
+          // Split into header, separator, and rows
+          let header_lines = list.take(lines, sep_index)
+          let remaining = list.drop(lines, sep_index + 1)
+
+          case header_lines {
+            [] -> string.join(lines, "\n")
+            // No header
+            _ -> {
+              // Use the last header line if there are multiple
+              let actual_header = case list.reverse(header_lines) {
+                [last_header, ..] -> last_header
+                [] -> ""
+                // Should not happen since header_lines is not empty
+              }
+
+              let header_cells =
+                actual_header
+                |> string.split("|")
+                |> list.map(string.trim)
+                |> list.filter(fn(cell) { cell != "" })
+
+              // Validate that we have at least some header cells
+              case list.length(header_cells) {
+                0 -> string.join(lines, "\n")
+                // No valid header cells
+                _ -> {
+                  let data_rows =
+                    remaining
+                    |> list.map(fn(row) {
+                      row
+                      |> string.split("|")
+                      |> list.map(string.trim)
+                      |> list.filter(fn(cell) { cell != "" })
+                    })
+                    |> list.filter(fn(row) { list.length(row) > 0 })
+
+                  let header_elements = {
+                    list.map(header_cells, fn(cell) {
+                      html.th(
+                        [attribute.class("px-4 py-2 text-left font-bold")],
+                        entry_to_conversion(cell),
+                      )
+                    })
+                  }
+                  let row_elements = {
+                    list.map(data_rows, fn(row) {
+                      html.tr([], {
+                        list.map(row, fn(cell) {
+                          html.td(
+                            [
+                              attribute.class(
+                                "px-4 py-2 border-t border-neutral-content",
+                              ),
+                            ],
+                            entry_to_conversion(cell),
+                          )
+                        })
+                      })
+                    })
+                  }
+
+                  html.table(
                     [
                       attribute.class(
-                        "px-4 py-2 border-t border-neutral-content",
+                        "table table-zebra w-full my-4 border border-neutral-content",
                       ),
                     ],
-                    [html.text(cell)],
+                    [
+                      html.thead(
+                        [attribute.class("bg-neutral text-neutral-content")],
+                        [html.tr([], header_elements)],
+                      ),
+                      html.tbody([], row_elements),
+                    ],
                   )
-                })
-              })
-            })
+                  |> element_to_raw_djotstring
+                }
+              }
+            }
           }
-
-          html.table(
-            [
-              attribute.class(
-                "table table-zebra w-full my-4 border border-neutral-content",
-              ),
-            ],
-            [
-              html.thead([attribute.class("bg-neutral text-neutral-content")], [
-                html.tr([], header_elements),
-                html.tbody([], row_elements),
-              ]),
-            ],
-          )
-          |> element_to_raw_djotstring
         }
-        False -> string.join(lines, "\n")
       }
     }
-    _ -> string.join(lines, "\n")
   }
 }
 
@@ -706,7 +725,7 @@ fn convert_blockquote_to_raw(lines: List(String)) -> String {
         "border-l-4 border-accent border-dotted pl-4 bg-secondary bg-opacity-10 mb-4 mt-4",
       ),
     ],
-    [html.pre([], [element.text(content)])],
+    entry_to_conversion(content),
   )
   |> element_to_raw_djotstring
 }
@@ -731,7 +750,7 @@ fn preprocess_task_lists(djot: String) -> String {
               attribute.disabled(True),
               attribute.class("mr-2 accent-primary"),
             ]),
-            element.text(content),
+            html.span([], entry_to_conversion(content)),
           ])
         }
         |> element_to_raw_djotstring
@@ -743,9 +762,18 @@ fn preprocess_task_lists(djot: String) -> String {
         {
           True -> {
             let content = string.drop_start(trimmed, 6)
-            "```=html\n<div class=\"flex items-center mb-2\"><input type=\"checkbox\" checked disabled class=\"mr-2 accent-primary\">"
-            <> content
-            <> "</div>\n```"
+            {
+              html.div([attribute.class("flex items-center mb-2")], [
+                html.input([
+                  attribute.type_("checkbox"),
+                  attribute.checked(True),
+                  attribute.disabled(True),
+                  attribute.class("mr-2 accent-primary"),
+                ]),
+                html.span([], entry_to_conversion(content)),
+              ])
+            }
+            |> element_to_raw_djotstring
           }
           False -> line
         }
@@ -785,51 +813,74 @@ fn process_autolink_markers(input: String) -> String {
   }
 }
 
-// Check if paragraph inlines represent an ordered list
-fn is_ordered_list_paragraph(inlines: List(Inline)) -> Bool {
-  case inlines {
-    [Text(text), ..] -> {
-      let lines = string.split(text, "\n")
+fn preprocess_ordered_lists(djot: String) -> String {
+  let lines = string.split(djot, "\n")
+  process_ordered_list_lines(lines, False, [])
+  |> string.join("\n")
+}
 
-      // Check if all lines match the ordered list pattern (number. content)
-      list.all(lines, fn(line) {
-        case string.split_once(line, ". ") {
-          Ok(#(num, _)) -> {
-            case int.parse(num) {
-              Ok(_) -> True
-              Error(_) -> False
-            }
-          }
-          Error(_) -> False
-        }
-      })
-      && list.length(lines) > 0
+fn process_ordered_list_lines(
+  lines: List(String),
+  in_list: Bool,
+  list_buffer: List(String),
+) -> List(String) {
+  case lines {
+    [] ->
+      case in_list {
+        True -> [convert_ordered_list_to_raw(list.reverse(list_buffer))]
+        False -> []
+      }
+
+    [line, ..rest] -> {
+      let trimmed = string.trim(line)
+      let is_list_item = is_ordered_list_item(trimmed)
+
+      case in_list, is_list_item {
+        True, True ->
+          process_ordered_list_lines(rest, True, [line, ..list_buffer])
+
+        True, False -> [
+          convert_ordered_list_to_raw(list.reverse(list_buffer)),
+          line,
+          ..process_ordered_list_lines(rest, False, [])
+        ]
+
+        False, True -> process_ordered_list_lines(rest, True, [line])
+
+        False, False -> [line, ..process_ordered_list_lines(rest, False, [])]
+      }
     }
-    _ -> False
   }
 }
 
-// Extract list items from paragraph text
-// Returns a list of tuples with (item number, item text content)
-fn extract_ordered_list_items(inlines: List(Inline)) -> List(#(Int, String)) {
-  case inlines {
-    [Text(text), ..] -> {
-      let lines = string.split(text, "\n")
-
-      // Parse each line into a tuple of (number, content)
-      list.filter_map(lines, fn(line) {
-        case string.split_once(line, ". ") {
-          Ok(#(num, content)) -> {
-            case int.parse(num) {
-              Ok(n) -> Ok(#(n, content))
-              Error(_) -> Error(Nil)
-            }
-          }
-          Error(_) -> Error(Nil)
-        }
-      })
+fn is_ordered_list_item(line: String) -> Bool {
+  case string.split_once(line, ". ") {
+    Ok(#(num_str, _)) -> {
+      case int.parse(string.trim(num_str)) {
+        Ok(_) -> True
+        Error(_) -> False
+      }
     }
-    _ -> []
+    Error(_) -> False
+  }
+}
+
+fn convert_ordered_list_to_raw(lines: List(String)) -> String {
+  case lines {
+    [] -> ""
+    _ -> {
+      let list_items =
+        lines
+        |> list.map(fn(line) {
+          case string.split_once(string.trim(line), ". ") {
+            Ok(#(_, content)) -> html.li([], entry_to_conversion(content))
+            Error(_) -> html.li([], [html.text(line)])
+          }
+        })
+
+      html.ol([attribute.class("list-decimal mb-4")], list_items)
+      |> element_to_raw_djotstring
+    }
   }
 }
 
