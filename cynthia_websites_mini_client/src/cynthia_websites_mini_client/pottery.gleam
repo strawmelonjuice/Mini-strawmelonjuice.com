@@ -1,6 +1,7 @@
 import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type.{type Model}
+import cynthia_websites_mini_client/pottery/djotparse
 import cynthia_websites_mini_client/pottery/molds
 import cynthia_websites_mini_client/pottery/paints
 import cynthia_websites_mini_client/utils
@@ -31,7 +32,7 @@ pub fn render_content(
 
       let description =
         content.description
-        |> parse_html("descr.md")
+        |> parse_html("descr.dj")
         |> element.to_string
       let variables =
         dict.new()
@@ -47,7 +48,7 @@ pub fn render_content(
       }
       let description =
         content.description
-        |> parse_html("descr.md")
+        |> parse_html("descr.dj")
         |> element.to_string
       let variables =
         dict.new()
@@ -130,9 +131,8 @@ pub fn render_content(
 
 pub fn parse_html(inner: String, filename: String) -> Element(messages.Msg) {
   case filename |> string.split(".") |> list.last {
-    // Markdown is rendered with a custom renderer. After that, it can be pasted into the template.
-    Ok("md") | Ok("markdown") | Ok("mdown") ->
-      element.unsafe_raw_html("div", "div", [], custom_md_render(inner))
+    // Djot is rendered with a custom renderer. After that, it will be direct lustre elements, so no need to wrap it in a unsafe raw html element.
+    Ok("dj") | Ok("djot") -> html.div([], djotparse.entry_to_conversion(inner))
     // HTML/SVG is directly pastable into the template.
     Ok("html") | Ok("htm") | Ok("svg") ->
       element.unsafe_raw_html("div", "div", [], inner)
@@ -150,16 +150,6 @@ pub fn parse_html(inner: String, filename: String) -> Element(messages.Msg) {
       ])
   }
 }
-
-pub fn custom_md_render(markdown: String) -> String {
-  custom_md_render_internal(markdown, utils.phone_home_url)
-}
-
-@external(javascript, "./pottery/markdown_renders_ffi.ts", "custom_render")
-fn custom_md_render_internal(
-  markdown: String,
-  call_home: fn() -> String,
-) -> String
 
 @external(javascript, "./dom.ts", "destroy_comment_box")
 pub fn destroy_comment_box() -> Nil

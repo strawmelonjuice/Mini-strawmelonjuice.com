@@ -1,4 +1,5 @@
 import bungibindies/bun
+import bungibindies/bun/spawn
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
 import cynthia_websites_mini_shared/configtype
@@ -15,7 +16,7 @@ import gleam/int
 import gleam/javascript/promise.{type Promise}
 import gleam/json
 import gleam/list
-import gleam/option
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleamy_lights/premixed
@@ -193,9 +194,9 @@ fn cynthia_config_global_only_exploiter(
     tom.get(o, ["posts", "comment_repo"]) |> result.map(tom.as_string)
   {
     Ok(Ok(field)) -> {
-      option.Some(field)
+      Some(field)
     }
-    _ -> option.None
+    _ -> None
   }
   let git_integration = case
     tom.get(o, ["integrations", "git"]) |> result.map(tom.as_bool)
@@ -284,12 +285,12 @@ fn cynthia_config_global_only_exploiter(
                 [#("path", tom.String(path))] -> {
                   // let file = bun.file(path)
                   // use content <- promise.await(bunfile.text())
-                  // `bunfile.text()` pretends it's infallible but is not. It should return a promised result. 
-                  // 
+                  // `bunfile.text()` pretends it's infallible but is not. It should return a promised result.
+                  //
                   // Also see: https://github.com/strawmelonjuice/bungibindies/issues/2
                   // Also missing: bunfile.bits(), but that is also because the bitarray and byte array transform is scary to me.
                   //
-                  // For now, this means we continue using the sync simplifile.read_bits() function, 
+                  // For now, this means we continue using the sync simplifile.read_bits() function,
                   case simplifile.read_bits(path) {
                     Ok(bits) -> [
                       bit_array.base64_encode(bits, True),
@@ -506,7 +507,6 @@ fn content_getter() -> promise.Promise(
     |> list.map(get_inner_and_meta)
   }
   let content = promise.map(promise.await_list(promises), result.all)
-  content
 }
 
 fn get_inner_and_meta(
@@ -544,25 +544,109 @@ fn get_inner_and_meta(
     // will be discarded, so loading it in from anywhere would be a waste of resources.
     case string.starts_with(permalink, "!"), possibly_extern {
       True, _ -> promise.resolve(Ok(""))
-      False, option.None -> {
+      False, None -> {
         promise.resolve(
           simplifile.read(file)
           |> result.replace_error("FS error while reading ´" <> file <> "´."),
         )
       }
-      False, option.Some(p) -> get_ext(p)
+      False, Some(p) -> get_ext(p)
     }
   })
 
-  let decoder = contenttypes.content_decoder_and_merger(inner_plain, file)
-  let metadata =
-    json.parse(meta_json, decoder)
-    |> result.map_error(fn(e) {
-      "Some error decoding metadata for ´"
-      <> file |> premixed.text_magenta()
-      <> "´: "
-      <> string.inspect(e)
-    })
+  // Now, conversion to Djot for markdown files done in-place:
+  let converted: Result(#(String, String), String) = case
+    string.ends_with(file, "markdown")
+    |> bool.or(
+      string.ends_with(file, "md") |> bool.or(string.ends_with(file, "mdown")),
+    )
+  {
+    True -> {
+      // If the file is external, we need to write it to a temporary file first.
+      let wri = case possibly_extern {
+        Some(..) -> {
+          simplifile.write(file, inner_plain)
+          |> result.replace_error(
+            "There was an error while writing the external content to '"
+            <> file |> premixed.text_bright_yellow()
+            <> "'.",
+          )
+        }
+        None -> Ok(Nil)
+      }
+      use _ <- result.try(wri)
+
+      use pandoc_path <- result.try(result.replace_error(
+        bun.which("pandoc"),
+        "There is a markdown file in Cynthia's content folder, but to convert that to Djot and display it, you need to have Pandoc installed on the PATH, which it is not!",
+      ))
+      let pandoc_child =
+        spawn.sync(spawn.OptionsToSubprocess(
+          [pandoc_path, file, "-f", "gfm", "-t", "djot"],
+          cwd: Some(process.cwd()),
+          env: None,
+          stderr: Some(spawn.Pipe),
+          stdout: Some(spawn.Pipe),
+        ))
+      let pandoc_child = case
+        {
+          let assert spawn.SyncSubprocess(asserted_sync_child) = pandoc_child
+          spawn.success(asserted_sync_child)
+        }
+      {
+        True -> Ok(pandoc_child)
+        False -> {
+          Error(
+            "There was an error while trying to convert '"
+            <> file |> premixed.text_bright_yellow()
+            <> "' to Djot: \n"
+            <> result.unwrap(spawn.stderr(pandoc_child), "")
+            <> "\n\nMake sure you have at least Pandoc 3.7.0 installed on your system, earlier versions may not work correctly.",
+          )
+        }
+      }
+      use pandoc_child <- result.try(pandoc_child)
+      let new_inner_plain: Result(String, String) =
+        spawn.stdout(pandoc_child)
+        |> result.replace_error("")
+      use new_inner_plain <- result.try(new_inner_plain)
+
+      // If the file was external, we need delete the temporary file.
+      let re = case possibly_extern {
+        Some(..) -> {
+          simplifile.delete(file)
+          |> result.replace_error(
+            "There was an error while deleting the temporary file '"
+            <> file |> premixed.text_bright_yellow()
+            <> "'.",
+          )
+        }
+        None -> Ok(Nil)
+      }
+
+      use _ <- result.try(re)
+
+      Ok(#(new_inner_plain, file <> ".dj"))
+    }
+
+    False -> {
+      Ok(#(inner_plain, file))
+    }
+  }
+
+  let metadata = case converted {
+    Ok(#(inner_plain, file)) -> {
+      let decoder = contenttypes.content_decoder_and_merger(inner_plain, file)
+      json.parse(meta_json, decoder)
+      |> result.map_error(fn(e) {
+        "Some error decoding metadata for ´"
+        <> file |> premixed.text_magenta()
+        <> "´: "
+        <> string.inspect(e)
+      })
+    }
+    Error(l) -> Error(l)
+  }
 
   promise.resolve(metadata)
 }
@@ -701,12 +785,12 @@ pub fn initcfg() {
   # This will allow Cynthia Mini to detect the git repository
   # For example linking to the commit hash in the footer
   git = true
- 
+
   [variables]
   # You can define your own variables here, which can be used in templates.
 
   ## ownit_template
-  ## 
+  ##
   ## Use this to define your own template for the 'ownit' layout.
   ##
   ## The template will be used for the 'ownit' layout, which is used for pages and posts.
@@ -749,12 +833,12 @@ pub fn initcfg() {
       <div class=\"divider\"></div>
       <p class=\"text-sm text-gray-600 mt-2\">Tags:
         {{#each tags}}
-          <span class=\"badge badge-secondary badge-outline mr-1\">{{this}}</span>
+<span class=\"badge badge-secondary badge-outline mr-1\">{{this}}</span>
         {{/each}}
       </p>
       {{/if}}
     {{/if}}
-    </div>  
+    </div>
   \"\"\"
 
   [posts]
@@ -795,9 +879,9 @@ pub fn initcfg() {
     console.log("Creating example content...")
     [
       item(
-        to: "hangers.md",
+        to: "hangers.dj",
         with: contenttypes.Content(
-          filename: "hangers.md",
+          filename: "hangers.dj",
           title: "Hangers",
           description: "An example page about hangers",
           layout: "theme",
@@ -809,10 +893,12 @@ This page will only show up if you have a layout with two or more menus availabl
         ),
       ),
       ext_item(
-        to: "themes.md",
+        to: "themes.dj",
+        // We are downloading markdown content as Djot content without conversion... Hopefully it'll parse correctly.
+        // Until the documentation is updated to reflect the new default file type :)
         from: "https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini-docs/refs/heads/main/content/3.%20Customisation/3.2-themes.md",
         with: contenttypes.Content(
-          filename: "themes.md",
+          filename: "themes.dj",
           title: "Themes",
           description: "External page example, using the theme list, downloading from <https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini-docs/refs/heads/main/content/3.%20customisation/3.2-themes.md>",
           layout: "theme",
@@ -822,43 +908,66 @@ This page will only show up if you have a layout with two or more menus availabl
         ),
       ),
       item(
-        "index.md",
+        "index.dj",
         contenttypes.Content(
-          filename: "",
+          filename: "index.dj",
           title: "Example landing",
           description: "This is an example index page",
           layout: "cindy-landing",
           permalink: "/",
           data: contenttypes.PageData(in_menus: [1]),
-          inner_plain: "# Hello, World
+          inner_plain: "{#hello-world}
+# Hello, World
+
+1. Numbered lists
+2. Images: ![Gleam\\'s Lucy
+   mascot](https://gleam.run/images/lucy/lucy.svg)
+
+{#the-world-is-big}
+## The world is big
+
+{#the-world-is-a-little-smaller}
+### The world is a little smaller
+
+{#the-world-is-tiny}
+#### The world is tiny
+
+{#the-world-is-tinier}
+##### The world is tinier
+
+{#the-world-is-the-tiniest}
+###### The world is the tiniest
+
+> Also quote blocks\\!
+> \\
+> -StrawmelonJuice
 
 
-  1. Numbered lists
-  2. Images: ![Gleam's Lucy mascot](https://gleam.run/images/lucy/lucy.svg)
+A task list:
+- [ ] Task 1
+- [x] Task 2
+- [ ] Task 3
 
-  ## The world is big
+A bullet list:
 
-  ### The world is a little smaller
+- Point 1
+- Point 2
 
-  #### The world is tiny
-
-  ##### The world is tinier
-
-  ###### The world is the tiniest
-
-  > Also quote blocks!
-  >
-  > -StrawmelonJuice
-
-  ```bash
+{.bash}
+  ```myfile.bash
   echo \"Code blocks!\"
   // - StrawmelonJuice
   ```
-  ",
+
+A small table:
+| Column 1 | Column 2 |
+| -------- | -------- |
+| Value 1  | Value 2  |
+",
         ),
       ),
       item(
-        to: "example-post.md",
+        to: "example-post.dj",
         with: contenttypes.Content(
           filename: "",
           title: "An example post!",
@@ -871,7 +980,7 @@ This page will only show up if you have a layout with two or more menus availabl
             date_updated: "2021-01-01",
             tags: ["example"],
           ),
-          inner_plain: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.md`.",
+          inner_plain: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.dj`.",
         ),
       ),
       item(

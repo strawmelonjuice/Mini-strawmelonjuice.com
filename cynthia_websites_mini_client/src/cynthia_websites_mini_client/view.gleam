@@ -26,7 +26,7 @@ pub fn main(model: Model) -> Element(Msg) {
             |> list.find(fn(content) { { content.permalink == model.path } })
             |> result.lazy_unwrap(fn() {
               contenttypes.Content(
-                filename: "notfound.md",
+                filename: "notfound.dj",
                 title: "Page not found",
                 description: model.path,
                 layout: "theme",
@@ -38,7 +38,7 @@ pub fn main(model: Model) -> Element(Msg) {
           let content = case model.path {
             "!" <> a -> {
               let #(tit, desc) = case content.filename {
-                "notfound.md" -> #(None, None)
+                "notfound.dj" -> #(None, None)
                 _ -> #(Some(content.title), Some(content.description))
               }
               case a {
