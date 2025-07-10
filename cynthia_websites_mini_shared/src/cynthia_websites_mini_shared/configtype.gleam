@@ -156,3 +156,54 @@ pub fn merge(
     content:,
   )
 }
+
+pub const ootb_index = "{#hello-world}
+# Hello, World
+
+1. Numbered lists
+2. Images: ![Gleam\\'s Lucy
+   mascot](https://gleam.run/images/lucy/lucy.svg)
+
+{#the-world-is-big}
+## The world is big
+
+{#the-world-is-a-little-smaller}
+### The world is a little smaller
+
+{#the-world-is-tiny}
+#### The world is tiny
+
+{#the-world-is-tinier}
+##### The world is tinier
+
+{#the-world-is-the-tiniest}
+###### The world is the tiniest
+
+> Also quote blocks\\!
+> \\
+> -StrawmelonJuice
+
+
+A task list:
+- [ ] Task 1
+- [x] Task 2
+- [ ] Task 3
+
+A bullet list:
+
+- Point 1
+- Point 2
+
+{.bash}
+  ```myfile.bash
+  echo \"Code blocks!\"
+  // - StrawmelonJuice
+  ```
+
+A small table:
+| Column 1 | Column 2 |
+| -------- | -------- |
+| Value 1  | Value 2  |
+| [Github](https://github.com)   | [Codeberg](https://codeberg.org) |
+|<https://github.com/CynthiaWebsiteEngine/Mini>|<https://github.com/strawmelonjuice/Mini-strawmelonjuice.com>|
+"
