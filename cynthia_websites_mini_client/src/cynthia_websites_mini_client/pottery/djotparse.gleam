@@ -16,11 +16,8 @@ import lustre/element.{type Element}
 import lustre/element/html
 
 pub fn entry_to_conversion(djot: String) -> List(Element(msg)) {
-  echo "Original djot: " <> string.slice(djot, 0, 50) <> "..."
   let preprocessed = preprocess_djot_extensions(djot)
-  echo "After preprocessing: " <> string.slice(preprocessed, 0, 50) <> "..."
   let parsed = jot.parse(preprocessed)
-  echo "Parsed container count: " <> string.inspect(list.length(parsed.content))
   document_to_lustre(parsed)
 }
 
@@ -35,41 +32,23 @@ pub fn preprocess_djot_extensions(djot: String) -> String {
     // Convert escaped exclamation marks
     |> string.trim()
   // Remove leading/trailing whitespace
-  echo "After normalization: " <> string.slice(normalized, 0, 50) <> "..."
 
   // Process heading attributes first to ensure IDs are attached correctly
   let with_heading_attrs = preprocess_heading_attributes(normalized)
-  echo "After heading attributes: "
-    <> string.slice(with_heading_attrs, 0, 50)
-    <> "..."
 
   // Fix multiline images
   let with_fixed_images = preprocess_multiline_images(with_heading_attrs)
-  echo "After fixing multiline images: "
-    <> string.slice(with_fixed_images, 0, 50)
-    <> "..."
 
   let with_autolinks = with_fixed_images |> preprocess_autolinks
-  echo "After autolinks: " <> string.slice(with_autolinks, 0, 50) <> "..."
 
   let with_strikethrough = with_autolinks |> preprocess_strikethrough
-  echo "After strikethrough: "
-    <> string.slice(with_strikethrough, 0, 50)
-    <> "..."
 
   let with_tables = with_strikethrough |> preprocess_tables
-  echo "After tables: " <> string.slice(with_tables, 0, 50) <> "..."
-
   let with_blockquotes = with_tables |> preprocess_blockquotes
-  echo "After blockquotes: " <> string.slice(with_blockquotes, 0, 50) <> "..."
 
   let with_task_lists = with_blockquotes |> preprocess_task_lists
-  echo "After task lists: " <> string.slice(with_task_lists, 0, 50) <> "..."
 
   let with_definition_lists = with_task_lists |> preprocess_definition_lists
-  echo "After definition lists: "
-    <> string.slice(with_definition_lists, 0, 50)
-    <> "..."
 
   with_definition_lists
 }
@@ -639,8 +618,6 @@ fn convert_table_to_raw(lines: List(String)) -> String {
 }
 
 pub fn preprocess_blockquotes(djot: String) -> String {
-  echo "Processing blockquotes..."
-
   // Process blockquotes as groups, not individual lines
   let lines = string.split(djot, "\n")
   process_blockquote_lines(lines, [], [], False)
@@ -716,8 +693,6 @@ fn convert_blockquote_to_raw(lines: List(String)) -> String {
       }
     })
     |> string.join(" ")
-
-  echo "Converting blockquote to raw HTML: " <> content
 
   "```=html\n<blockquote class=\"border-l-4 border-accent pl-4 italic text-base-content/80 my-4\"><p class=\"mb-0\">"
   <> content
@@ -958,51 +933,7 @@ fn extract_ordered_list_items(inlines: List(Inline)) -> List(#(Int, String)) {
   }
 }
 
-// Debug function to test the pipeline
-pub fn debug_conversion(djot: String) -> String {
-  let preprocessed = preprocess_djot_extensions(djot)
-  let parsed = jot.parse(preprocessed)
-  "Preprocessed: "
-  <> preprocessed
-  <> "\n\nParsed containers count: "
-  <> string.inspect(list.length(parsed.content))
-}
-
-// Debug function to test image processing
-pub fn debug_image_processing(djot: String) -> String {
-  echo "Processing image in: " <> string.slice(djot, 0, 100) <> "..."
-  let preprocessed = preprocess_djot_extensions(djot)
-  let parsed = jot.parse(preprocessed)
-
-  let image_count =
-    parsed.content
-    |> list.filter(fn(container) {
-      case container {
-        Paragraph(_, inlines) -> {
-          inlines
-          |> list.any(fn(inline) {
-            case inline {
-              Image(_, _) -> True
-              _ -> False
-            }
-          })
-        }
-        _ -> False
-      }
-    })
-    |> list.length
-
-  echo "Found " <> string.inspect(image_count) <> " image containers"
-
-  let result = document_to_lustre(parsed)
-  "Processed image content with "
-  <> string.inspect(list.length(result))
-  <> " elements"
-}
-
 pub fn preprocess_multiline_images(djot: String) -> String {
-  echo "Looking for multiline image references..."
-
   djot
   |> string.split("\n")
   |> process_multiline_image_lines([], "")
@@ -1027,10 +958,8 @@ fn process_multiline_image_lines(
         "" -> {
           case has_incomplete_image {
             // Start collecting a multiline image
-            True -> {
-              echo "Starting multiline image buffer with: " <> line
-              process_multiline_image_lines(rest, processed, line)
-            }
+            True -> process_multiline_image_lines(rest, processed, line)
+
             // Normal line
             False ->
               process_multiline_image_lines(rest, [line, ..processed], "")
@@ -1045,9 +974,6 @@ fn process_multiline_image_lines(
             // Complete the image and add to processed
             True -> {
               let complete_line = buffer <> " " <> line
-              echo "Completed multiline image: "
-                <> string.slice(complete_line, 0, 100)
-                <> "..."
               process_multiline_image_lines(
                 rest,
                 [complete_line, ..processed],
@@ -1056,7 +982,6 @@ fn process_multiline_image_lines(
             }
             // Continue buffering
             False -> {
-              echo "Continuing multiline image buffer with: " <> line
               process_multiline_image_lines(
                 rest,
                 processed,
@@ -1072,8 +997,6 @@ fn process_multiline_image_lines(
 
 // Process heading attributes like {#id} before headings
 pub fn preprocess_heading_attributes(djot: String) -> String {
-  echo "Processing heading attributes..."
-
   let lines = string.split(djot, "\n")
   let processed = process_heading_attribute_lines(lines, [])
   string.join(processed, "\n")
@@ -1110,8 +1033,6 @@ fn process_heading_attribute_lines(
                 Ok(#(_, with_id)) -> {
                   case string.split_once(with_id, "}") {
                     Ok(#(id, _)) -> {
-                      echo "Found heading ID: " <> id
-                      // Just add ID to the HTML attribute, don't include in visible text
                       let modified_heading = next <> " {#" <> id <> "}"
                       process_heading_attribute_lines(next_rest, [
                         modified_heading,
@@ -1152,56 +1073,4 @@ fn clean_heading_text(inlines: List(Inline)) -> List(Inline) {
       _ -> inline
     }
   })
-}
-
-// Debug function to test specific example input
-pub fn debug_example(djot: String) -> String {
-  // Add specific debug for multiline images in this example
-  echo "\n---- Testing specific example input ----"
-
-  // Debug each step
-  let normalized =
-    djot
-    |> string.replace("\r\n", "\n")
-    |> string.replace("\r", "\n")
-    |> string.trim()
-  echo "\nAfter normalization:"
-  echo string.slice(normalized, 0, 100) <> "..."
-
-  // Debug the heading attributes
-  let with_heading_attrs = preprocess_heading_attributes(normalized)
-  echo "\nAfter heading attributes processing:"
-  echo string.slice(with_heading_attrs, 0, 100) <> "..."
-
-  // Debug specific image processing
-  echo "\nLooking for images in normalized input..."
-  let image_lines =
-    normalized
-    |> string.split("\n")
-    |> list.filter(fn(line) {
-      string.contains(line, "![") || string.contains(line, "](")
-    })
-  echo "Found potential image lines: " <> string.inspect(image_lines)
-
-  // Debug the multiline image processing specifically
-  let with_fixed_images = preprocess_multiline_images(with_heading_attrs)
-  echo "\nAfter fixing multiline images:"
-  echo string.slice(with_fixed_images, 0, 100) <> "..."
-
-  // Debug blockquotes
-  let after_blockquotes = preprocess_blockquotes(with_fixed_images)
-  echo "\nAfter blockquote processing:"
-  echo string.slice(after_blockquotes, 0, 100) <> "..."
-
-  // Full preprocessing and parsing
-  let preprocessed = preprocess_djot_extensions(djot)
-  echo "\n---- Final preprocessed content: ----"
-  echo preprocessed
-
-  let parsed = jot.parse(preprocessed)
-  let container_count = list.length(parsed.content)
-  echo "\nParsed containers count: " <> string.inspect(container_count)
-
-  // Return the preprocessed content for inspection
-  preprocessed
 }
