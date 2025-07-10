@@ -285,12 +285,12 @@ fn cynthia_config_global_only_exploiter(
                 [#("path", tom.String(path))] -> {
                   // let file = bun.file(path)
                   // use content <- promise.await(bunfile.text())
-                  // `bunfile.text()` pretends it's infallible but is not. It should return a promised result. 
-                  // 
+                  // `bunfile.text()` pretends it's infallible but is not. It should return a promised result.
+                  //
                   // Also see: https://github.com/strawmelonjuice/bungibindies/issues/2
                   // Also missing: bunfile.bits(), but that is also because the bitarray and byte array transform is scary to me.
                   //
-                  // For now, this means we continue using the sync simplifile.read_bits() function, 
+                  // For now, this means we continue using the sync simplifile.read_bits() function,
                   case simplifile.read_bits(path) {
                     Ok(bits) -> [
                       bit_array.base64_encode(bits, True),
@@ -785,12 +785,12 @@ pub fn initcfg() {
   # This will allow Cynthia Mini to detect the git repository
   # For example linking to the commit hash in the footer
   git = true
- 
+
   [variables]
   # You can define your own variables here, which can be used in templates.
 
   ## ownit_template
-  ## 
+  ##
   ## Use this to define your own template for the 'ownit' layout.
   ##
   ## The template will be used for the 'ownit' layout, which is used for pages and posts.
@@ -833,12 +833,12 @@ pub fn initcfg() {
       <div class=\"divider\"></div>
       <p class=\"text-sm text-gray-600 mt-2\">Tags:
         {{#each tags}}
-          <span class=\"badge badge-secondary badge-outline mr-1\">{{this}}</span>
+<span class=\"badge badge-secondary badge-outline mr-1\">{{this}}</span>
         {{/each}}
       </p>
       {{/if}}
     {{/if}}
-    </div>  
+    </div>
   \"\"\"
 
   [posts]
@@ -879,9 +879,9 @@ pub fn initcfg() {
     console.log("Creating example content...")
     [
       item(
-        to: "hangers.md",
+        to: "hangers.dj",
         with: contenttypes.Content(
-          filename: "hangers.md",
+          filename: "hangers.dj",
           title: "Hangers",
           description: "An example page about hangers",
           layout: "theme",
@@ -893,10 +893,12 @@ This page will only show up if you have a layout with two or more menus availabl
         ),
       ),
       ext_item(
-        to: "themes.md",
+        to: "themes.dj",
+        // We are downloading markdown content as Djot content without conversion... Hopefully it'll parse correctly.
+        // Until the documentation is updated to reflect the new default file type :)
         from: "https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini-docs/refs/heads/main/content/3.%20Customisation/3.2-themes.md",
         with: contenttypes.Content(
-          filename: "themes.md",
+          filename: "themes.dj",
           title: "Themes",
           description: "External page example, using the theme list, downloading from <https://raw.githubusercontent.com/CynthiaWebsiteEngine/Mini-docs/refs/heads/main/content/3.%20customisation/3.2-themes.md>",
           layout: "theme",
@@ -906,43 +908,66 @@ This page will only show up if you have a layout with two or more menus availabl
         ),
       ),
       item(
-        "index.md",
+        "index.dj",
         contenttypes.Content(
-          filename: "",
+          filename: "index.dj",
           title: "Example landing",
           description: "This is an example index page",
           layout: "cindy-landing",
           permalink: "/",
           data: contenttypes.PageData(in_menus: [1]),
-          inner_plain: "# Hello, World
+          inner_plain: "{#hello-world}
+# Hello, World
+
+1. Numbered lists
+2. Images: ![Gleam\\'s Lucy
+   mascot](https://gleam.run/images/lucy/lucy.svg)
+
+{#the-world-is-big}
+## The world is big
+
+{#the-world-is-a-little-smaller}
+### The world is a little smaller
+
+{#the-world-is-tiny}
+#### The world is tiny
+
+{#the-world-is-tinier}
+##### The world is tinier
+
+{#the-world-is-the-tiniest}
+###### The world is the tiniest
+
+> Also quote blocks\\!
+> \\
+> -StrawmelonJuice
 
 
-  1. Numbered lists
-  2. Images: ![Gleam's Lucy mascot](https://gleam.run/images/lucy/lucy.svg)
+A task list:
+- [ ] Task 1
+- [x] Task 2
+- [ ] Task 3
 
-  ## The world is big
+A bullet list:
 
-  ### The world is a little smaller
+- Point 1
+- Point 2
 
-  #### The world is tiny
-
-  ##### The world is tinier
-
-  ###### The world is the tiniest
-
-  > Also quote blocks!
-  >
-  > -StrawmelonJuice
-
-  ```bash
+{.bash}
+  ```myfile.bash
   echo \"Code blocks!\"
   // - StrawmelonJuice
   ```
-  ",
+
+A small table:
+| Column 1 | Column 2 |
+| -------- | -------- |
+| Value 1  | Value 2  |
+",
         ),
       ),
       item(
-        to: "example-post.md",
+        to: "example-post.dj",
         with: contenttypes.Content(
           filename: "",
           title: "An example post!",
@@ -955,7 +980,7 @@ This page will only show up if you have a layout with two or more menus availabl
             date_updated: "2021-01-01",
             tags: ["example"],
           ),
-          inner_plain: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.md`.",
+          inner_plain: "# Hello, World!\n\nHello! This is an example post, you'll find me at `content/example-post.dj`.",
         ),
       ),
       item(
