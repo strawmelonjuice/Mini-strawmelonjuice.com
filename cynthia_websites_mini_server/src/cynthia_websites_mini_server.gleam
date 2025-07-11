@@ -1,13 +1,13 @@
 import bungibindies
 import bungibindies/bun
 import bungibindies/bun/http/serve.{ServeOptions}
+import cynthia_websites_mini_client
+import cynthia_websites_mini_client/configtype
 import cynthia_websites_mini_server/config
 import cynthia_websites_mini_server/mutable_model_type
 import cynthia_websites_mini_server/static_routes
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/web
-import cynthia_websites_mini_client
-import cynthia_websites_mini_client/configtype
 import gleam/bool
 import gleam/int
 import gleam/javascript/array

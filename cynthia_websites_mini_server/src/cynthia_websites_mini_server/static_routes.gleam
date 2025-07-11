@@ -1,10 +1,10 @@
 import bungibindies/bun/http/serve/response
 import bungibindies/bun/spawn.{OptionsToSubprocess}
-import cynthia_websites_mini_server/mutable_model_type
-import cynthia_websites_mini_server/utils/files.{client_css, client_js}
 import cynthia_websites_mini_client
 import cynthia_websites_mini_client/configtype
 import cynthia_websites_mini_client/ui
+import cynthia_websites_mini_server/mutable_model_type
+import cynthia_websites_mini_server/utils/files.{client_css, client_js}
 import gleam/bool
 import gleam/dict
 import gleam/javascript/array

@@ -1,8 +1,8 @@
+import cynthia_websites_mini_client/contenttypes.{PostData}
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type.{type Model}
 import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_client/utils
-import cynthia_websites_mini_client/contenttypes.{PostData}
 import gleam/bool
 import gleam/list
 import gleam/option
