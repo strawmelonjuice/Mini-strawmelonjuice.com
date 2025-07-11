@@ -1,4 +1,4 @@
-import cynthia_websites_mini_shared/configtype
+import cynthia_websites_mini_client/configtype
 import rsvp
 
 /// Msg is the parent type for all the possible messages

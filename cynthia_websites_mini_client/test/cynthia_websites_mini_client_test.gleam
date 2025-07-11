@@ -1,6 +1,6 @@
 import birdie
 import cynthia_websites_mini_client/pottery/djotparse
-import cynthia_websites_mini_shared/configtype
+import cynthia_websites_mini_client/configtype
 import gleam/string
 import gleeunit
 import gleeunit/should

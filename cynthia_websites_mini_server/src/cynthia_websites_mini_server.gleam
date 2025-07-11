@@ -6,8 +6,8 @@ import cynthia_websites_mini_server/mutable_model_type
 import cynthia_websites_mini_server/static_routes
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/web
-import cynthia_websites_mini_shared
-import cynthia_websites_mini_shared/configtype
+import cynthia_websites_mini_client
+import cynthia_websites_mini_client/configtype
 import gleam/bool
 import gleam/int
 import gleam/javascript/array
@@ -41,7 +41,7 @@ pub fn main() {
     )
   {
     True -> {
-      console.log(cynthia_websites_mini_shared.version())
+      console.log(cynthia_websites_mini_client.version())
       process.exit(0)
     }
     False -> Nil

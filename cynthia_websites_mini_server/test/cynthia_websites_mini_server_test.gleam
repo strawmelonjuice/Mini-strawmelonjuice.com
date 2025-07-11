@@ -1,7 +1,7 @@
 import bungibindies/bun
 import cynthia_websites_mini_server/mutable_model_type
-import cynthia_websites_mini_shared/configtype.{SharedCynthiaConfigGlobalOnly}
-import cynthia_websites_mini_shared/timestamps
+import cynthia_websites_mini_client/configtype.{SharedCynthiaConfigGlobalOnly}
+import cynthia_websites_mini_client/timestamps
 import gleam/bool
 import gleam/int
 import gleam/list

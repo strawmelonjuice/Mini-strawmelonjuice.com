@@ -5,8 +5,8 @@ import cynthia_websites_mini_client/pottery/djotparse
 import cynthia_websites_mini_client/pottery/molds
 import cynthia_websites_mini_client/pottery/paints
 import cynthia_websites_mini_client/utils
-import cynthia_websites_mini_shared/configtype
-import cynthia_websites_mini_shared/contenttypes
+import cynthia_websites_mini_client/configtype
+import cynthia_websites_mini_client/contenttypes
 import gleam/dict
 import gleam/dynamic
 import gleam/list

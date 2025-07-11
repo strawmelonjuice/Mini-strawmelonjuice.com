@@ -1,4 +1,4 @@
-import cynthia_websites_mini_shared/contenttypes.{type Content}
+import cynthia_websites_mini_client/contenttypes.{type Content}
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
 import gleam/json

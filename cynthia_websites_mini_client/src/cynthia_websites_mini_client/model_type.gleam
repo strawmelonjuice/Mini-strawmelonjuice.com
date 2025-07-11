@@ -1,4 +1,4 @@
-import cynthia_websites_mini_shared/configtype
+import cynthia_websites_mini_client/configtype
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode

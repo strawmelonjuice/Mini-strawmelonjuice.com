@@ -5,7 +5,7 @@ import bungibindies/bun/http/serve/response
 import cynthia_websites_mini_server/config
 import cynthia_websites_mini_server/mutable_model_type
 import cynthia_websites_mini_server/static_routes
-import cynthia_websites_mini_shared/configtype
+import cynthia_websites_mini_client/configtype
 import gleam/dict
 import gleam/javascript/array
 import gleam/javascript/promise.{type Promise}

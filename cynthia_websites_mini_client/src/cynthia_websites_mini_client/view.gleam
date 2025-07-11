@@ -5,7 +5,7 @@ import cynthia_websites_mini_client/pageloader/postlistloader
 import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_client/pottery/oven
 import cynthia_websites_mini_client/utils
-import cynthia_websites_mini_shared/contenttypes
+import cynthia_websites_mini_client/contenttypes
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/result

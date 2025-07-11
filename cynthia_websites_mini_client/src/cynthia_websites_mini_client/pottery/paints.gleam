@@ -1,7 +1,7 @@
 import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/model_type.{type Model}
-import cynthia_websites_mini_shared/configtype
-import cynthia_websites_mini_shared/ui/themes_generated
+import cynthia_websites_mini_client/configtype
+import cynthia_websites_mini_client/ui/themes_generated
 import gleam/list
 import gleam/option
 import gleam/result
