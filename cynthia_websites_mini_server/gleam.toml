@@ -11,11 +11,11 @@ typescript_declarations = true
 
 [dependencies]
 # Shared dependencies with the client
-gleam_stdlib = " 0.59.0"
+gleam_stdlib = "0.59.0"
 plinth = ">= 0.5.9 and < 1.0.0"
-
 gleam_javascript = "1.0.0"
 gleam_community_colour = "1.4.1"
+
 gleam_json = "2.3.0"
 gleam_http = "3.7.2"
 gleam_fetch = "1.3.0"
