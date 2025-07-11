@@ -500,6 +500,7 @@ fn theme_common(
   variables variables: Dict(String, Dynamic),
   model model: model_type.Model,
 ) -> Element(messages.Msg) {
+  let content = heading_indicator_adder(content)
   let menu_is_open = result.is_ok(dict.get(model.other, "strawmelonmenu open"))
   // Extract site name and determine if this is a post
   let assert Ok(site_name) =
@@ -930,4 +931,19 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
       })
     }
   }
+}
+
+fn heading_indicator_adder(content: Element(a)) -> Element(a) {
+  let badge_generic =
+    " m-auto inline-block align-top badge badge-soft  badge-xs"
+  let badge_ghost = "<span class=\"badge-ghost " <> badge_generic <> "\">"
+
+  element.to_string(content)
+  |> string.replace("</h1>", badge_ghost <> "H1</div></h1>")
+  |> string.replace("</h2>", badge_ghost <> "H2</div></h2>")
+  |> string.replace("</h3>", badge_ghost <> "H3</div></h3>")
+  |> string.replace("</h4>", badge_ghost <> "H4</div></h4>")
+  |> string.replace("</h5>", badge_ghost <> "H5</div></h5>")
+  |> string.replace("</h6>", badge_ghost <> "H6</div></h6>")
+  |> element.unsafe_raw_html("div", "div", [], _)
 }
