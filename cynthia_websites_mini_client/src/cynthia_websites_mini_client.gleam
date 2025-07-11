@@ -1,5 +1,8 @@
 // IMPORTS ---------------------------------------------------------------------
 
+import cynthia_websites_mini_client/configtype
+import cynthia_websites_mini_client/configurable_variables
+import cynthia_websites_mini_client/contenttypes
 import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/messages.{
   type Msg, ApiReturnedData, UserNavigateTo,
@@ -8,9 +11,6 @@ import cynthia_websites_mini_client/model_type.{type Model, Model}
 import cynthia_websites_mini_client/pottery
 import cynthia_websites_mini_client/utils
 import cynthia_websites_mini_client/view
-import cynthia_websites_mini_shared/configtype
-import cynthia_websites_mini_shared/configurable_variables
-import cynthia_websites_mini_shared/contenttypes
 import gleam/bit_array
 import gleam/bool
 import gleam/dict
@@ -533,3 +533,6 @@ fn add_each_menu(
     }
   }
 }
+
+@external(javascript, "./cynthia_websites_mini_client/version_ffi.ts", "my_own_version")
+pub fn version() -> String

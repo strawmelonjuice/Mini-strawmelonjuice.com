@@ -69,15 +69,10 @@ description = "Clean server build artifacts"
 run = ["gleam clean", "rm -rf ./build", "rm -rf ./prelude.ts", "rm -rf ./src/client_code_generated_ffi.ts"]
 dir = "./cynthia_websites_mini_server"
 
-[tasks.clean-shared]
-hide = true
-description = "Clean shared build artifacts"
-run = ["gleam clean", "rm -rf ./build"]
-dir = "./cynthia_websites_mini_shared"
 
 [tasks.clean-all]
 description = "Clean all build artifacts and generated files"
-depends = ["clean-client", "clean-server", "clean-shared"]
+depends = ["clean-client", "clean-server"]
 run = ["rm -rf ./dist", "rm -rf ./node_modules/"]
 
 [tasks.clean-test]
@@ -155,15 +150,10 @@ description = "Format Gleam code in server"
 run = ["gleam format"]
 dir = "./cynthia_websites_mini_server"
 
-[tasks.fmt-shared]
-hide = true
-description = "Format Gleam code in shared"
-run = ["gleam format"]
-dir = "./cynthia_websites_mini_shared"
 
 [tasks.fmt-all]
 description = "Format Gleam code in both client and server"
-depends = ["fmt-client", "fmt-server", "fmt-shared"]
+depends = ["fmt-client", "fmt-server"]
 
 
 # ###########################################################################

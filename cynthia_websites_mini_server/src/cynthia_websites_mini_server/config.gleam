@@ -1,10 +1,10 @@
 import bungibindies/bun
 import bungibindies/bun/spawn
+import cynthia_websites_mini_client/configtype
+import cynthia_websites_mini_client/configurable_variables
+import cynthia_websites_mini_client/contenttypes
 import cynthia_websites_mini_server/utils/files
 import cynthia_websites_mini_server/utils/prompts
-import cynthia_websites_mini_shared/configtype
-import cynthia_websites_mini_shared/configurable_variables
-import cynthia_websites_mini_shared/contenttypes
 import gleam/bit_array
 import gleam/bool
 import gleam/dict

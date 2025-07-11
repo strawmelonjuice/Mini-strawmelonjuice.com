@@ -1,7 +1,7 @@
 //// Configurable variables module
 ////
 //// This module doesn't exist to hold any actual types for configurable variables,
-//// as that is implemented in `cynthia_websites_mini_shared/configtype`. Also not
+//// as that is implemented in `cynthia_websites_mini_client/configtype`. Also not
 //// Providing any fucntions for reading, serialising etc. those functions are implemented
 //// in their relative `cynthia_websites_mini_server` and `cynthia_websites_mini_client` modules.
 ////

@@ -46,7 +46,7 @@ for (const theme of themeconf) {
 }
 themes_gleam_content += `]\n`;
 // Write the generated Gleam file, creating the directory if it doesn't exist
-const shared_ui_dir = path.join(config_root, "/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui");
+const shared_ui_dir = path.join(config_root, "/cynthia_websites_mini_client/src/cynthia_websites_mini_client/ui");
 if (!existsSync(shared_ui_dir)) {
   mkdirSync(shared_ui_dir, { recursive: true });
 }
@@ -67,7 +67,7 @@ const tailwindconfig = {
   content: [
     `${config_root}/cynthia_websites_mini_client/**/*{.gleam,.ts}`,
     `${config_root}/cynthia_websites_mini_server/src/cynthia_websites_mini_server/static_routes.gleam`,
-    `${config_root}/cynthia_websites_mini_shared/src/cynthia_websites_mini_shared/ui.gleam`,
+    `${config_root}/cynthia_websites_mini_client/src/cynthia_websites_mini_client/ui.gleam`,
   ],
   theme: { extend: {} },
   plugins: [daisyui],

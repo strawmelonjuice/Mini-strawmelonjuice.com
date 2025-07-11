@@ -122,9 +122,8 @@ writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n", "utf
 import { readFileSync } from "fs";
 import { resolve } from "path";
 const gleamTomlPaths = [
-    "cynthia_websites_mini_shared/gleam.toml",
+    "cynthia_websites_mini_client/gleam.toml",
     "cynthia_websites_mini_server/gleam.toml",
-    "cynthia_websites_mini_client/gleam.toml"
 ];
 gleamTomlPaths.forEach((TomlPath) => {
     const fullPath = resolve(config_root, TomlPath);

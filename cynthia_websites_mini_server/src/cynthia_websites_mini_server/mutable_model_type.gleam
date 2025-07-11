@@ -1,5 +1,5 @@
+import cynthia_websites_mini_client/configtype
 import cynthia_websites_mini_server/config as config_module
-import cynthia_websites_mini_shared/configtype
 import gleam/javascript/promise
 import gleam/option.{type Option, None}
 import javascript/mutable_reference
