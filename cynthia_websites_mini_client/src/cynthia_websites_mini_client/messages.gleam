@@ -11,4 +11,5 @@ pub type Msg {
   UserOnDocumentationLayoutToggleSidebar
   CindyToggleMenu1
   UserToggleStrawmelonMenu
+  TickUp
 }
