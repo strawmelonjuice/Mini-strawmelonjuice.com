@@ -34,7 +34,6 @@ async function applyPatches() {
     stderr: "inherit",
   });
 
-
   console.log("Applying file patches...");
   await copyPatches(patchesDir, cloneDir);
 
