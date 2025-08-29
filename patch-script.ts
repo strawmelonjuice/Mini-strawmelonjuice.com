@@ -6,7 +6,6 @@ import { existsSync } from "fs";
 import { cp, readFile, writeFile } from "fs/promises";
 import path, { join } from "path";
 
-
 const repoUrl = "https://github.com/CynthiaWebsiteEngine/Mini";
 const branch = "main";
 const patchesDir = "patches/files";
@@ -14,11 +13,11 @@ const specialPatchesDir = "patches/special";
 const cloneDir = "patch-target";
 
 async function applyPatches() {
-    // Delete the cloneDir, but if it contains a test subdirectory, make sure that'll be preserved and restored after cloning.
-    if (existsSync(path.join(cloneDir, "test"))) {
-      await $`mv ${cloneDir}/test ./test`;
-    }
-    await $`rm -rf ${cloneDir}`;
+  // Delete the cloneDir, but if it contains a test subdirectory, make sure that'll be preserved and restored after cloning.
+  if (existsSync(path.join(cloneDir, "test"))) {
+    await $`mv ${cloneDir}/test ./test`;
+  }
+  await $`rm -rf ${cloneDir}`;
 
   console.log("Cloning the original repository...");
   await $`git clone --branch ${branch} ${repoUrl} ${cloneDir}`;
@@ -78,7 +77,10 @@ async function applySpecialPatches(patchesDir: string, targetDir: string) {
     for (const change of patchContent.changes) {
       if (change.action === "replace") {
         const searchRegex = new RegExp(change.search, "g");
-        targetFileContent = targetFileContent.replace(searchRegex, change.replace);
+        targetFileContent = targetFileContent.replace(
+          searchRegex,
+          change.replace,
+        );
       }
     }
 
@@ -90,15 +92,18 @@ async function applySpecialPatches(patchesDir: string, targetDir: string) {
 }
 
 async function showGitDiff(files: string[], repoDir: string) {
-    // skip this if ran with --no-diff
-    if (process.argv.includes("--no-diff")) {
-      console.log("Skipping git diff...");
-      return;
-    }
+  // skip this if ran with --no-diff
+  if (process.argv.includes("--no-diff")) {
+    console.log("Skipping git diff...");
+    return;
+  }
 
   for (const file of files) {
     console.log(`Showing diff for ${file}...`);
-    spawnSync(["git", "-C", repoDir, "diff", file], { stdout: "inherit", stderr: "inherit" });
+    spawnSync(["git", "-C", repoDir, "diff", file], {
+      stdout: "inherit",
+      stderr: "inherit",
+    });
   }
 }
 

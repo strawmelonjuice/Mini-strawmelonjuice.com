@@ -1,11 +1,10 @@
 {
-    "file": "cynthia_websites_mini_client/src/cynthia_websites_mini_client.gleam",
-    "changes": [
-        {
-            "action": "replace",
-            "search": "case msg {\n",
-            "replace": "case msg {\n            messages.UserToggleStrawmelonMenu -> {\n      let other = case dict.get(model.other, \"strawmelonmenu open\") {\n        Ok(..) -> {\n          // is open, so close it\n          dict.delete(model.other, \"strawmelonmenu open\")\n        }\n        Error(..) -> {\n          // is closed, so open it\n          dict.insert(model.other, \"strawmelonmenu open\", dynamic.from(None))\n        }\n      }\n      #(Model(..model, other:), effect.none())\n    }\n "
-        }
-        
-    ]
+  "file": "cynthia_websites_mini_client/src/cynthia_websites_mini_client.gleam",
+  "changes": [
+    {
+      "action": "replace",
+      "search": "case msg {\n",
+      "replace": "case msg {\n            messages.UserToggleStrawmelonMenu -> {\n      let other = case dict.get(model.other, \"strawmelonmenu open\") {\n        Ok(..) -> {\n          // is open, so close it\n          dict.delete(model.other, \"strawmelonmenu open\")\n        }\n        Error(..) -> {\n          // is closed, so open it\n          dict.insert(model.other, \"strawmelonmenu open\", dynamic.from(None))\n        }\n      }\n      #(Model(..model, other:), effect.none())\n    }\n "
+    }
+  ]
 }
