@@ -7,6 +7,12 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -139,9 +145,15 @@ cynthia_websites_mini_client/src/cynthia_websites_mini_client/ui/themes_generate
 # Linked files for FFI type declarations
 cynthia_websites_mini_server/prelude.ts
 cynthia_websites_mini_client/prelude.ts
+patches/files/cynthia_websites_mini_client/prelude.ts
+patches/files/cynthia_websites_mini_server/prelude.ts
+
 
 # Test env
 test/*
 
 # Temporary files
 tailwind.config.mjs
+
+# Patched files
+patch-target/

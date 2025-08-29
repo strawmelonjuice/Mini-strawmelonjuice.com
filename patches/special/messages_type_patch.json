@@ -1,0 +1,11 @@
+{
+    "file": "cynthia_websites_mini_client/src/cynthia_websites_mini_client/messages.gleam",
+    "changes": [
+        {
+            "action": "replace",
+            "search": "pub type Msg {",
+            "replace": "pub type Msg {\n  UserToggleStrawmelonMenu"
+        }
+        
+    ]
+}

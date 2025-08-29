@@ -1,0 +1,15 @@
+{
+    "file": "cynthia_websites_mini_server/src/cynthia_websites_mini_server/config.gleam",
+    "changes": [
+        {
+            "action": "replace",
+            "search": "theme = \\\\\"autumn\\\\\"",
+            "replace": "theme = \\\"strawmelonjuice-light\\\""
+        },
+        {
+            "action": "replace",
+            "search": "theme = \\\\\"night\\\\\"",
+            "replace": "theme = \\\"strawmelonjuice-dark\\\""
+        }
+    ]
+}

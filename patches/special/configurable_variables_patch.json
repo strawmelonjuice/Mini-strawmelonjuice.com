@@ -1,0 +1,10 @@
+{
+  "file": "cynthia_websites_mini_client/src/cynthia_websites_mini_client/configurable_variables.gleam",
+  "changes": [
+    {
+      "action": "replace",
+      "search": "#\\(\n    // Template for the ownit layout",
+      "replace": "#(\n    // Imports the badges json\n    \"strawmelonjuice_badges\",\n    var_string,\n  ),\n#(\n    // Template for the ownit layout"
+    }
+  ]
+}

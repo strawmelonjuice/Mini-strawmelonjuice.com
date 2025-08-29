@@ -1,0 +1,15 @@
+{
+  "file": "cynthia_websites_mini_client/src/cynthia_websites_mini_client/pottery/molds.gleam",
+  "changes": [
+    {
+      "action": "replace",
+      "search": "case layout {",
+      "replace": "case layout {\n      \"strawmelonjuice.com\" -> {\n      // This is a special case for the strawmelonjuice.com website.\n      // For testing purposes, it uses this layout until it's ready.\n      case is_post {\n        False -> fn(\n          content: Element(messages.Msg),\n          metadata: Dict(String, Dynamic),\n        ) -> Element(messages.Msg) {\n          strawmelonjuice_com.page_layout(content, metadata, model)\n        }\n        True -> fn(\n          content: Element(messages.Msg),\n          metadata: Dict(String, Dynamic),\n        ) -> Element(messages.Msg) {\n          strawmelonjuice_com.post_layout(content, metadata, model)\n        }\n      }\n    }\n\n     "
+    },
+    {
+      "action": "replace",
+      "search": "import cynthia_websites_mini_client/pottery/molds/cindy_simple",
+      "replace": "import cynthia_websites_mini_client/pottery/molds/cindy_simple\nimport cynthia_websites_mini_client/pottery/molds/strawmelonjuice_com"
+    }
+  ]
+}
