@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { $, spawnSync } from "bun";
+import { $, spawn, spawnSync } from "bun";
 import { fstat } from "fs";
 import { existsSync } from "fs";
 import { cp, readFile, writeFile } from "fs/promises";
@@ -25,6 +25,15 @@ async function applyPatches() {
   if (existsSync("./test")) {
     await $`mv ./test ${cloneDir}/test`;
   }
+
+  // Run bun install in the clone directory
+  console.log("Installing dependencies...");
+  spawn(["bun", "install"], {
+    cwd: cloneDir,
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+
 
   console.log("Applying file patches...");
   await copyPatches(patchesDir, cloneDir);
