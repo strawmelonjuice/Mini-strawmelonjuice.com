@@ -30,8 +30,12 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build and bundle package
-        run: mise run bundle-server
+      - name: Build and bundle package --thereby rewriting most of this repository to bypass the fact that we don't usually hold the mini code anymore.
+        run: |
+          mise run bundle-server
+          rm -rf ./patch-target/.git/
+          rm -rf ./patch-target/.github/
+          rsync -a --remove-source-files ./patch-target/ ./
 
       - name: Create package tarball
         run: |
