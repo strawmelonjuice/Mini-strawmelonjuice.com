@@ -1,0 +1,10 @@
+{
+    "file": "cynthia_websites_mini_client/src/cynthia_websites_mini_client/pottery.gleam",
+    "changes": [
+        {
+            "action": "replace",
+            "search": "html.script\\(",
+            "replace": "html.option("
+        }
+    ]
+}

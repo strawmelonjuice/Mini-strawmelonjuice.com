@@ -1,0 +1,10 @@
+{
+    "file": "cynthia_websites_mini_client/src/cynthia_websites_mini_client/dom.ts",
+    "changes": [
+        {
+            "action": "replace",
+            "search": "comment_box.classList.add\\(\"w-full\", \"h-full\"\\);",
+            "replace": "comment_box.classList.add(\"w-full\", \"h-full\", \"overflow-y-scroll\");comment_box.style.height = \"500px\";"
+        }
+    ]
+}

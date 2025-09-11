@@ -1,3 +1,4 @@
+import cynthia_websites_mini_client/dom
 import cynthia_websites_mini_client/messages
 import cynthia_websites_mini_client/model_type
 import cynthia_websites_mini_client/utils
@@ -61,7 +62,7 @@ pub fn page_layout(
           [
             attribute.id("da-badgies"),
             attribute.class(
-              "border border-base-300 rounded-md overflow-hidden mb-4 bg-base-300 hidden md:block",
+              "border border-base-300 rounded-md overflow-hidden mb-4 bg-base-300 hidden lg:block",
             ),
           ],
           badgies_inside,
@@ -70,7 +71,7 @@ pub fn page_layout(
           [
             attribute.id("le-badgies"),
             attribute.class(
-              "border border-base-300 rounded-md overflow-hidden mt-4 bg-base-300 md:hidden",
+              "border border-base-300 rounded-md overflow-hidden mt-4 bg-base-300 lg:hidden",
             ),
           ],
           badgies_inside,
@@ -105,18 +106,18 @@ pub fn page_layout(
 
   let page_meta =
     html.div(
-      [attribute.id("da-sidebar"), attribute.class("w-full md:sticky md:top-4")],
+      [attribute.id("da-sidebar"), attribute.class("w-full lg:sticky lg:top-4")],
       [
         case description_option {
           Some(description) -> {
             html.div(
-              [attribute.class("flex flex-col md:flex-row md:gap-4 mb-4")],
+              [attribute.class("flex flex-col lg:flex-row lg:gap-4 mb-4")],
               [
                 // About section with description
                 html.div(
                   [
                     attribute.class(
-                      "w-full md:w-1/2 border border-base-300 rounded-md overflow-hidden mb-4 md:mb-0 bg-base-300",
+                      "w-full lg:w-1/2 border border-base-300 rounded-md overflow-hidden mb-4 lg:mb-0 bg-base-300",
                     ),
                   ],
                   [
@@ -146,10 +147,11 @@ pub fn page_layout(
   theme_common(
     content:,
     menu:,
-    sidebar: page_meta,
+    sidebars: #(page_meta, element.none()),
     underneath: badgies_tall,
     variables:,
     model:,
+    is_post: False,
   )
 }
 
@@ -290,16 +292,20 @@ pub fn post_layout(
     |> result.unwrap(dynamic.from(None))
     |> decode.run(decode.string)
 
-  let post_meta =
+  let post_meta = #(
     html.div(
-      [attribute.id("da-sidebar"), attribute.class("w-full md:sticky md:top-4")],
       [
-        html.div([attribute.class("flex flex-col md:flex-row md:gap-4 mb-4")], [
+        attribute.id("da-sidebar"),
+        attribute.class("w-full"),
+        // attribute.class("w-full lg:sticky lg:top-4"),
+      ],
+      [
+        html.div([attribute.class("flex flex-col lg:flex-row lg:gap-4 mb-4")], [
           // About section with description
           html.div(
             [
               attribute.class(
-                "w-full md:w-1/2 border border-base-300 rounded-md overflow-hidden mb-4 md:mb-0 bg-base-300",
+                "w-full lg:w-1/2 border border-base-300 rounded-md overflow-hidden mb-4 lg:mb-0 bg-base-300",
               ),
             ],
             [
@@ -320,7 +326,7 @@ pub fn post_layout(
           html.div(
             [
               attribute.class(
-                "w-full md:w-1/2 border border-base-300 rounded-md overflow-hidden bg-base-300",
+                "w-full lg:w-1/2 border border-base-300 rounded-md overflow-hidden bg-base-300",
               ),
             ],
             [
@@ -402,7 +408,7 @@ pub fn post_layout(
                       html.span(
                         [
                           attribute.class(
-                            "px-2 py-0.5 text-xs rounded-full font-medium bg-primary/15 text-primary",
+                            "px-2 py-0.5 text-xs rounded-full font-medium bg-primary/15 text-primary-content",
                           ),
                         ]
                           |> list.append(
@@ -444,58 +450,111 @@ pub fn post_layout(
             ],
           ),
         ]),
-        html.div(
-          [
-            attribute.id("da-tags"),
-            attribute.class(
-              "border border-base-300 rounded-md overflow-hidden mb-4 bg-base-300",
-            ),
-          ],
-          [
-            // Header for tags section
-            html.div(
-              [
-                attribute.class(
-                  "bg-base-200 px-3 py-2 text-sm font-medium border-b border-base-300",
-                ),
-              ],
-              [html.text("Tags")],
-            ),
-            html.div([attribute.class("p-3")], [
-              html.div(
-                [attribute.class("flex flex-wrap gap-2")],
-                variables
-                  |> dict.get("tags")
-                  |> result.unwrap(dynamic.from([]))
-                  |> decode.run(decode.list(decode.string))
-                  |> result.unwrap([])
-                  |> list.map(string.trim)
-                  |> list.map(fn(tag) {
-                    html.a(
-                      [
-                        attribute.class(
-                          "px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/15 text-primary hover:bg-primary/25",
-                        ),
-                        attribute.href("#!/tag/" <> tag),
-                      ],
-                      [html.text(tag)],
-                    )
-                  }),
-              ),
-            ]),
-          ],
-        ),
       ],
-    )
+    ),
+    html.div([attribute.class("h-full max-h-[45vh]")], [
+      html.div(
+        [
+          attribute.id("da-tags"),
+          attribute.class(
+            "border border-base-300 rounded-md overflow-hidden mb-4 bg-base-300",
+          ),
+        ],
+        [
+          // Header for tags section
+          html.div(
+            [
+              attribute.class(
+                "bg-base-200 px-3 py-2 text-sm font-medium border-b border-base-300",
+              ),
+            ],
+            [html.text("Tags")],
+          ),
+          html.div([attribute.class("p-3")], [
+            html.div(
+              [attribute.class("flex flex-wrap gap-2")],
+              variables
+                |> dict.get("tags")
+                |> result.unwrap(dynamic.from([]))
+                |> decode.run(decode.list(decode.string))
+                |> result.unwrap([])
+                |> list.map(string.trim)
+                |> list.map(fn(tag) {
+                  html.a(
+                    [
+                      attribute.class(
+                        "px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/15 text-primary-content hover:bg-primary/25",
+                      ),
+                      attribute.href("#!/tag/" <> tag),
+                    ],
+                    [html.text(tag)],
+                  )
+                }),
+            ),
+          ]),
+        ],
+      ),
+      html.div(
+        [
+          attribute.id("da-comments"),
+          attribute.class("border border-base-300 rounded-md mb-4 bg-base-300"),
+        ],
+        [
+          // Header for comments section
+          html.div(
+            [
+              attribute.class(
+                "bg-base-200 px-3 py-2 text-sm font-medium border-b border-base-300",
+              ),
+            ],
+            [html.text("Comments")],
+          ),
+          html.div([], [
+            html.div([attribute.class("flex flex-wrap gap-2")], [
+              // Utterances comments will be loaded here
+              {
+                let comment_color_scheme = case dom.get_color_scheme() {
+                  "dark" -> "dark-blue"
+                  _ -> "github-dark-orange"
+                }
+                let assert Some(complete_data) = model.complete_data
+
+                // Utterances script directly after main content
+                html.script(
+                  [
+                    attribute.attribute("async", ""),
+                    attribute.attribute("crossorigin", "anonymous"),
+                    attribute.attribute("theme", comment_color_scheme),
+                    attribute.attribute("issue-term", model.path),
+                    attribute.attribute(
+                      "repo",
+                      complete_data.comment_repo |> option.unwrap(""),
+                    ),
+                    attribute.attribute(
+                      "return-url",
+                      utils.phone_home_url() <> "#" <> model.path,
+                    ),
+                    attribute.src("https://utteranc.es/client.js"),
+                  ],
+                  "",
+                )
+              },
+            ]),
+          ]),
+        ],
+      ),
+    ]),
+  )
 
   // Assemble the complete layout with sidebar content
   theme_common(
     content: content,
     menu: menu,
-    sidebar: post_meta,
+    sidebars: post_meta,
     underneath: element.none(),
-    variables: variables,
+    variables:,
     model:,
+    is_post: True,
   )
 }
 
@@ -510,10 +569,11 @@ pub fn post_layout(
 fn theme_common(
   content content: Element(messages.Msg),
   menu menu: List(Element(messages.Msg)),
-  sidebar sidebar: Element(messages.Msg),
+  sidebars sidebar: #(Element(messages.Msg), Element(messages.Msg)),
   underneath underneath: Element(messages.Msg),
   variables variables: Dict(String, Dynamic),
   model model: model_type.Model,
+  is_post is_post: Bool,
 ) -> Element(messages.Msg) {
   let content = heading_indicator_adder(content)
   let menu_is_open = result.is_ok(dict.get(model.other, "strawmelonmenu open"))
@@ -522,13 +582,6 @@ fn theme_common(
     dict.get(variables, "global_site_name")
     |> result.unwrap(dynamic.from(None))
     |> decode.run(decode.string)
-  let is_post =
-    {
-      dict.get(variables, "content_type")
-      |> result.unwrap(dynamic.from(None))
-      |> decode.run(decode.string)
-    }
-    == Ok("post")
 
   html.div(
     [
@@ -591,7 +644,7 @@ fn theme_common(
                     ),
                   ],
                 ),
-                html.div([attribute.class("hidden md:block flex-grow")], [
+                html.div([attribute.class("hidden lg:block flex-grow")], [
                   html.nav([attribute.class("flex h-full")], [
                     html.ul(
                       [
@@ -612,7 +665,7 @@ fn theme_common(
                   ),
                 ],
                 [
-                  html.div([attribute.class("md:hidden")], [
+                  html.div([attribute.class("lg:hidden")], [
                     html.button(
                       [
                         attribute.class(
@@ -641,7 +694,7 @@ fn theme_common(
           html.div(
             [
               attribute.class(
-                "md:hidden bg-base-100 border-b border-base-300 shadow-md",
+                "lg:hidden bg-base-100 border-b border-base-300 shadow-md",
               ),
             ],
             [
@@ -766,16 +819,11 @@ fn theme_common(
           ),
         ],
         [
-          // Different layout for posts vs pages
-          case is_post {
+          // Different layout for posts vs pages (desktop only)
+          case !is_post {
             True -> {
-              html.div([attribute.class("flex flex-col md:flex-row md:gap-6")], [
-                // Sidebar (1/3 width on desktop) - Put first in DOM for both mobile and desktop
-                html.div([attribute.class("w-full md:w-1/3 mb-6 md:mb-0")], [
-                  sidebar,
-                ]),
-                // Main content area (2/3 width on desktop)
-                html.div([attribute.class("w-full md:w-2/3")], [
+              let maincontent =
+                html.div([attribute.class("w-full lg:w-2/3")], [
                   html.div([attribute.class("mb-6")], [
                     html.h1(
                       [
@@ -811,18 +859,32 @@ fn theme_common(
                       ),
                     ],
                   ),
+                ])
+              html.div([attribute.class("flex flex-col lg:flex-row lg:gap-6")], [
+                // Sidebar (1/3 width on desktop) - Put first in DOM for both mobile and desktop
+                html.div([attribute.class("w-full lg:w-1/3 mb-6 lg:mb-0")], [
+                  sidebar.0,
+                  html.div([attribute.class("block lg:hidden mb-4")], [
+                    maincontent,
+                  ]),
+                  sidebar.1,
+                ]),
+                // Main content area (2/3 width on desktop)
+                html.div([attribute.class("hidden lg:block w-full h-full")], [
+                  maincontent,
                 ]),
               ])
             }
             False -> {
               // Page layout: Simplified, README-style layout with side-by-side layout on desktop
-              html.div([attribute.class("flex flex-col md:flex-row md:gap-6")], [
+              html.div([attribute.class("flex flex-col lg:flex-row lg:gap-6")], [
                 // Page header from sidebar parameter - displayed in a sidebar column on desktop
-                html.div([attribute.class("w-full md:w-1/3 mb-6 md:mb-0")], [
-                  sidebar,
+                html.div([attribute.class("w-full lg:w-1/3 mb-6 lg:mb-0")], [
+                  sidebar.0,
+                  sidebar.1,
                 ]),
                 // Content column - takes 2/3 width on desktop
-                html.div([attribute.class("w-full md:w-2/3")], [
+                html.div([attribute.class("w-full lg:w-2/3")], [
                   html.div(
                     [
                       attribute.id("da-content-box"),
@@ -847,6 +909,7 @@ fn theme_common(
           underneath,
         ],
       ),
+
       html.div(
         [attribute.class("border-t border-base-300 bg-base-100 mt-auto py-8")],
         [
@@ -854,7 +917,7 @@ fn theme_common(
             html.div(
               [
                 attribute.class(
-                  "flex flex-col md:flex-row items-center justify-between gap-4",
+                  "flex flex-col lg:flex-row items-center justify-between gap-4",
                 ),
               ],
               [
