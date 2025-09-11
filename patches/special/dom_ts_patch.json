@@ -7,10 +7,9 @@
       "replace": "comment_box.classList = \"utterances w-full h-[90000px] contents\";comment_box.style.height = \"\";"
     },
     {
-        "action": "replace",
-        "search": "\"utterances-frame w-full min-h-\\[30vh\\] h-full outline-none focus:outline-none\";",
-        "replace": "\"utterances-frame w-full min-h-[30vh] h-[90000px] outline-none focus:outline-none\";"
+      "action": "replace",
+      "search": "\"utterances-frame w-full min-h-\\[30vh\\] h-full outline-none focus:outline-none\";",
+      "replace": "\"utterances-frame w-full min-h-[30vh] h-[90000px] outline-none focus:outline-none\";"
     }
   ]
 }
-
