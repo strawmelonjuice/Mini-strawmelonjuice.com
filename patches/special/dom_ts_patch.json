@@ -4,7 +4,13 @@
     {
       "action": "replace",
       "search": "comment_box.classList.add\\(\"w-full\", \"h-full\"\\);",
-      "replace": "comment_box.classList.add(\"w-full\", \"h-full\", \"overflow-y-scroll\");comment_box.style.height = \"500px\";"
+      "replace": "comment_box.classList = \"utterances w-full h-[90000px] contents\";comment_box.style.height = \"\";"
+    },
+    {
+        "action": "replace",
+        "search": "\"utterances-frame w-full min-h-\\[30vh\\] h-full outline-none focus:outline-none\";",
+        "replace": "\"utterances-frame w-full min-h-[30vh] h-[90000px] outline-none focus:outline-none\";"
     }
   ]
 }
+

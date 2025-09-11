@@ -452,7 +452,7 @@ pub fn post_layout(
         ]),
       ],
     ),
-    html.div([attribute.class("h-full max-h-[45vh]")], [
+    html.div([], [
       html.div(
         [
           attribute.id("da-tags"),
@@ -494,23 +494,39 @@ pub fn post_layout(
           ]),
         ],
       ),
-      html.div(
-        [
-          attribute.id("da-comments"),
-          attribute.class("border border-base-300 rounded-md mb-4 bg-base-300"),
-        ],
-        [
-          // Header for comments section
+    ]),
+  )
+
+  // Assemble the complete layout with sidebar content
+  theme_common(
+    content: content,
+    menu: menu,
+    sidebars: post_meta,
+    underneath: html.div(
+      [
+        attribute.id("da-comments"),
+        attribute.class(
+          "border border-base-300 rounded-md mb-4 bg-base-300 h-full mt-4 ",
+        ),
+      ],
+      [
+        // Header for comments section
+        html.div(
+          [
+            attribute.class(
+              "bg-base-200 px-3 py-2 text-sm font-medium border-b border-base-300",
+            ),
+          ],
+          [html.text("Comments")],
+        ),
+        html.div([attribute.class("h-full")], [
           html.div(
             [
               attribute.class(
-                "bg-base-200 px-3 py-2 text-sm font-medium border-b border-base-300",
+                "flex flex-nowrap w-full h-[600px] overflow-y-scroll",
               ),
             ],
-            [html.text("Comments")],
-          ),
-          html.div([], [
-            html.div([attribute.class("flex flex-wrap gap-2")], [
+            [
               // Utterances comments will be loaded here
               {
                 let comment_color_scheme = case dom.get_color_scheme() {
@@ -539,19 +555,30 @@ pub fn post_layout(
                   "",
                 )
               },
-            ]),
-          ]),
-        ],
-      ),
-    ]),
-  )
-
-  // Assemble the complete layout with sidebar content
-  theme_common(
-    content: content,
-    menu: menu,
-    sidebars: post_meta,
-    underneath: element.none(),
+              html.style(
+                [],
+                "
+              .utterances {
+                height: unset !important;
+                overflow-y: auto !important;
+              }
+              .utterances-frame {
+                position: unset !important;
+                left: 0;
+                right: 0;
+                width: 100% !important;
+                min-width: unset !important;
+                max-width: unset !important;
+                height: 90000px !important;
+                border: 0;
+              }
+              ",
+              ),
+            ],
+          ),
+        ]),
+      ],
+    ),
     variables:,
     model:,
     is_post: True,
