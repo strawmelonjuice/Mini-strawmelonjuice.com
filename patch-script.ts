@@ -80,6 +80,13 @@ async function applySpecialPatches(patchesDir: string, targetDir: string) {
     const patchContent = JSON.parse(await readFile(patchPath, "utf-8"));
 
     const targetFilePath = join(targetDir, patchContent.file);
+
+    if (!existsSync(targetFilePath)) {
+      throw new Error(
+        `Error: Target file ${patchContent.file} does not exist in the cloned repository.`,
+      );
+    }
+
     let targetFileContent = await readFile(targetFilePath, "utf-8");
 
     for (const change of patchContent.changes) {
@@ -117,4 +124,5 @@ async function showGitDiff(files: string[], repoDir: string) {
 
 applyPatches().catch((err) => {
   console.error("Error applying patches:", err);
+  process.exit(1);
 });
