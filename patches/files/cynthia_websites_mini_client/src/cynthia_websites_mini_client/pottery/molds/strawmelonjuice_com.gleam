@@ -103,10 +103,46 @@ pub fn page_layout(
       |> decode.run(decode.string)
       |> result.unwrap("")
     })
+let hide_metadata_block =
 
+
+    decode.run(
+
+
+      result.unwrap(
+
+
+        dict.get(variables, "hide_metadata_block"),
+
+
+        dynamic.from(False),
+
+
+      ),
+
+
+      decode.bool,
+
+
+    )
+
+
+    |> result.unwrap(False)
+
+
+  let hide_metadata_block_classonly = case hide_metadata_block {
+
+
+    True -> " hidden"
+
+
+    False -> ""
+
+
+  }
   let page_meta =
     html.div(
-      [attribute.id("da-sidebar"), attribute.class("w-full lg:sticky lg:top-4")],
+      [attribute.id("da-sidebar"), attribute.class("w-full lg:sticky lg:top-4" <> hide_metadata_block_classonly)],
       [
         case description_option {
           Some(description) -> {
