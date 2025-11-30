@@ -25,7 +25,21 @@ pub fn page_layout(
   let silly_allowed =
     bool.negate(string.contains(model.path, "portfolio"))
     && bool.negate(string.starts_with(model.path, "!"))
+  let hide_metadata_block =
+    decode.run(
+      result.unwrap(
+        dict.get(variables, "hide_metadata_block"),
+        dynamic.from(False),
+      ),
+      decode.bool,
+    )
+    |> result.unwrap(False)
 
+  let hide_metadata_block_classonly = case hide_metadata_block {
+    True -> " hidden"
+
+    False -> ""
+  }
   let #(badgies_wide, badgies_tall) = case silly_allowed {
     True -> {
       let badgies_inside = {
@@ -103,46 +117,15 @@ pub fn page_layout(
       |> decode.run(decode.string)
       |> result.unwrap("")
     })
-let hide_metadata_block =
 
-
-    decode.run(
-
-
-      result.unwrap(
-
-
-        dict.get(variables, "hide_metadata_block"),
-
-
-        dynamic.from(False),
-
-
-      ),
-
-
-      decode.bool,
-
-
-    )
-
-
-    |> result.unwrap(False)
-
-
-  let hide_metadata_block_classonly = case hide_metadata_block {
-
-
-    True -> " hidden"
-
-
-    False -> ""
-
-
-  }
   let page_meta =
     html.div(
-      [attribute.id("da-sidebar"), attribute.class("w-full lg:sticky lg:top-4" <> hide_metadata_block_classonly)],
+      [
+        attribute.id("da-sidebar"),
+        attribute.class(
+          "w-full lg:sticky lg:top-4" <> hide_metadata_block_classonly,
+        ),
+      ],
       [
         case description_option {
           Some(description) -> {
@@ -638,6 +621,21 @@ fn theme_common(
   model model: model_type.Model,
   is_post is_post: Bool,
 ) -> Element(messages.Msg) {
+  let hide_metadata_block =
+    decode.run(
+      result.unwrap(
+        dict.get(variables, "hide_metadata_block"),
+        dynamic.from(False),
+      ),
+      decode.bool,
+    )
+    |> result.unwrap(False)
+
+  let hide_metadata_block_classonly = case hide_metadata_block {
+    True -> " hidden"
+
+    False -> ""
+  }
   let content = heading_indicator_adder(content)
   let menu_is_open = result.is_ok(dict.get(model.other, "strawmelonmenu open"))
   // Extract site name and determine if this is a post
@@ -707,13 +705,13 @@ fn theme_common(
                     ),
                   ],
                 ),
-                html.div([attribute.class("hidden lg:block flex-grow")], [
+                html.div([attribute.class("hidden xl:block flex-grow")], [
                   html.nav([attribute.class("flex h-full")], [
                     html.ul(
                       [
                         attribute.id("menu_1_inside"),
                         attribute.class(
-                          "menu menu-vertical lg:menu-horizontal bg-base-200 rounded-box",
+                          "menu menu-horizontal bg-base-200 rounded-box",
                         ),
                       ],
                       menu,
@@ -728,7 +726,7 @@ fn theme_common(
                   ),
                 ],
                 [
-                  html.div([attribute.class("lg:hidden")], [
+                  html.div([attribute.class("xl:hidden")], [
                     html.button(
                       [
                         attribute.class(
@@ -757,7 +755,7 @@ fn theme_common(
           html.div(
             [
               attribute.class(
-                "lg:hidden bg-base-100 border-b border-base-300 shadow-md",
+                "xl:hidden bg-base-100 border-b border-base-300 shadow-md",
               ),
             ],
             [
@@ -767,7 +765,7 @@ fn theme_common(
                   html.div(
                     [
                       attribute.class(
-                        "flex items-center h-8 bg-base-200/70 border border-base-300 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary",
+                        "flex items-center h-8 bg-base-200/70 border border-base-300 rounded-md hover:bg-base-200 focus-within:bg-base-100 focus-within:border-primary sm:hidden",
                       ),
                     ],
                     [
@@ -891,7 +889,8 @@ fn theme_common(
                     html.h1(
                       [
                         attribute.class(
-                          "text-2xl font-semibold text-base-content mb-4",
+                          "text-2xl font-semibold text-base-content mb-4"
+                          <> hide_metadata_block_classonly,
                         ),
                       ],
                       [
