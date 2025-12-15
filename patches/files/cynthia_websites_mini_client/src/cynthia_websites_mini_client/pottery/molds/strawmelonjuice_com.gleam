@@ -213,6 +213,10 @@ fn badges(badge_list: BadgeList) -> Element(messages.Msg) {
   }
 }
 
+/// Hides the footer and returns its paragraph innerHTML.
+@external(javascript, "./strawmelonjuice_com_ffi.ts", "steal_footer")
+fn steal_footer() -> String
+
 /// The new tick system introduced a bug: Badges keep shuffling uncontrollably
 /// This 'caches' them into a window object, so that they do not need to be reshuffled constantly.
 @external(javascript, "./strawmelonjuice_com_ffi.ts", "badges_getter")
@@ -636,7 +640,8 @@ fn theme_common(
 
     False -> ""
   }
-  let content = heading_indicator_adder(content)
+  let content =
+    content |> heading_indicator_adder() |> social_media_classes_adder()
   let menu_is_open = result.is_ok(dict.get(model.other, "strawmelonmenu open"))
   // Extract site name and determine if this is a post
   let assert Ok(site_name) =
@@ -993,6 +998,18 @@ fn theme_common(
                   ]),
                 ]),
                 html.p([attribute.class("text-xs text-base-content/60")], [
+                  element.unsafe_raw_html(
+                    "div",
+                    "div",
+                    [],
+                    steal_footer()
+                      |> string.replace(
+                        "dark:text-sky-600 text-sky-800 underline",
+                        "link link-primary font-semibold",
+                      ),
+                  ),
+                ]),
+                html.p([attribute.class("text-xs text-base-content/60")], [
                   html.text("Using a "),
                   html.a(
                     [
@@ -1073,6 +1090,14 @@ pub fn menu_1(from model: model_type.Model) -> List(Element(messages.Msg)) {
   }
 }
 
+/// In case you wonder why this function exists:
+/// I want to add heading level indicators (H1, H2, etc.) next to
+/// each heading in the content for better visual structure during editing.
+/// This function takes the content element, converts it to a string,
+/// performs string replacements to insert the indicators, and then
+/// converts it back to an element.
+///
+/// Yes that means tailwind knows. Yes that is why.
 fn heading_indicator_adder(content: Element(a)) -> Element(a) {
   let badge_generic =
     " m-auto inline-block align-top badge badge-soft  badge-xs"
@@ -1094,5 +1119,16 @@ fn heading_indicator_adder(content: Element(a)) -> Element(a) {
   |> string.replace("</h4>", badge_ghost <> "H4</div></h4>")
   |> string.replace("</h5>", badge_ghost <> "H5</div></h5>")
   |> string.replace("</h6>", badge_ghost <> "H6</div></h6>")
+  |> element.unsafe_raw_html("div", "div", [], _)
+}
+
+/// Adds social media classes to elements that require them
+/// just a replace function to make tailwind happy
+fn social_media_classes_adder(content: Element(a)) -> Element(a) {
+  element.to_string(content)
+  |> string.replace(
+    "class=\"social-media-icons\"",
+    "class=\"grid grid-flow-col gap-4\"",
+  )
   |> element.unsafe_raw_html("div", "div", [], _)
 }
