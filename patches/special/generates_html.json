@@ -1,23 +1,23 @@
 {
-	"file": "cynthia_websites_mini_server/src/cynthia_websites_mini_server/ssrs.gleam",
-	"changes": [
-		{
-			"description": "Always view title",
-			"action": "replace",
-			"search": "<title>&lt;&lt;site hosted by Cynthia mini&gt;&gt;</title>",
-			"replace": "<title>Mar's site</title>"
-		},
-		{
-			"description": "Adds in Mastodon author tag.",
-			"action": "replace",
-			"search": "<meta name='viewport' content='width=device-width, initial-scale=1'>",
-			"replace": "<meta name=\\\"fediverse:creator\\\" content=\\\"@strawmelonjuice@pony.social\\\">\n<meta name='viewport' content='width=device-width, initial-scale=1'>"
-		},
-		{
-			"description": "Adds in Mastodon site verification.",
-			"action": "replace",
-			"search": "<div id='viewable' class='bg-base-100 w-full h-full min-h-screen will-change-transform'>",
-			"replace": "<div id='viewable' class='bg-base-100 w-full h-full min-h-screen will-change-transform'><a rel=\\\"me\\\" href=\\\"https://pony.social/@strawmelonjuice\\\">Mastodon</a>"
-		}
-	]
+  "file": "cynthia_websites_mini_server/src/cynthia_websites_mini_server/ssrs.gleam",
+  "changes": [
+    {
+      "description": "Always view title",
+      "action": "replace",
+      "search": "<title>&lt;&lt;site hosted by Cynthia mini&gt;&gt;</title>",
+      "replace": "<title>Mar's site</title>"
+    },
+    {
+      "description": "Adds in Mastodon author tag.",
+      "action": "replace",
+      "search": "<meta name='viewport' content='width=device-width, initial-scale=1'>",
+      "replace": "<meta name=\\\"fediverse:creator\\\" content=\\\"@strawmelonjuice@pony.social\\\">\n<meta name='viewport' content='width=device-width, initial-scale=1'>"
+    },
+    {
+      "description": "Adds in Mastodon site verification.",
+      "action": "replace",
+      "search": "<div id='viewable' class='bg-base-100 w-full h-full min-h-screen will-change-transform'>",
+      "replace": "<div id='viewable' class='bg-base-100 w-full h-full min-h-screen will-change-transform'><a rel=\\\"me\\\" href=\\\"https://pony.social/@strawmelonjuice\\\">Mastodon</a>"
+    }
+  ]
 }
